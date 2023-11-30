@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+
+set -e
+
+if [ "$#" -eq 0 ] ; then
+  # rlwrap auxin.core ;
+  echo "none"
+
+elif [ "$#" -eq 2 ] ; then
+  auxin ./jqn.lisp "$1" "$2"
+  # auxin ./jqn.lisp "$1" "$2" | jq '.'
+else
+  # rlwrap auxin.core --script "$@" ;
+  echo "none"
+fi
+

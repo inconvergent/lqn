@@ -1,0 +1,43 @@
+This is SBCL 2.3.10, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+To load "jqn":
+  Load 1 ASDF system:
+    jqn
+; Loading "jqn"
+; compiling file "/data/x/jqn/src/packages.lisp" (written 30 NOV 2023 11:21:50 PM):
+[package jqn]
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.3.10-linux-x64/data/x/jqn/src/packages-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/data/x/jqn/src/init.lisp" (written 30 NOV 2023 11:22:44 PM):
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.3.10-linux-x64/data/x/jqn/src/init-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/data/x/jqn/src/utils.lisp" (written 30 NOV 2023 11:24:00 PM):
+.
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.3.10-linux-x64/data/x/jqn/src/utils-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/data/x/jqn/src/docs.lisp" (written 30 NOV 2023 11:23:25 PM):
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.3.10-linux-x64/data/x/jqn/src/docs-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/data/x/jqn/src/jqn.lisp" (written 30 NOV 2023 11:24:32 PM):
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.3.10-linux-x64/data/x/jqn/src/jqn-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.008
+
+Evaluation took:
+  0.052 seconds of real time
+  0.055651 seconds of total run time (0.038606 user, 0.017045 system)
+  107.69% CPU
+  211 forms interpreted
+  365 lambdas converted
+  206,038,681 processor cycles
+  21,686,960 bytes consed
+  

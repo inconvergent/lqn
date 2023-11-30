@@ -1,0 +1,49 @@
+[
+  {
+    "_id": "65679d23d38d711eaf999e89",
+    "index": 0,
+    "things": [
+      {
+        "id": 0,
+        "name": "Chris"
+      }
+    ],
+    "msg": "this is a message",
+    "fave": "strawberry"
+  },
+  {
+    "_id": "65679d23fe33bc4c240675c0",
+    "index": 1,
+    "things": [
+      {
+        "id": 0,
+        "name": "Winters"
+      },
+      {
+        "id": 1,
+        "name": "Haii"
+      },
+      {
+        "id": 2,
+        "name": "Klein"
+      }
+    ],
+    "msg": "Hello, undefined! You have 1 unread messages.",
+    "fave": "strawberry"
+  },
+  {
+    "_id": "65679d235b4143d2932ea17a",
+    "things": [
+      {
+        "id": 1,
+        "name": "Star"
+      },
+      {
+        "id": 2,
+        "name": "Ball"
+      }
+    ],
+    "msg": "Hello, undefined! You have 5 unread messages.",
+    "fave": "blueberry"
+  }
+]
