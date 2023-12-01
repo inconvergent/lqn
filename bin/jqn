@@ -7,7 +7,7 @@ if [ "$#" -eq 0 ] ; then
   echo "none"
 
 elif [ "$#" -eq 2 ] ; then
-  auxin ./jqn.lisp "$1" "$2"
+  auxin ./jqn-sh.lisp "$1" "$2"
   # auxin ./jqn.lisp "$1" "$2" | jq '.'
 else
   # rlwrap auxin.core --script "$@" ;

@@ -1,5 +1,7 @@
 (in-package #:jqn)
 
+; https://phmarek.github.io/yason/#install
+
 ; (defvar *opt* '(optimize (safety 1) (speed 3) debug space))
 
 (defun d? (s) "describe symbol." (describe s)) (defun i? (s) "inspect s" (inspect s))
@@ -75,16 +77,8 @@
       (if prune (remove-if (lambda (s) (= 0 (length s))) res)
                 res))))
 
-(defun get-file (filename)
-  (with-open-file (stream filename)
-    (loop for line = (read-line stream nil)
-          while line
-          collect line)))
-
+; (defun get-file (filename)
+;   (with-open-file (stream filename)
+;     (loop for line = (read-line stream nil) while line collect line)))
 (defun read-str (s) (read-from-string s nil nil))
-
-(defun loadf (fn)
-  "load json file."
-  (with-open-file (f fn :direction :input)
-    (json:decode-json f)))
 
