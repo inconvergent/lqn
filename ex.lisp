@@ -24,8 +24,7 @@
             :db t
             :q
             (* :_id
-              ("things"
-                (* "id" ("name" 1))))
+              (:things (* :name :id)))
             )))
   )
 

@@ -17,23 +17,15 @@
   (loop for k in q
         collect (typecase k (keyword `(,(string-downcase (mkstr k)) _))
                             (string `(,k _))
-                            (cons k))))
-
-(defun ser (o)
-  (etypecase o
-            (hash-table
-              (loop for k being the hash-key of o using (hash-value v)
-                    collect `(,k . ,(ser v))))
-            (cons (mapcar (lambda (v) (ser v)) o))
-            (t o)
-                     ))
+                            (cons `(,(string-downcase (mkstr (car k))) ,@(cdr k))))))
 
 (defun jqn (src q)
   "compile jqn query"
   (labels ((compile/itr (src d)
              (let ((list-body ; HERE TODO
                      (loop for (kk vv) in d
-                           collect `(cons ,kk (ser (gethash ,kk o))))))
+                           do (print vv)
+                           collect `(cons ,kk ,(rec `(gethash ,kk o) vv)))))
                `(loop for o in ,src
                       collect `(,,@list-body ))))
            (rec (src d)
@@ -48,9 +40,9 @@
 (defun jqn/show (q compiled)
  (format t "
 ██ COMPILED ██████████████████████████
-██ q:   ~a
+██ q:   ~s
 ██ ---
-   ~a
+   ~s
 ██ ██████████████████████████~%" q compiled))
 
 (defmacro jqnd (dat &key q db)
@@ -68,23 +60,4 @@
   (declare (string dat))
   (awg (dat*) (eval `(let ((,dat* ,dat))
                        (jqnf ,dat* :q ,q)))))
-
-; (defun jqn (src q)
-;   "compile jqn query"
-;   (labels ((compile/itr (src d)
-;              (let ((case-body ; HERE TODO
-;                      (loop for (kk vv) in d
-;                            for i from 0
-;                            nconc `(,@(if (= 0 i) '(if) '(else if)) (eq k ,kk)
-;                                    collect `(,,kk . ,,(rec 'v vv))))))
-;                `(loop for o in ,src
-;                       collect (loop for (k . v) in o ,@case-body))))
-;            (rec (src d)
-;              (cond ((all? d) src)
-;                    ((atom d) d)
-;                    ((car-itr? d) (compile/itr src
-;                                    (compile/itr/preproc (cdr d))))
-;                    ((car-kv? d) d)
-;                    (t (error "not implemented: ~a" d)))))
-;     (rec src q)))
 
