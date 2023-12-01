@@ -63,11 +63,6 @@
 (abbrev mvb multiple-value-bind)
 (abbrev dsb destructuring-bind)
 (abbrev awg with-gensyms)
-; (abbrev awf flatten)
-
-; (defun undup (e &optional (flatten t)) ; TODO: avoid or rewrite awf?
-;   (declare (optimize speed))
-;   (remove-duplicates (if flatten (awf e) e)))
 
 (defun split-string (x s &key prune)
   (declare (character x) (string s) (boolean prune))
@@ -86,19 +81,10 @@
           while line
           collect line)))
 
+(defun read-str (s) (read-from-string s nil nil))
 
-; (defun ensure-list (l)
-;   "return l if l is a nil/list. otherwise return (list l)."
-;   (the list (typecase l (null nil) (list l) (t (list l)))))
-; (defun to-list (a) (declare (sequence a)) "coerce sequence to list." (coerce a 'list))
-; (defun vector-last (a) (declare (vector a)) "last element of vector." (aref a (1- (length a))))
-; (defun vector-first (a) (declare (vector a)) "first element of vector." (aref a 0))
-; (defun to-vector (init)
-;   (declare (list init)) "make non-adjustable array with init contents."
-;   (make-array (length init)
-;     :initial-contents init :adjustable nil :element-type 'list))
-
-; (defun remove-nil (l)
-;   "coerce to list, and remove any nils"
-;   (remove-if-not #'identity (ensure-list l)))
+(defun loadf (fn)
+  "load json file."
+  (with-open-file (f fn :direction :input)
+    (json:decode-json f)))
 
