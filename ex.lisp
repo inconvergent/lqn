@@ -18,15 +18,11 @@
   ;   ; (dumps jsn :indent t)
   ;   )
 
-  (format t "~s~%"
-    (progn ;json:encode-json-to-string
-      (jqnf "./bin/sample.json"
-            :db t
-            :q
-            (* :_id
-              (:things (* :name :id)))
-            )))
-  )
+  (loop for i from 0
+        for x in (jqnf "./bin/sample.json" :db t
+                       :q (* :_id
+                             (:things (* :name :id))))
+        do (print i) (print x)))
 
 (main (auxin:cmd-args))
 

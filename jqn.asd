@@ -4,7 +4,7 @@
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   ; :in-order-to ((asdf:test-op (asdf:test-op #:jqn/tests)))
   :licence "MIT" :pathname "src/" :serial nil
-  :depends-on (#:cl-json #:yason)
+  :depends-on (#:yason)
   :components ((:file "packages")
                (:file "init" :depends-on ("packages"))
                (:file "utils" :depends-on ("init"))
