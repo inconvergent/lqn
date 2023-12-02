@@ -8,21 +8,27 @@
    ~s
 ██ ██████████████████████████~%" q compiled))
 
-(defmacro push? (res k v)
-  (declare (symbol res)) "push (k . v) to res if v"
-  (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,,k . ,,v*) ,res)))))
-(defmacro push! (res k v &optional default)
-  (declare (symbol res)) "push (k . v) to res if v; otherwise push (k . default)"
+(defmacro push? (lst k v)
+  (declare (symbol lst)) "push (k . v) to lst if v"
+  (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,,k . ,,v*) ,lst)))))
+
+(defmacro push! (lst k v &optional default)
+  (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
   (awg (v*) `(let ((,v* ,v))
-               (if ,v* (push `(,,k . ,,v*) ,res)
-                       (push `(,,k . ,,default) ,res)))))
+               (if ,v* (push `(,,k . ,,v*) ,lst)
+                       (push `(,,k . ,,default) ,lst)))))
 
 (defun loadf (fn)
   (declare (string fn)) "load json from file fn"
-  (with-open-file (f fn :direction :input) (yason:parse f)))
+  (with-open-file (f fn :direction :input)
+    (let ((yason:*parse-json-arrays-as-vectors* t))
+      (yason:parse f))))
+
 (defun dumps (o &key (s *standard-output*) indent)
   (declare (stream s) (boolean indent)) "encode o as json to stream, s"
-  (yason:encode o (yason:make-json-output-stream s :indent indent)))
+  (let ((yason:*list-encoder* 'yason:encode-alist)
+        )
+    (yason:encode (print o) (yason:make-json-output-stream s :indent indent))))
 
 (defun car-kv? (d) (and (listp d) (keywordp (car d))))
 (defun car-itr? (d) (and (listp d) (eq '* (car d))))
@@ -43,8 +49,12 @@
                        (loop for (kk vv) in (reverse d)
                              collect `(push? ,res ,kk
                                        ,(rec `(gethash ,kk ,o) vv)))))
-                 `(loop for ,o in ,src
-                        collect (let ((,res (list))) ,@loop-body ,res)))))
+                 `(loop with lst = (make-adjustable-vector)
+                        for ,o across ,src
+                        do (let ((,res (list)))
+                             ,@loop-body
+                             (vextend ,res lst))
+                        finally (return lst)))))
            (rec (src d)
              (cond ((all? d) src)
                    ((atom d) d)

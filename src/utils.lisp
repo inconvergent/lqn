@@ -66,6 +66,15 @@
 (abbrev dsb destructuring-bind)
 (abbrev awg with-gensyms)
 
+(abbrev vextend vector-push-extend)
+
+(defun make-adjustable-vector (&key init (type t) (size 128))
+  (if init (make-array (length init)
+             :fill-pointer t :initial-contents init
+             :element-type type :adjustable t)
+           (make-array size
+             :fill-pointer 0 :element-type type :adjustable t)))
+
 (defun split-string (x s &key prune)
   (declare (character x) (string s) (boolean prune))
   "split s at all instances of character x."
