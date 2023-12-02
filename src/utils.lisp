@@ -59,6 +59,17 @@
                 (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
         do (return-from match-substr i)))
 
+(defun unpack-selectors (sym)
+  (loop for sel in `(+@ -@)
+        for ind = (match-substr (mkstr sel) (mkstr sym))
+        if (and ind (= ind 0))
+        do (return-from unpack-selectors
+              (list sel (typecase sym
+                          (string (subseq sym 2))
+                          (keyword (kv (subseq (mkstr sym) 2)))))))
+  (list :_ sym))
+
+
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s))))
                  syms)
@@ -92,4 +103,19 @@
 ;   (with-open-file (stream filename)
 ;     (loop for line = (read-line stream nil) while line collect line)))
 (defun read-str (s) (read-from-string s nil nil))
+
+; (defun unpack-vvsym (sym &key (s :!) (niltype :nil) (symout t))
+;   (declare (symbol sym) ((or string keyword character) s))
+;   "split names of type f34!var into (values :f var 3 4)"
+;   (labels ((find-type (p) (if p (kv (car p)) niltype))
+;            (find-dim (p) (if p (digit-char-p (car p)) 1)))
+;     (dsb (pref vname) (nilpad 2 (split-substr (mkstr s) (mkstr sym)))
+;       (unless vname (error "UNPACK-VVSYM missing tail: ~a" sym))
+;       (mvb (pref-digits pref-chars)
+;         (if pref (fx-split-str #'digit-char-p (mkstr pref)) (values nil nil))
+;         (values (the keyword (find-type pref-chars))
+;                 (if symout (psymb (symbol-package sym) (string-upcase vname))
+;                            (string-upcase vname))
+;                 (the fixnum (find-dim pref-digits)) ; dim
+;                 (the fixnum (find-dim (reverse pref-digits)))))))) ; dimout
 

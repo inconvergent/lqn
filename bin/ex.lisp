@@ -20,8 +20,10 @@
 
   (loop for i from 0
         for x across (jqnf "./sample.json" :db t
-                       :q (* :_id
-                             (:things (* :name :id))))
+                       :q (*  :_id
+                             (:things (* :name :id))
+                             :+@force
+                             ))
         do (print i) (print x))
   ; (dumps #(((3 . #(1 2 3))) 2 3))
   )

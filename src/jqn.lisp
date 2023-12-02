@@ -34,11 +34,14 @@
 (defun all? (d) (eq d '_))
 
 (defun compile/itr/preproc (q)
-  (loop for k in q ; todo case cons should check if (car keyword)
-        collect (etypecase k
-                  (keyword `(,(string-downcase (mkstr k)) _))
-                  (cons `(,(string-downcase (mkstr (car k))) ,@(cdr k)))
-                  (string `(,k _)))))
+  (veq:vp
+     (loop for k in q
+          collect (etypecase k
+                    (keyword `(,@(unpack-selectors k) _))
+                    (cons `(,@(unpack-selectors (car k)) ,@(cdr k)))
+                    (string `(,(unpac-selectors k) _))))))
+
+; TODO: always return empty vector, dont iterate nil?
 
 (defun jqn (src q)
   "compile jqn query"
@@ -46,7 +49,7 @@
     ((compile/itr (src d)
        (awg (res lst o)
          (let ((loop-body
-                 (loop for (kk vv) in (reverse d)
+                 (loop for (mode kk vv) in (reverse d) ; TODO: MODE HERE
                        collect `(push? ,res ,kk
                                  ,(rec `(gethash ,kk ,o) vv)))))
            `(loop with ,lst = (make-adjustable-vector)
