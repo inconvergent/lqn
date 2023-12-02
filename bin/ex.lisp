@@ -19,7 +19,7 @@
   ;   )
 
   (loop for i from 0
-        for x across (jqnf "./bin/sample.json" :db t
+        for x across (jqnf "./sample.json" :db t
                        :q (* :_id
                              (:things (* :name :id))))
         do (print i) (print x))

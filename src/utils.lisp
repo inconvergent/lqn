@@ -17,7 +17,10 @@
 (defun mkstr (&rest args) "coerce this to string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
 (defun reread (&rest args) "mkstr then read from string." (values (read-from-string (apply #'mkstr args))))
-(defun kv (s) (declare (symbol s)) "mkstr, upcase, keyword." (intern (string-upcase (symbol-name s)) :keyword))
+(defun kv (s) "mkstr, upcase, keyword."
+  (intern (string-upcase (etypecase s (symbol (symbol-name s))
+                                      (string s)))
+          :keyword))
 (defun last* (l) (declare (list l)) "last item in list." (first (last l)))
 (defun close-path (l) (declare (list l)) "cons last of to l." (cons (last* l) l))
 (defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
@@ -61,11 +64,10 @@
                  syms)
      ,@body))
 
-(abbrev mvc multiple-value-call)
-(abbrev mvb multiple-value-bind)
-(abbrev dsb destructuring-bind)
 (abbrev awg with-gensyms)
-
+(abbrev dsb destructuring-bind)
+(abbrev mvb multiple-value-bind)
+(abbrev mvc multiple-value-call)
 (abbrev vextend vector-push-extend)
 
 (defun make-adjustable-vector (&key init (type t) (size 128))

@@ -10,12 +10,12 @@
 
 (defmacro push? (lst k v)
   (declare (symbol lst)) "push (k . v) to lst if v"
-  (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,,k . ,,v*) ,lst)))))
+  (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
 
 (defmacro push! (lst k v &optional default)
   (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
   (awg (v*) `(let ((,v* ,v))
-               (if ,v* (push `(,,k . ,,v*) ,lst)
+               (if ,v* (push `(,,(symb k) . ,,v*) ,lst)
                        (push `(,,k . ,,default) ,lst)))))
 
 (defun loadf (fn)
@@ -26,9 +26,8 @@
 
 (defun dumps (o &key (s *standard-output*) indent)
   (declare (stream s) (boolean indent)) "encode o as json to stream, s"
-  (let ((yason:*list-encoder* 'yason:encode-alist)
-        )
-    (yason:encode (print o) (yason:make-json-output-stream s :indent indent))))
+  (let ((yason:*list-encoder* 'yason:encode-alist))
+    (yason:encode o (yason:make-json-output-stream s :indent indent))))
 
 (defun car-kv? (d) (and (listp d) (keywordp (car d))))
 (defun car-itr? (d) (and (listp d) (eq '* (car d))))
@@ -43,25 +42,25 @@
 
 (defun jqn (src q)
   "compile jqn query"
-  (labels ((compile/itr (src d)
-             (awg (res o)
-               (let ((loop-body
-                       (loop for (kk vv) in (reverse d)
-                             collect `(push? ,res ,kk
-                                       ,(rec `(gethash ,kk ,o) vv)))))
-                 `(loop with lst = (make-adjustable-vector)
-                        for ,o across ,src
-                        do (let ((,res (list)))
-                             ,@loop-body
-                             (vextend ,res lst))
-                        finally (return lst)))))
-           (rec (src d)
-             (cond ((all? d) src)
-                   ((atom d) d)
-                   ((car-itr? d) (compile/itr src
-                                   (compile/itr/preproc (cdr d))))
-                   ((car-kv? d) d)
-                   (t (error "not implemented: ~a" d)))))
+  (labels
+    ((compile/itr (src d)
+       (awg (res lst o)
+         (let ((loop-body
+                 (loop for (kk vv) in (reverse d)
+                       collect `(push? ,res ,kk
+                                 ,(rec `(gethash ,kk ,o) vv)))))
+           `(loop with ,lst = (make-adjustable-vector)
+                  for ,o across ,src
+                  do (let ((,res (list)))
+                       ,@loop-body
+                       (vextend ,res ,lst))
+                  finally (return ,lst)))))
+     (rec (src d) (cond ((all? d) src)
+                        ((atom d) d)
+                        ((car-itr? d) (compile/itr src
+                                        (compile/itr/preproc (cdr d))))
+                        ((car-kv? d) d)
+                        (t (error "not implemented: ~a" d)))))
     (rec src q)))
 
 (defmacro jqnd (dat &key q db)
