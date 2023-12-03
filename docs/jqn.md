@@ -1,40 +1,40 @@
-#### JQN:JQN
+#### JQN:APSH!
 
 ```
- ; JQN:JQN
+ ; JQN:APSH!
  ;   [symbol]
  ; 
- ; JQN names a compiled function:
- ;   Lambda-list: (SRC Q)
- ;   Derived type: (FUNCTION (T T) (VALUES T &OPTIONAL))
+ ; APSH! names a macro:
+ ;   Lambda-list: (LST K V &OPTIONAL DEFAULT)
  ;   Documentation:
- ;     compile jqn query
- ;   Source file: /data/x/jqn/src/jqn.lisp
+ ;     push (k . v) to lst if v; otherwise push (k . default)
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:JQND
+#### JQN:APSH?
 
 ```
- ; JQN:JQND
+ ; JQN:APSH?
  ;   [symbol]
  ; 
- ; JQND names a macro:
- ;   Lambda-list: (DAT &KEY Q)
+ ; APSH? names a macro:
+ ;   Lambda-list: (LST K V)
  ;   Documentation:
- ;     query dat
- ;   Source file: /data/x/jqn/src/jqn.lisp
+ ;     push (k . v) to lst if v
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:JQNF
+#### JQN:DUMPS
 
 ```
- ; JQN:JQNF
+ ; JQN:DUMPS
  ;   [symbol]
  ; 
- ; JQNF names a macro:
- ;   Lambda-list: (FN &KEY Q)
+ ; DUMPS names a compiled function:
+ ;   Lambda-list: (O &KEY (S *STANDARD-OUTPUT*) INDENT)
+ ;   Derived type: (FUNCTION (T &KEY (:S STREAM) (:INDENT BOOLEAN)) *)
  ;   Documentation:
- ;     query file fn
+ ;     encode o as json to stream, s
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
@@ -46,9 +46,63 @@
  ; 
  ; LOADF names a compiled function:
  ;   Lambda-list: (FN)
- ;   Derived type: (FUNCTION (T) *)
+ ;   Derived type: (FUNCTION (STRING) *)
  ;   Documentation:
- ;     load json file.
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;     load json from file fn
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:PROC-QRY
+
+```
+ ; JQN:PROC-QRY
+ ;   [symbol]
+ ; 
+ ; PROC-QRY names a compiled function:
+ ;   Lambda-list: (SRC Q)
+ ;   Derived type: (FUNCTION (T T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     compile jqn query
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:QRYD
+
+```
+ ; JQN:QRYD
+ ;   [symbol]
+ ; 
+ ; QRYD names a macro:
+ ;   Lambda-list: (DAT &KEY Q DB)
+ ;   Documentation:
+ ;     query dat
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:QRYF
+
+```
+ ; JQN:QRYF
+ ;   [symbol]
+ ; 
+ ; QRYF names a macro:
+ ;   Lambda-list: (FN &KEY Q DB)
+ ;   Documentation:
+ ;     query file fn
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:QRYL
+
+```
+ ; JQN:QRYL
+ ;   [symbol]
+ ; 
+ ; QRYL names a compiled function:
+ ;   Lambda-list: (DAT &KEY Q)
+ ;   Derived type: (FUNCTION (STRING &KEY (:Q T)) *)
+ ;   Documentation:
+ ;     compile query and run it on dat
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 

@@ -1,7 +1,6 @@
 (in-package #:jqn)
 
-; https://phmarek.github.io/yason/#install
-
+; https://phmarek.github.io/yason/
 ; (defvar *opt* '(optimize (safety 1) (speed 3) debug space))
 
 (defun d? (s) "describe symbol." (describe s)) (defun i? (s) "inspect s" (inspect s))
@@ -10,8 +9,29 @@
   (unless silent (format t "~&JQN version: ~a~%." v))
   v)
 
+(defmacro with-gensyms (syms &body body)
+  `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s))))
+                 syms)
+     ,@body))
+
 (defmacro abbrev (short long)
   `(defmacro ,short (&rest args) `(,',long ,@args)))
+(abbrev awg with-gensyms)
+(abbrev dsb destructuring-bind)
+(abbrev mvb multiple-value-bind)
+(abbrev mvc multiple-value-call)
+(abbrev mav make-adjustable-vector)
+(abbrev vextend vector-push-extend)
+
+(defmacro apsh? (lst k v)
+  (declare (symbol lst)) "push (k . v) to lst if v"
+  (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
+
+(defmacro apsh! (lst k v &optional default)
+  (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
+  (awg (v*) `(let ((,v* ,v))
+               (if ,v* (push `(,,(kv k) . ,,v*) ,lst)
+                       (push `(,,k . ,,default) ,lst)))))
 
 (defun mapqt (l) (declare (list l)) "new list with quoted items." (mapcar (lambda (s) `(quote ,s)) l))
 (defun mkstr (&rest args) "coerce this to string."
@@ -59,28 +79,6 @@
                 (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
         do (return-from match-substr i)))
 
-(defun unpack-selectors (sym)
-  (loop for sel in `(+@ -@)
-        for ind = (match-substr (mkstr sel) (mkstr sym))
-        if (and ind (= ind 0))
-        do (return-from unpack-selectors
-              (list sel (typecase sym
-                          (string (subseq sym 2))
-                          (keyword (kv (subseq (mkstr sym) 2)))))))
-  (list :_ sym))
-
-
-(defmacro with-gensyms (syms &body body)
-  `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s))))
-                 syms)
-     ,@body))
-
-(abbrev awg with-gensyms)
-(abbrev dsb destructuring-bind)
-(abbrev mvb multiple-value-bind)
-(abbrev mvc multiple-value-call)
-(abbrev vextend vector-push-extend)
-
 (defun make-adjustable-vector (&key init (type t) (size 128))
   (if init (make-array (length init)
              :fill-pointer t :initial-contents init
@@ -99,23 +97,27 @@
       (if prune (remove-if (lambda (s) (= 0 (length s))) res)
                 res))))
 
+(defun read-str (s) (read-from-string s nil nil))
 ; (defun get-file (filename)
 ;   (with-open-file (stream filename)
 ;     (loop for line = (read-line stream nil) while line collect line)))
-(defun read-str (s) (read-from-string s nil nil))
 
-; (defun unpack-vvsym (sym &key (s :!) (niltype :nil) (symout t))
-;   (declare (symbol sym) ((or string keyword character) s))
-;   "split names of type f34!var into (values :f var 3 4)"
-;   (labels ((find-type (p) (if p (kv (car p)) niltype))
-;            (find-dim (p) (if p (digit-char-p (car p)) 1)))
-;     (dsb (pref vname) (nilpad 2 (split-substr (mkstr s) (mkstr sym)))
-;       (unless vname (error "UNPACK-VVSYM missing tail: ~a" sym))
-;       (mvb (pref-digits pref-chars)
-;         (if pref (fx-split-str #'digit-char-p (mkstr pref)) (values nil nil))
-;         (values (the keyword (find-type pref-chars))
-;                 (if symout (psymb (symbol-package sym) (string-upcase vname))
-;                            (string-upcase vname))
-;                 (the fixnum (find-dim pref-digits)) ; dim
-;                 (the fixnum (find-dim (reverse pref-digits)))))))) ; dimout
+(defun ensure-vector (v)
+  (declare (sequence v))
+  (etypecase v (vector v) (list (coerce v 'vector))))
+
+
+(defun car-kv? (d) (and (listp d) (keywordp (car d))))
+(defun car-itr? (d) (and (listp d) (eq '* (car d))))
+(defun all? (d) (eq d '_))
+
+(defun unpack-selectors (sym)
+  (loop for sel in `(+@ -@)
+        for ind = (match-substr (mkstr sel) (mkstr sym))
+        if (and ind (= ind 0))
+        do (return-from unpack-selectors
+              (list sel (typecase sym
+                          (string (subseq sym 2))
+                          (keyword (kv (subseq (mkstr sym) 2)))))))
+  (list :_ sym))
 

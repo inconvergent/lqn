@@ -15,17 +15,17 @@
   ;    (loop for k being the hash-keys in o using (hash-value v)
   ;         do (veq:vp k v (type-of k) (type-of v))
   ;     ))
-  ;   ; (dumps jsn :indent t)
+  ;   ; (wrtjsn jsn :indent t)
   ;   )
 
   (loop for i from 0
-        for x across (jqnf "./sample.json" :db t
+        for x across (qryf "./sample.json" :db t
                        :q (*  :_id
                              (:things (* :name :id))
                              (:+@force 333)
                              ))
         do (print i) (print x))
-  ; (dumps #(((3 . #(1 2 3))) 2 3))
+  ; (wrtjsn #(((3 . #(1 2 3))) 2 3))
   )
 
 (main (auxin:cmd-args))

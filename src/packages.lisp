@@ -1,5 +1,10 @@
 (defpackage #:jqn
   (:use #:common-lisp)
   (:nicknames #:cl-jqn)
-  (:export #:jqnf #:jqnd #:jqn #:loadf))
+  (:export
+    #:qryd #:qryf #:qryl
+    #:proc-qry
+    #:loadjsn #:wrtjsn
+    #:apsh? #:apsh!
+    ))
 
