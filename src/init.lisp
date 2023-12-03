@@ -6,3 +6,6 @@
 ;             (format t "~&---------!!!!! GRPH COMPILED IN DEVMODE !!!!!---------
 ; --------- ~a~%" ',dev-vals))
 ;     `(progn (defvar *dev* nil) (defvar *opt* ',vals))))
+
+(defvar *qmodes* `(:+@ :-@))
+

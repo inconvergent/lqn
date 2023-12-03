@@ -20,9 +20,9 @@
 
   (loop for i from 0
         for x across (qryf "./sample.json" :db t
-                       :q (*  :_id
-                             (:things (* :name :id))
-                             (:+@force 333)
+                       :q (*  :+@_id
+                             ("+@things" (* :name :id))
+                             ("+@force" 333)
                              ))
         do (print i) (print x))
   ; (wrtjsn #(((3 . #(1 2 3))) 2 3))

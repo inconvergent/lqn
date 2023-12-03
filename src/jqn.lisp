@@ -1,5 +1,6 @@
 (in-package :jqn)
 
+
 (defun jqn/show (q compiled)
  (format t "
 ██ COMPILED ██████████████████████████
@@ -7,7 +8,6 @@
 ██ ---
    ~s
 ██ ██████████████████████████~%" q compiled))
-
 
 (defun loadjsn (fn)
   (declare (string fn)) "load json from file fn"
@@ -21,10 +21,16 @@
     (yason:encode o (yason:make-json-output-stream s :indent indent))))
 
 (defun compile/itr/preproc (q)
-  (loop for k in q
-        collect (etypecase k (keyword `(,@(unpack-selectors k) _))
-                             (cons `(,@(unpack-selectors (car k)) ,@(cdr k)))
-                             (string `(,(unpac-selectors k) _)))))
+  (labels ((unpack-cons (k &aux (ck (car k)))
+             (declare (list k))
+             (ecase (length k)
+               (1 `(,@(unpack-mode ck *qmodes*) _))
+               (2 `(,@(unpack-mode ck *qmodes*) ,@(cdr k)))
+               (3  `(,ck ,(ensure-string (second k)) ,(third k))))))
+    (loop for k in q
+          collect (etypecase k (keyword `(,@(unpack-mode k *qmodes*) _))
+                               (string `(,(unpack-mode k *qmodes*) _))
+                               (cons `(,@(unpack-cons k)))))))
 (defun ensure-string (s)
   (etypecase s (keyword (string-downcase (mkstr s)))
                (string s)))
@@ -36,7 +42,7 @@
        (awg (kvres itrlst o)
          (let ((loop-body ; TODO: MODE HERE
                  (loop for (mode kk vv) in (reverse d)
-                       for psh = (ecase mode (:_ 'apsh?) (+@ 'apsh!))
+                       for psh = (ecase mode (:_ 'apsh?) (:+@ 'apsh!))
                        collect `(,psh ,kvres ,kk
                                   ,(rec `(gethash ,(ensure-string kk) ,o) vv)))))
            `(loop with ,itrlst = (mav)
@@ -47,7 +53,7 @@
                   finally (return ,itrlst)))))
      (rec (dat d) (cond ((all? d) dat) ((atom d) d)
                         ((car-itr? d) (compile/itr dat
-                                        (compile/itr/preproc (cdr d))))
+                                        (print (compile/itr/preproc (cdr d)))))
                         ((car-kv? d) d)
                         (t (error "not implemented: ~a" d)))))
     (rec dat q)))

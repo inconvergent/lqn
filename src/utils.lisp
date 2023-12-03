@@ -111,13 +111,13 @@
 (defun car-itr? (d) (and (listp d) (eq '* (car d))))
 (defun all? (d) (eq d '_))
 
-(defun unpack-selectors (sym)
-  (loop for sel in `(+@ -@)
-        for ind = (match-substr (mkstr sel) (mkstr sym))
+(defun unpack-mode (sym &optional (modes *qmodes*))
+  (loop for mode in modes
+        for ind = (match-substr (mkstr mode) (mkstr sym))
         if (and ind (= ind 0))
-        do (return-from unpack-selectors
-              (list sel (typecase sym
-                          (string (subseq sym 2))
-                          (keyword (kv (subseq (mkstr sym) 2)))))))
+        do (return-from unpack-mode
+              (list mode (typecase sym
+                           (string (subseq sym 2))
+                           (keyword (kv (subseq (mkstr sym) 2)))))))
   (list :_ sym))
 
