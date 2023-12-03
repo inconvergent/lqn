@@ -22,7 +22,7 @@
         for x across (jqnf "./sample.json" :db t
                        :q (*  :_id
                              (:things (* :name :id))
-                             :+@force
+                             (:+@force 333)
                              ))
         do (print i) (print x))
   ; (dumps #(((3 . #(1 2 3))) 2 3))

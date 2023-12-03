@@ -8,6 +8,10 @@
    ~s
 ██ ██████████████████████████~%" q compiled))
 
+(defun ensure-vector (v)
+  (declare (sequence v))
+  (etypecase v (vector v) (list (coerce v 'vector))))
+
 (defmacro push? (lst k v)
   (declare (symbol lst)) "push (k . v) to lst if v"
   (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
@@ -15,7 +19,7 @@
 (defmacro push! (lst k v &optional default)
   (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
   (awg (v*) `(let ((,v* ,v))
-               (if ,v* (push `(,,(symb k) . ,,v*) ,lst)
+               (if ,v* (push `(,,(kv k) . ,,v*) ,lst)
                        (push `(,,k . ,,default) ,lst)))))
 
 (defun loadf (fn)
@@ -34,14 +38,11 @@
 (defun all? (d) (eq d '_))
 
 (defun compile/itr/preproc (q)
-  (veq:vp
-     (loop for k in q
-          collect (etypecase k
-                    (keyword `(,@(unpack-selectors k) _))
-                    (cons `(,@(unpack-selectors (car k)) ,@(cdr k)))
-                    (string `(,(unpac-selectors k) _))))))
-
-; TODO: always return empty vector, dont iterate nil?
+  (loop for k in q
+        collect (etypecase k
+                  (keyword `(,@(unpack-selectors k) _))
+                  (cons `(,@(unpack-selectors (car k)) ,@(cdr k)))
+                  (string `(,(unpac-selectors k) _)))))
 
 (defun jqn (src q)
   "compile jqn query"
@@ -49,17 +50,19 @@
     ((compile/itr (src d)
        (awg (res lst o)
          (let ((loop-body
-                 (loop for (mode kk vv) in (reverse d) ; TODO: MODE HERE
-                       collect `(push? ,res ,kk
+                 ; TODO: MODE HERE
+                 (loop for (mode kk vv) in (reverse d)
+                       ; do (print mode)
+                       collect `(,(ecase mode (:_ 'push?) (+@ 'push!))
+                                 ,res ,kk
                                  ,(rec `(gethash ,kk ,o) vv)))))
            `(loop with ,lst = (make-adjustable-vector)
-                  for ,o across ,src
-                  do (let ((,res (list)))
-                       ,@loop-body
-                       (vextend ,res ,lst))
+                  for ,o across (ensure-vector ,src)
+                  for ,res = (list)
+                  do (progn ,@loop-body
+                            (vextend ,res ,lst))
                   finally (return ,lst)))))
-     (rec (src d) (cond ((all? d) src)
-                        ((atom d) d)
+     (rec (src d) (cond ((all? d) src) ((atom d) d)
                         ((car-itr? d) (compile/itr src
                                         (compile/itr/preproc (cdr d))))
                         ((car-kv? d) d)
