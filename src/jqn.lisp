@@ -39,7 +39,7 @@
 (defun proc-qry (dat q)
   "compile jqn query"
   (labels
-    ((select-psh (mode kk vv)
+    ((psh (mode kk vv)
        (case mode (:? 'apsh?) (:+ 'apsh+)
          (otherwise (error "unexpected mode in selector for (~a ~a ~a)"
                            mode kk vv))))
@@ -47,8 +47,8 @@
        (awg (kvres itrlst o)
          (let ((loop-body
                  (loop for (mode kk vv) in (reverse d)
-                       collect `(,(select-psh mode kk vv) ,kvres ,kk
-                                  ,(rec `(gethash ,(ensure-string kk) ,o) vv)))))
+                       collect `(,(psh mode kk vv) ,kvres ,kk
+                                 ,(rec `(gethash ,(ensure-string kk) ,o) vv)))))
            `(loop with ,itrlst = (mav)
                   for ,o across (ensure-vector ,dat)
                   for ,kvres = (list)
