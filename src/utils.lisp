@@ -9,6 +9,8 @@
   (unless silent (format t "~&JQN version: ~a~%." v))
   v)
 
+(defmacro eq* (v &rest rest &aux (v* (gensym "V*")))
+  `(let ((,v* ,v)) (or ,@(loop for r in rest collect `(eq ,v* (the symbol ,r))))))
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s))))
                  syms)
@@ -106,10 +108,9 @@
   (declare (sequence v))
   (etypecase v (vector v) (list (coerce v 'vector))))
 
-; TODO: coerce modes/iter to kv
-(defun car-kv? (d) (and (listp d) (keywordp (car d))))
-(defun car-itr? (d) (and (listp d) (or (eq '* (car d)) (eq :* (car d)))))
-(defun all? (d) (or (eq d '_) (eq d :_)))
+(defun itr? (d) (eq* d '* :*))
+(defun car-itr? (d) (and (listp d) (itr? (car d))))
+(defun all? (d) (eq* d '_ :_))
 
 (defun unpack-mode (sym &optional (modes *qmodes*) (default :?))
   (loop for mode in modes
@@ -118,6 +119,6 @@
         do (return-from unpack-mode
               (list (kv (subseq (mkstr mode) 0 1))
                 (typecase sym (string (subseq sym 2))
-                              (keyword (kv (subseq (mkstr sym) 2)))))))
+                              (symbol (kv (subseq (mkstr sym) 2)))))))
   (list default sym))
 
