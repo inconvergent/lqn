@@ -27,7 +27,7 @@
   (declare (symbol lst)) "push (k . v) to lst if v"
   (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
 
-(defmacro apsh! (lst k v &optional default)
+(defmacro apsh+ (lst k v &optional default)
   (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
   (awg (v*) `(let ((,v* ,v))
                (if ,v* (push `(,,(kv k) . ,,v*) ,lst)
@@ -106,18 +106,18 @@
   (declare (sequence v))
   (etypecase v (vector v) (list (coerce v 'vector))))
 
-
+; TODO: coerce modes/iter to kv
 (defun car-kv? (d) (and (listp d) (keywordp (car d))))
-(defun car-itr? (d) (and (listp d) (eq '* (car d))))
-(defun all? (d) (eq d '_))
+(defun car-itr? (d) (and (listp d) (or (eq '* (car d)) (eq :* (car d)))))
+(defun all? (d) (or (eq d '_) (eq d :_)))
 
-(defun unpack-mode (sym &optional (modes *qmodes*))
+(defun unpack-mode (sym &optional (modes *qmodes*) (default :?))
   (loop for mode in modes
         for ind = (match-substr (mkstr mode) (mkstr sym))
         if (and ind (= ind 0))
         do (return-from unpack-mode
-              (list mode (typecase sym
-                           (string (subseq sym 2))
-                           (keyword (kv (subseq (mkstr sym) 2)))))))
-  (list :_ sym))
+              (list (kv (subseq (mkstr mode) 0 1))
+                (typecase sym (string (subseq sym 2))
+                              (keyword (kv (subseq (mkstr sym) 2)))))))
+  (list default sym))
 
