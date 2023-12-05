@@ -12,7 +12,7 @@
           (qryf "./sample.json" :db t
                 :q (*  _id
                       (+@things (* name id))
-                      (+@force (print (@ :msg)))
+                      (+@msg (string-downcase (@ :msg)))
                       ))
         do (print i) (print x))
   ; (print

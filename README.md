@@ -41,31 +41,32 @@ jqn sample.json '(* _id (items (* name id (+@val 77))))'
 
 ## expressions [expr]:
 ```
- - (* sel1 sel2) -> iterate list of object and select these selectors
- - _             -> select everything [default]
+  _               -> select everything [default]
+  (* s1 [... sn]) -> iterate list of objects and select these selectors
+  (& s1 [... sn]) -> select these selectors from object
 ```
 
 ## modes [m]
 ```
   ? include selector if key is present or expr is (not null) [default]
-  + always include
+  + always include this selector
 ```
 
 ## selectors [sel]
 ```
-  symbol          -> ?@symbol; [same as: (? symbol _)]
-  ?@symbol        -> mode: ?; key: "symbol"; val: _
-  +@symbol        -> mode: +; key: "symbol"; val: _
-  (symbol expr)   -> mode: ?; key: "symbol"; val: expr
-  (+@symbol expr) -> mode: +; key: "symbol"; val: expr
-  (+ symbol expr) -> mode: +; key: "symbol"; val: expr
+  key          -> ?@key
+  ?@key        -> mode: ?; "key": _
+  +@key        -> mode: +; "key": _
+  (key expr)   -> mode: ?; "key": expr
+  (+@key expr) -> mode: +; "key": expr
+  (+ key expr) -> mode: +; "key": expr
 ```
 if you need case sensitive keys you can use strings instead:
 ```
-  "?@Symbol"        -> mode: ?; key: "Symbol"; val: _
-  ("?@Symbol" expr) -> mode: ?; key: "Symbol"; val: expr
-  ("+@Symbol" expr) -> mode: +; key: "Symbol"; val: expr
-  (+ "Symbol" expr) -> mode: +; key: "Symbol"; val: expr
+  "?@Key"        -> mode: ?; "Key": _
+  ("?@Key" expr) -> mode: ?; "Key": expr
+  ("+@Key" expr) -> mode: +; "Key": expr
+  (+ "Key" expr) -> mode: +; "Key": expr
 ```
 
 ## TODO/NOTES
@@ -73,25 +74,25 @@ if you need case sensitive keys you can use strings instead:
 current example of compiled query.
 
 ```lisp
-; ██ COMPILED ██████████████████████████
-; ██ q:   (* _ID (+@THINGS (* NAME ID)) (+@NEW-FIELD (PRINT (@ :MSG))))
-; ██ ---
-;    (LOOP WITH #:ITRLST5 = (MAV)
-;          FOR #:O6 ACROSS (ENSURE-VECTOR #:DAT*3)
-;          FOR #:KVRES4 = (LIST)
-;          DO (PROGN
-;              (APSH+ #:KVRES4 :NEW-FIELD (PRINT (@ #:O6 "msg")))
-;              (APSH+ #:KVRES4 :THINGS
-;                     (LOOP WITH #:ITRLST8 = (MAV)
-;                           FOR #:O9 ACROSS (ENSURE-VECTOR (@ #:O6 "things"))
-;                           FOR #:KVRES7 = (LIST)
-;                           DO (PROGN
-;                               (APSH? #:KVRES7 ID (@ #:O9 "id"))
-;                               (APSH? #:KVRES7 NAME (@ #:O9 "name"))
-;                               (VEXTEND #:KVRES7 #:ITRLST8))
-;                           FINALLY (RETURN #:ITRLST8)))
-;              (APSH? #:KVRES4 _ID (@ #:O6 "_id"))
-;              (VEXTEND #:KVRES4 #:ITRLST5))
-;          FINALLY (RETURN #:ITRLST5))
+  ██ COMPILED ██████████████████████████
+  ██ q:   (* _ID (+@THINGS (* NAME ID)) (+@NEW-FIELD (PRINT (@ :MSG))))
+  ██ ---
+     (LOOP WITH #:ITRLST5 = (MAV)
+           FOR #:O6 ACROSS (ENSURE-VECTOR #:DAT*3)
+           FOR #:KVRES4 = (LIST)
+           DO (PROGN
+               (APSH+ #:KVRES4 :NEW-FIELD (PRINT (@ #:O6 "msg")))
+               (APSH+ #:KVRES4 :THINGS
+                      (LOOP WITH #:ITRLST8 = (MAV)
+                            FOR #:O9 ACROSS (ENSURE-VECTOR (@ #:O6 "things"))
+                            FOR #:KVRES7 = (LIST)
+                            DO (PROGN
+                                (APSH? #:KVRES7 ID (@ #:O9 "id"))
+                                (APSH? #:KVRES7 NAME (@ #:O9 "name"))
+                                (VEXTEND #:KVRES7 #:ITRLST8))
+                            FINALLY (RETURN #:ITRLST8)))
+               (APSH? #:KVRES4 _ID (@ #:O6 "_id"))
+               (VEXTEND #:KVRES4 #:ITRLST5))
+           FINALLY (RETURN #:ITRLST5))
 ```
 

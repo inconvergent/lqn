@@ -6,14 +6,5 @@ pth=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 # TODO make the exec cmd configurable in .env
 
-if [ "$#" -eq 0 ] ; then
-  echo "jqn: unexpected input"
-elif [ "$#" -eq 2 ] ; then
-  # use your own lisp image (mine is auxin):
-  auxin "$pth/jqn-sh.lisp" "$1" "$2"
-  # or:
-  # sbcl --script ./jqn.lisp "$1" "$2" | jq '.'
-else
-  echo "jqn: unexpected input"
-fi
+auxin "$pth/jqn-sh.lisp" "$@"
 
