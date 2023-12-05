@@ -6,7 +6,7 @@
   (
    ; print
    wrtjsn
-    (qryl (second args) :q (read-str (third args)))))
+    (qryl (second args) :db t :q (read-str (third args)))))
 
 (main (auxin:cmd-args))
 

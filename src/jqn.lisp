@@ -40,8 +40,6 @@
          (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
     (mapcar #'unpack q)))
 
-
-
 (defun proc-qry (dat q)
   "compile jqn query"
   (labels
@@ -59,23 +57,19 @@
        (case mode (:? 'apsh?) (:+ 'apsh+)
          (otherwise (error "unexpected mode in selector: ~a ~a~%expr: ~a"
                            mode kk expr))))
+     (do-body (kvres dat d)
+       (loop for (mode kk expr) in (reverse d)
+             collect `(,(psh mode kk expr) ,kvres ,kk
+                       ,(compile/expr/rec (ensure-string kk) dat expr))))
      (compile/kv (dat d)
-        (awg (kvres)
-          `(let ((,kvres (list)))
-             ,@(loop for (mode kk expr) in (reverse d)
-                     collect `(,(psh mode kk expr) ,kvres ,kk
-                               ,(compile/expr/rec (ensure-string kk) dat expr)))
-             ,kvres)))
+       (awg (kvres) `(let ((,kvres (list)))
+                       ,@(do-body kvres dat d)
+                       ,kvres)))
      (compile/itr (dat d)
        (awg (kvres itrlst o)
-         `(loop with ,itrlst = (mav)
+         `(loop with ,itrlst = (mav) for ,kvres = (list)
                 for ,o across (ensure-vector ,dat)
-                for ,kvres = (list)
-                do (progn ,@(loop for (mode kk expr) in (reverse d)
-                                  collect `(,(psh mode kk expr) ,kvres ,kk
-                                            ,(compile/expr/rec (ensure-string kk)
-                                               o expr)))
-                          (vextend ,kvres ,itrlst))
+                do (progn ,@(do-body kvres o d) (vextend ,kvres ,itrlst))
                 finally (return ,itrlst))))
      (rec (dat d)
        (cond ((all? d) dat) ((atom d) d)
@@ -93,7 +87,6 @@
 (defmacro qryf (fn &key (q :_) db)
   (declare (boolean db)) "query file fn"
   `(qryd (loadjsn ,fn) :q ,q :db ,db))
-
 (defun qryl (dat &key (q :_) db)
   (declare (string dat)) "compile query and run it on dat"
   (awg (dat*) (eval `(let ((,dat* ,dat))
