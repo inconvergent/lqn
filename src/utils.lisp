@@ -111,6 +111,8 @@
 (defun itr? (d) (eq* d '* :*))
 (defun car-itr? (d) (and (listp d) (itr? (car d))))
 (defun all? (d) (eq* d '_ :_))
+(defun get? (s) (eq* s :@ '@))
+(defun car-get? (s) (and (listp s) (get? (car s))))
 
 (defun unpack-mode (sym &optional (modes *qmodes*) (default :?))
   (loop for mode in modes

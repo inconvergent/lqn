@@ -45,30 +45,35 @@
 (defmacro @ (o k &optional default)
   (if default `(gethash ,k ,o ,default) `(gethash ,k ,o)))
 
+
+
 (defun proc-qry (dat q)
   "compile jqn query"
   (labels
-    ((psh (mode kk vv)
+    ((compile/expr/rec (kk o expr)
+       (cond ((all? expr) `(@ ,o ,kk))
+             ((atom expr) expr)
+             ; ((car-itr? expr) (rec o expr))
+             ((car-itr? expr) (rec `(@ ,o ,kk) expr))
+             ((car-get? expr)
+              `(@ ,o ,(ensure-string (second expr)) ,@(cddr expr)))
+             ((consp expr) (cons (compile/expr/rec kk o (car expr))
+                                 (compile/expr/rec kk o (cdr expr))))
+             (t (warn "unexpected expr in selector: ~a~%expr: ~a" (list kk o expr)))))
+
+     (psh (mode kk expr)
        (case mode (:? 'apsh?) (:+ 'apsh+)
-         (otherwise (error "unexpected mode in selector for (~a ~a ~a)"
-                           mode kk vv))))
-     (make-val (kk o vv)
-       (veq:vpr kk o vv)
-       ;; KK | O | VV
-       ; >> things | O6 | (* NAME ID)
-       ;; KK | O | VV
-       ; >> _id | O6 | _
-       (cond ((car-itr? vv ) (rec `(@ ,o ,kk) vv))
-             ((all? vv) `(@ ,o ,kk))
-             (t (warn "unexpected value in selector ~a" (list kk o vv)))))
+         (otherwise (error "unexpected mode in selector: ~a ~a~%expr: ~a"
+                           mode kk expr))))
      (compile/itr (dat d)
        (awg (kvres itrlst o)
          `(loop with ,itrlst = (mav)
                 for ,o across (ensure-vector ,dat)
                 for ,kvres = (list)
-                do (progn ,@(loop for (mode kk vv) in (reverse d)
-                                  collect `(,(psh mode kk vv) ,kvres ,kk
-                                            ,(make-val (ensure-string kk) o vv)))
+                do (progn ,@(loop for (mode kk expr) in (reverse d)
+                                  collect `(,(psh mode kk expr) ,kvres ,kk
+                                            ,(compile/expr/rec (ensure-string kk)
+                                               o expr)))
                           (vextend ,kvres ,itrlst))
                 finally (return ,itrlst))))
      (rec (dat d)

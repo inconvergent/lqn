@@ -5,7 +5,8 @@
     "things": [
       {
         "id": 0,
-        "name": "Chris"
+        "name": "Chris",
+        "extra": "extra99"
       }
     ],
     "msg": "this is a message",
@@ -17,11 +18,13 @@
     "things": [
       {
         "id": 10,
-        "name": "Winters"
+        "name": "Winters",
+        "extra": "extra1"
       },
       {
         "id": 11,
-        "name": "Haii"
+        "name": "Haii",
+        "extra": "extra2"
       },
       {
         "id": 12,

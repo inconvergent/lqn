@@ -68,3 +68,30 @@ if you need case sensitive keys you can use strings instead:
   (+ "Symbol" expr) -> mode: +; key: "Symbol"; val: expr
 ```
 
+## TODO/NOTES
+
+current example of compiled query.
+
+```lisp
+; ██ COMPILED ██████████████████████████
+; ██ q:   (* _ID (+@THINGS (* NAME ID)) (+@NEW-FIELD (PRINT (@ :MSG))))
+; ██ ---
+;    (LOOP WITH #:ITRLST5 = (MAV)
+;          FOR #:O6 ACROSS (ENSURE-VECTOR #:DAT*3)
+;          FOR #:KVRES4 = (LIST)
+;          DO (PROGN
+;              (APSH+ #:KVRES4 :NEW-FIELD (PRINT (@ #:O6 "msg")))
+;              (APSH+ #:KVRES4 :THINGS
+;                     (LOOP WITH #:ITRLST8 = (MAV)
+;                           FOR #:O9 ACROSS (ENSURE-VECTOR (@ #:O6 "things"))
+;                           FOR #:KVRES7 = (LIST)
+;                           DO (PROGN
+;                               (APSH? #:KVRES7 ID (@ #:O9 "id"))
+;                               (APSH? #:KVRES7 NAME (@ #:O9 "name"))
+;                               (VEXTEND #:KVRES7 #:ITRLST8))
+;                           FINALLY (RETURN #:ITRLST8)))
+;              (APSH? #:KVRES4 _ID (@ #:O6 "_id"))
+;              (VEXTEND #:KVRES4 #:ITRLST5))
+;          FINALLY (RETURN #:ITRLST5))
+```
+

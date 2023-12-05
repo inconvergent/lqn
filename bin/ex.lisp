@@ -22,7 +22,7 @@
           (qryf "./sample.json" :db t
                 :q (*  _id
                       (+@things (* name id))
-                      ; (+@force (@ :msg))
+                      (+@force (print (@ :msg)))
                       ))
         do (print i) (print x))
 
