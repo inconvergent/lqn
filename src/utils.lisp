@@ -25,6 +25,10 @@
 (abbrev mav make-adjustable-vector)
 (abbrev vextend vector-push-extend)
 
+(defmacro @ (o k &optional default)
+  "get k from dict o; or default"
+  (if default `(gethash ,k ,o ,default) `(gethash ,k ,o)))
+
 (defmacro apsh? (lst k v)
   (declare (symbol lst)) "push (k . v) to lst if v"
   (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
@@ -104,15 +108,20 @@
 ;   (with-open-file (stream filename)
 ;     (loop for line = (read-line stream nil) while line collect line)))
 
-(defun ensure-vector (v)
-  (declare (sequence v))
+(defun ensure-vector (v) (declare (sequence v)) "list to vector; or vector"
   (etypecase v (vector v) (list (coerce v 'vector))))
+(defun ensure-string (s) "symbol to lowercase string; or string"
+  (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
 
-(defun itr? (d) (eq* d '* :*))
-(defun car-itr? (d) (and (listp d) (itr? (car d))))
-(defun all? (d) (eq* d '_ :_))
-(defun get? (s) (eq* s :@ '@))
+; TODO: fix this mess
+(defun all? (s) (eq* s '_ :_))
+(defun get? (s) (eq* s '@ :_))
+(defun itr? (s) (eq* s '* :*))
+(defun kv?  (s) (eq* s '& :&))
+(defun car-all? (s) (and (listp s) (all? (car s))))
 (defun car-get? (s) (and (listp s) (get? (car s))))
+(defun car-itr? (d) (and (listp d) (itr? (car d))))
+(defun car-kv? (d)  (and (listp d) (kv?  (car d))))
 
 (defun unpack-mode (sym &optional (modes *qmodes*) (default :?))
   (loop for mode in modes

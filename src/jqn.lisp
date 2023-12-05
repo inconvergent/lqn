@@ -8,6 +8,7 @@
    ~s
 ██ ██████████████████████████~%" q compiled))
 
+
 (defun loadjsn (fn)
   (declare (string fn)) "load json from file fn"
   (with-open-file (f fn :direction :input)
@@ -38,12 +39,6 @@
          (cons   (unpack-cons k))
          (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
     (mapcar #'unpack q)))
-(defun ensure-string (s)
-  (etypecase s (symbol (string-downcase (mkstr s)))
-               (string s)))
-
-(defmacro @ (o k &optional default)
-  (if default `(gethash ,k ,o ,default) `(gethash ,k ,o)))
 
 
 
@@ -53,18 +48,24 @@
     ((compile/expr/rec (kk o expr)
        (cond ((all? expr) `(@ ,o ,kk))
              ((atom expr) expr)
-             ; ((car-itr? expr) (rec o expr))
              ((car-itr? expr) (rec `(@ ,o ,kk) expr))
              ((car-get? expr)
               `(@ ,o ,(ensure-string (second expr)) ,@(cddr expr)))
              ((consp expr) (cons (compile/expr/rec kk o (car expr))
                                  (compile/expr/rec kk o (cdr expr))))
-             (t (warn "unexpected expr in selector: ~a~%expr: ~a" (list kk o expr)))))
-
+             (t (warn "unexpected expr in selector: ~a~%expr: ~a"
+                      (list kk o expr)))))
      (psh (mode kk expr)
        (case mode (:? 'apsh?) (:+ 'apsh+)
          (otherwise (error "unexpected mode in selector: ~a ~a~%expr: ~a"
                            mode kk expr))))
+     (compile/kv (dat d)
+        (awg (kvres)
+          `(let ((,kvres (list)))
+             ,@(loop for (mode kk expr) in (reverse d)
+                     collect `(,(psh mode kk expr) ,kvres ,kk
+                               ,(compile/expr/rec (ensure-string kk) dat expr)))
+             ,kvres)))
      (compile/itr (dat d)
        (awg (kvres itrlst o)
          `(loop with ,itrlst = (mav)
@@ -78,23 +79,23 @@
                 finally (return ,itrlst))))
      (rec (dat d)
        (cond ((all? d) dat) ((atom d) d)
-             ((car-itr? d) (compile/itr dat
-                             (compile/itr/preproc (cdr d))))
+             ((car-kv? d)  (compile/kv  dat (compile/itr/preproc (cdr d))))
+             ((car-itr? d) (compile/itr dat (compile/itr/preproc (cdr d))))
              (t (error "compile error for: ~a ~a" dat d)))))
 
     (rec dat q)))
 
-(defmacro qryd (dat &key q db)
-  (declare (boolean db) (cons q)) "query dat"
+(defmacro qryd (dat &key (q :_) db)
+  (declare (boolean db)) "query dat"
   (awg (dat*) (let ((compiled (proc-qry dat* q)))
                 (when db (jqn/show q compiled))
                 `(let ((,dat* ,dat)) ,compiled))))
-(defmacro qryf (fn &key q db)
-  (declare (boolean db) (cons q)) "query file fn"
+(defmacro qryf (fn &key (q :_) db)
+  (declare (boolean db)) "query file fn"
   `(qryd (loadjsn ,fn) :q ,q :db ,db))
 
-(defun qryl (dat &key q)
+(defun qryl (dat &key (q :_) db)
   (declare (string dat)) "compile query and run it on dat"
   (awg (dat*) (eval `(let ((,dat* ,dat))
-                       (qryf ,dat* :q ,q)))))
+                       (qryf ,dat* :q ,q :db ,db)))))
 

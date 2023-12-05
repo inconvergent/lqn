@@ -4,30 +4,22 @@
 
 (ql:quickload :auxin :silent t)
 (ql:quickload :jqn :silent t)
-
 (in-package :jqn)
 
-
-(defun main (args)
+(defun main ()
   ; (loop for i from 0
   ;       for x across
   ;         (qryf "./sample.json" :db t
   ;               :q (*  _id
   ;                     (+@things (* name id))
-  ;                     (+@force 333)))
+  ;                     (+@force (print (@ :msg)))
+  ;                     ))
   ;       do (print i) (print x))
-
-  (loop for i from 0
-        for x across
-          (qryf "./sample.json" :db t
-                :q (*  _id
-                      (+@things (* name id))
-                      (+@force (print (@ :msg)))
-                      ))
-        do (print i) (print x))
-
+  (print
+    (qryf "./sample2.json" :db t
+      :q _))
 
   )
 
-(main (auxin:cmd-args))
+(main)
 

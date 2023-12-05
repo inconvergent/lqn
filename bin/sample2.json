@@ -1,0 +1,31 @@
+{
+  "credit": "Davis Instruments Corp.",
+  "credit_URL": "http://www.davisnet.com",
+  "disclaimer_url": "http://www.davisnet.com/about/terms.asp",
+  "copyright_url": "http://www.davisnet.com/about/terms.asp",
+  "privacy_policy_url": "http://www.davisnet.com/about/privacy.asp",
+  "image": {
+    "url": "http://www.weatherlink.com/images/Logo_Davis_reflxblu.jpg",
+    "title": "Davis WeatherLink",
+    "link": "http://www.weatherlink.com"
+  },
+  "suggested_pickup": "15 minutes after the hour",
+  "suggested_pickup_period": "60",
+  "dewpoint_c": "-22.2",
+  "dewpoint_f": "-8.0",
+  "dewpoint_string": "-8.0 F (-22.2 C)",
+  "heat_index_c": "-20.6",
+  "heat_index_f": "-5.0",
+  "heat_index_string": "-5.0 F (-20.6 C)",
+  "observation_time": "Last Updated on Dec 5 2023, 9:37 pm CET",
+  "davis_current_observation": {
+    "station_name": "Skistadion",
+    "observation_age": 42,
+    "dewpoint_day_high_f": "-7",
+    "dewpoint_day_high_time": "8:47pm",
+    "dewpoint_day_low_f": "-8",
+    "windchill_month_low_f": "-9",
+    "windchill_year_low_f": "-9"
+  },
+  "time_to_generate": "0.012046 seconds"
+}
