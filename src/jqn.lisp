@@ -1,6 +1,5 @@
 (in-package :jqn)
 
-
 (defun jqn/show (q compiled)
  (format t "
 ██ COMPILED ██████████████████████████
@@ -17,24 +16,34 @@
 
 (defun wrtjsn (o &key (s *standard-output*) indent)
   (declare (stream s) (boolean indent)) "encode o as json to stream, s"
-  (let ((yason:*list-encoder* 'yason:encode-alist))
+  (let ((yason:*symbol-key-encoder* 'yason:encode-symbol-as-lowercase)
+        (yason:*symbol-encoder* 'yason:encode-symbol-as-lowercase)
+        (yason:*list-encoder* 'yason:encode-alist))
     (yason:encode o (yason:make-json-output-stream s :indent indent))))
 
 (defun compile/itr/preproc (q)
-  (labels ((unpack-cons (k &aux (ck (car k)))
-             (declare (list k))
-             (case (length k)
-               (1 `(,@(unpack-mode ck *qmodes*) :_))              ; ?/m [m]@key _
-               (2 `(,@(unpack-mode ck *qmodes*) ,(second k)))     ; ?/m [m]@key expr
-               (3  `(,ck ,(ensure-string (second k)) ,(third k))) ; m       key expr
-               (otherwise (warn "unexpected # items in selector: ~a" k)))))
-    (loop for k in q
-          collect (etypecase k (symbol `(,@(unpack-mode k *qmodes*) :_))
-                               (string `(,(unpack-mode k *qmodes*) :_))
-                               (cons `(,@(unpack-cons k)))))))
+  (labels
+    ((unpack-cons (k &aux (ck (car k)))
+       (declare (list k))
+       (case (length k)
+         (0 (warn "empty selector"))
+         (1 `(,@(unpack-mode ck *qmodes*) :_))             ; ?/m [m]@key _
+         (2 `(,@(unpack-mode ck *qmodes*) ,(second k)))    ; ?/m [m]@key expr
+         (3 `(,ck ,(ensure-string (second k)) ,(third k))) ; m       key expr
+         (otherwise (warn "bad # items in selector: ~a" k))))
+     (unpack (k)
+       (typecase k
+         (symbol `(,@(unpack-mode k *qmodes*) :_))
+         (string `(,@(unpack-mode k *qmodes*) :_))
+         (cons   (unpack-cons k))
+         (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
+    (mapcar #'unpack q)))
 (defun ensure-string (s)
   (etypecase s (symbol (string-downcase (mkstr s)))
                (string s)))
+
+(defmacro @ (o k &optional default)
+  (if default `(gethash ,k ,o ,default) `(gethash ,k ,o)))
 
 (defun proc-qry (dat q)
   "compile jqn query"
@@ -43,24 +52,31 @@
        (case mode (:? 'apsh?) (:+ 'apsh+)
          (otherwise (error "unexpected mode in selector for (~a ~a ~a)"
                            mode kk vv))))
-     (make-val (kk o vv) (rec `(gethash ,kk ,o) vv))
+     (make-val (kk o vv)
+       (veq:vpr kk o vv)
+       ;; KK | O | VV
+       ; >> things | O6 | (* NAME ID)
+       ;; KK | O | VV
+       ; >> _id | O6 | _
+       (cond ((car-itr? vv ) (rec `(@ ,o ,kk) vv))
+             ((all? vv) `(@ ,o ,kk))
+             (t (warn "unexpected value in selector ~a" (list kk o vv)))))
      (compile/itr (dat d)
        (awg (kvres itrlst o)
-         (let ((loop-body
-                 (loop for (mode kk vv) in (reverse d)
-                       collect `(,(psh mode kk vv) ,kvres ,kk
-                                 ,(make-val (ensure-string kk) o vv)))))
-           `(loop with ,itrlst = (mav)
-                  for ,o across (ensure-vector ,dat)
-                  for ,kvres = (list)
-                  do (progn ,@loop-body
-                            (vextend ,kvres ,itrlst))
-                  finally (return ,itrlst)))))
-     (rec (dat d) (cond ((all? d) dat)
-                        ((car-itr? d) (compile/itr dat
-                                        (compile/itr/preproc (cdr d))))
-                        ((atom d) d)
-                        (t (error "compile error for: ~a" d)))))
+         `(loop with ,itrlst = (mav)
+                for ,o across (ensure-vector ,dat)
+                for ,kvres = (list)
+                do (progn ,@(loop for (mode kk vv) in (reverse d)
+                                  collect `(,(psh mode kk vv) ,kvres ,kk
+                                            ,(make-val (ensure-string kk) o vv)))
+                          (vextend ,kvres ,itrlst))
+                finally (return ,itrlst))))
+     (rec (dat d)
+       (cond ((all? d) dat) ((atom d) d)
+             ((car-itr? d) (compile/itr dat
+                             (compile/itr/preproc (cdr d))))
+             (t (error "compile error for: ~a ~a" dat d)))))
+
     (rec dat q)))
 
 (defmacro qryd (dat &key q db)

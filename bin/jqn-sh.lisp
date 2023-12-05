@@ -3,7 +3,9 @@
 (in-package :jqn)
 
 (defun main (args)
-  (print ;wrtjsn
+  (
+   ; print
+   wrtjsn
     (qryl (second args) :q (read-str (third args)))))
 
 (main (auxin:cmd-args))
