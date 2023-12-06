@@ -25,6 +25,24 @@
         (yason:*list-encoder* 'yason:encode-alist))
     (yason:encode o (yason:make-json-output-stream s :indent indent))))
 
+(defun jsnout* (o &key indent (s (make-string-output-stream)))
+  (declare (boolean indent)) "serialize o as json string"
+  (jsnout o :s s :indent indent)
+  (get-output-stream-string s))
+
+(defun ldn-serialize (o &optional (kvkeys t))
+  (etypecase o (string o)
+               (hash-table (loop for k being the hash-keys of o using (hash-value v)
+                                 collect `(,(kv k) . ,(ldn-serialize v))))
+               (vector (loop with res = (make-adjustable-vector)
+                             for v across o do (vextend (ldn-serialize v) res)
+                             finally (return res)))
+               (cons (loop for (k . v) in o
+                           collect `(,(kv k) . ,(ldn-serialize v))))
+               (atom o)))
+
+
+
 (defun compile/itr/preproc (q)
   (labels
     ((unpack-cons (k &aux (ck (car k)))
@@ -46,15 +64,19 @@
 ; TODO: handle (*)/(&) as _
 ; TODO: default to "(& key)" for "key"
 
+ ; this is hacky, and will break if we add negation
+(defmacro expr-all-shortcut (d dat body)
+  `(if (all? (cadr ,d)) ,dat ,body))
+
 (defun proc-qry (dat q)
   "compile jqn query"
   (labels
     ((compile/expr/rec (kk o expr)
-       (cond ((all? expr) `(@ ,o ,kk))
+       (cond ((all? expr) `(jqn:@ ,o ,kk))
              ((atom expr) expr)
-             ((car-itr? expr) (rec `(@ ,o ,kk) expr))
+             ((car-itr? expr) (rec `(jqn:@ ,o ,kk) expr))
              ((car-get? expr)
-              `(@ ,o ,(ensure-string (second expr)) ,@(cddr expr)))
+              `(jqn:@ ,o ,(ensure-string (second expr)) ,@(cddr expr)))
              ((consp expr) (cons (compile/expr/rec kk o (car expr))
                                  (compile/expr/rec kk o (cdr expr))))
              (t (warn "unexpected expr in selector: ~a~%expr: ~a" k expr))))
@@ -76,8 +98,10 @@
                 finally (return ,itrlst))))
      (rec (dat d)
        (cond ((all? d) dat) ((atom d) d)
-             ((car-kv? d)  (compile/kv  dat (compile/itr/preproc (cdr d))))
-             ((car-itr? d) (compile/itr dat (compile/itr/preproc (cdr d))))
+             ((car-kv? d)  (expr-all-shortcut d dat
+                             (compile/kv  dat (compile/itr/preproc (cdr d)))))
+             ((car-itr? d) (expr-all-shortcut d dat
+                             (compile/itr dat (compile/itr/preproc (cdr d)))))
              (t (error "compile error for: ~a ~a" dat d)))))
 
     (rec dat q)))

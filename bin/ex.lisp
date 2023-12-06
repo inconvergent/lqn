@@ -4,19 +4,20 @@
 
 (ql:quickload :auxin :silent t)
 (ql:quickload :jqn :silent t)
-(in-package :jqn)
+; (in-package :jqn)
 
-; (print (jqn::internal-path-string "test/sample.json"))
+; TODO crash on explicit nil
 
 (defun main ()
-  (loop for i from 0
-        for x across
-          (qryf "./sample.json" :db t
-                :q (*  _id
-                      (+@things (* name id))
-                      (+@msg (string-downcase (@ :msg)))
-                      ))
-        do (print i) (print x))
+  (print
+   (jqn::ldn-serialize
+     (jqn:qryf "./sample.json" :db t
+               :q (* things)
+                ; (*  _id
+                ;       (+@things (* name id))
+                ;       (+@msg (string-downcase (@ :msg))))
+                )
+          ))
   ; (print
   ;   (qryf "./sample2.json" :db t
   ;     :q _))

@@ -9,8 +9,8 @@
   (unless silent (format t "~&JQN version: ~a~%." v))
   v)
 
-(defmacro eq* (v &rest rest &aux (v* (gensym "V*")))
-  `(let ((,v* ,v)) (or ,@(loop for r in rest collect `(eq ,v* (the symbol ,r))))))
+; (defmacro eq* (v &rest rest &aux (v* (gensym "V*")))
+;   `(let ((,v* ,v)) (or ,@(loop for r in rest collect `(eq ,v* (the symbol ,r))))))
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s))))
                  syms)
@@ -120,10 +120,12 @@
   (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
 
 ; TODO: fix this mess
-(defun all? (s) (eq* s '_ :_))
-(defun get? (s) (eq* s '@ :_))
-(defun itr? (s) (eq* s '* :*))
-(defun kv?  (s) (eq* s '& :&))
+(defun all? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
+(defun get? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :@)))
+(defun itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
+; (defun itr? (s) (eq* s '* :*))
+(defun kv? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :&)))
+; (defun kv?  (s) (eq* s '& :&))
 (defun car-all? (s) (and (listp s) (all? (car s))))
 (defun car-get? (s) (and (listp s) (get? (car s))))
 (defun car-itr? (d) (and (listp d) (itr? (car d))))
