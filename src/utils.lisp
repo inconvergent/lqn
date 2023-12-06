@@ -112,8 +112,6 @@
     (and (<=  (length prefix) (length s))
          (string= prefix s :end2 (length prefix)))))
 
-(defun read-str (s) (read-from-string s nil nil))
-
 (defun ensure-vector (v) (declare (sequence v)) "list to vector; or vector"
   (etypecase v (vector v) (list (coerce v 'vector))))
 (defun ensure-string (s) "symbol to lowercase string; or string"

@@ -9,7 +9,8 @@
                (:file "init" :depends-on ("packages"))
                (:file "utils" :depends-on ("init"))
                (:file "docs" :depends-on ("utils"))
-               (:file "jqn" :depends-on ("utils" "docs"))))
+               (:file "io" :depends-on ("utils"))
+               (:file "jqn" :depends-on ("io" "utils" "docs"))))
 
 (asdf:defsystem #:jqn/tests
   :depends-on (#:veq #:jqn #:prove #+:jqn-parallel #:lparallel #:uiop #:asdf)

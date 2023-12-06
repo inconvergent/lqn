@@ -10,9 +10,9 @@
 
 (defun main ()
   (print
-   (jqn::ldn-serialize
-     (jqn:qryf "./sample.json" :db t
-               :q (* things)
+   (jqn:ldnout
+     (jqn:qryf "./sample2.json" :db t
+               :q (& _)
                 ; (*  _id
                 ;       (+@things (* name id))
                 ;       (+@msg (string-downcase (@ :msg))))

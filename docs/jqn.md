@@ -44,7 +44,7 @@
  ;   Derived type: (FUNCTION (STRING) *)
  ;   Documentation:
  ;     parse json from file, fn
- ;   Source file: /data/x/jqn/src/jqn.lisp
+ ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
 #### JQN:JSNLOADS
@@ -58,7 +58,7 @@
  ;   Derived type: (FUNCTION (&OPTIONAL T) *)
  ;   Documentation:
  ;     parse json from stream; or *standard-input*
- ;   Source file: /data/x/jqn/src/jqn.lisp
+ ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
 #### JQN:JSNOUT
@@ -72,7 +72,21 @@
  ;   Derived type: (FUNCTION (T &KEY (:S STREAM) (:INDENT BOOLEAN)) *)
  ;   Documentation:
  ;     stream encoded json from o to s; or *standard-output*
- ;   Source file: /data/x/jqn/src/jqn.lisp
+ ;   Source file: /data/x/jqn/src/io.lisp
+```
+
+#### JQN:LDNOUT
+
+```
+ ; JQN:LDNOUT
+ ;   [symbol]
+ ; 
+ ; LDNOUT names a compiled function:
+ ;   Lambda-list: (O &OPTIONAL (KVKEYS T))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     serialize internal json representation to readable lisp data.
+ ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
 #### JQN:PROC-QRY
