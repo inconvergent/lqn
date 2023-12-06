@@ -8,15 +8,18 @@
    ~s
 ██ ██████████████████████████~%" q compiled))
 
+(defun jsnloads (&optional (s *standard-input*))
+  "parse json from stream; or *standard-input*"
+  (let ((yason:*parse-json-arrays-as-vectors* t))
+    (yason:parse s)))
 
-(defun loadjsn (fn)
-  (declare (string fn)) "load json from file fn"
-  (with-open-file (f fn :direction :input)
-    (let ((yason:*parse-json-arrays-as-vectors* t))
-      (yason:parse f))))
+(defun jsnloadf (fn)
+  (declare (string fn)) "parse json from file, fn"
+  (with-open-file (f fn :direction :input) (jsnloads f)))
 
-(defun wrtjsn (o &key (s *standard-output*) indent)
-  (declare (stream s) (boolean indent)) "encode o as json to stream, s"
+(defun jsnout (o &key (s *standard-output*) indent)
+  (declare (stream s) (boolean indent))
+  "stream encoded json from o to s; or *standard-output*"
   (let ((yason:*symbol-key-encoder* 'yason:encode-symbol-as-lowercase)
         (yason:*symbol-encoder* 'yason:encode-symbol-as-lowercase)
         (yason:*list-encoder* 'yason:encode-alist))
@@ -40,6 +43,9 @@
          (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
     (mapcar #'unpack q)))
 
+; TODO: handle (*)/(&) as _
+; TODO: default to "(& key)" for "key"
+
 (defun proc-qry (dat q)
   "compile jqn query"
   (labels
@@ -51,8 +57,7 @@
               `(@ ,o ,(ensure-string (second expr)) ,@(cddr expr)))
              ((consp expr) (cons (compile/expr/rec kk o (car expr))
                                  (compile/expr/rec kk o (cdr expr))))
-             (t (warn "unexpected expr in selector: ~a~%expr: ~a"
-                      (list kk o expr)))))
+             (t (warn "unexpected expr in selector: ~a~%expr: ~a" k expr))))
      (psh (mode kk expr)
        (case mode (:? 'apsh?) (:+ 'apsh+)
          (otherwise (error "unexpected mode in selector: ~a ~a~%expr: ~a"
@@ -78,15 +83,16 @@
     (rec dat q)))
 
 (defmacro qryd (dat &key (q :_) db)
-  (declare (boolean db)) "query dat"
+  (declare (boolean db)) "run jqn query on dat"
   (awg (dat*) (let ((compiled (proc-qry dat* q)))
                 (when db (jqn/show q compiled))
                 `(let ((,dat* ,dat)) ,compiled))))
+
 (defmacro qryf (fn &key (q :_) db)
-  (declare (boolean db)) "query file fn"
-  `(qryd (loadjsn ,fn) :q ,q :db ,db))
+  (declare (boolean db)) "run jqn query on file, fn"
+  `(qryd (jsnloadf ,fn) :q ,q :db ,db))
+
 (defun qryl (dat &key (q :_) db)
-  (declare (string dat)) "compile query and run it on dat"
-  (awg (dat*) (eval `(let ((,dat* ,dat))
-                       (qryf ,dat* :q ,q :db ,db)))))
+  "compile jqn query and run on dat"
+  (eval `(qryd ,dat :q ,q :db ,db)))
 

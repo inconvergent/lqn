@@ -2,7 +2,8 @@
   (:use #:common-lisp)
   (:nicknames #:cl-jqn)
   (:export
-    #:loadjsn #:wrtjsn
-    #:proc-qry #:qryd #:qryf #:qryl
+    #:jsnloads #:jsnloadf #:jsnout
+    #:proc-qry
+    #:qryd #:qryf #:qryl
     #:apsh? #:apsh! #:@))
 

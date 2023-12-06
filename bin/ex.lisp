@@ -6,6 +6,8 @@
 (ql:quickload :jqn :silent t)
 (in-package :jqn)
 
+; (print (jqn::internal-path-string "test/sample.json"))
+
 (defun main ()
   (loop for i from 0
         for x across

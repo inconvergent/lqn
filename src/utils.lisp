@@ -25,6 +25,10 @@
 (abbrev mav make-adjustable-vector)
 (abbrev vextend vector-push-extend)
 
+(defun internal-path-string (path &optional (pkg :jqn))
+  (declare (string path))
+  (namestring (asdf:system-relative-pathname pkg path)))
+
 (defmacro @ (o k &optional default)
   "get k from dict o; or default"
   (if default `(gethash ,k ,o ,default) `(gethash ,k ,o)))
@@ -103,10 +107,12 @@
       (if prune (remove-if (lambda (s) (= 0 (length s))) res)
                 res))))
 
+(defun startswith? (s prefix)
+  (let ((s (mkstr s)))
+    (and (<=  (length prefix) (length s))
+         (string= prefix s :end2 (length prefix)))))
+
 (defun read-str (s) (read-from-string s nil nil))
-; (defun get-file (filename)
-;   (with-open-file (stream filename)
-;     (loop for line = (read-line stream nil) while line collect line)))
 
 (defun ensure-vector (v) (declare (sequence v)) "list to vector; or vector"
   (etypecase v (vector v) (list (coerce v 'vector))))
