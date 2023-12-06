@@ -37,11 +37,11 @@
   "compile jqn query"
   (labels
     ((compile/expr/rec (kk o expr)
-       (cond ((all? expr) `(jqn:@ ,o ,kk))
+       (cond ((all? expr) `(*@ ,o ,kk))
              ((atom expr) expr)
-             ((car-itr? expr) (rec `(jqn:@ ,o ,kk) expr))
-             ((car-get? expr)
-              `(jqn:@ ,o ,(ensure-string (second expr)) ,@(cddr expr)))
+             ((car-itr? expr) (rec `(*@ ,o ,kk) expr))
+             ((car-kvget? expr)
+              `(*@ ,o ,(ensure-string (second expr)) ,@(cddr expr)))
              ((consp expr) (cons (compile/expr/rec kk o (car expr))
                                  (compile/expr/rec kk o (cdr expr))))
              (t (warn "unexpected expr in selector: ~a~%expr: ~a" k expr))))

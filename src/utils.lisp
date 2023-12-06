@@ -29,9 +29,16 @@
   (declare (string path))
   (namestring (asdf:system-relative-pathname pkg path)))
 
-(defmacro @ (o k &optional default)
+(defmacro *@ (o k &optional default)
   "get k from dict o; or default"
   (if default `(gethash ,k ,o ,default) `(gethash ,k ,o)))
+
+; (defmacro *@ (o sel)
+;   "get index or range from json array (vector).
+; if sel is an atom: (aref o ,sel)
+; if sel is cons: (subseq o ,@sel)"
+;   (etypecase sel (cons `(subseq o ,@sel))
+;                  (atom `(aref ,o ,sel))))
 
 (defmacro apsh? (lst k v)
   (declare (symbol lst)) "push (k . v) to lst if v"
@@ -119,13 +126,13 @@
 
 ; TODO: fix this mess
 (defun all? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
-(defun get? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :@)))
+(defun kvget? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*@)))
 (defun itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
 ; (defun itr? (s) (eq* s '* :*))
 (defun kv? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :&)))
 ; (defun kv?  (s) (eq* s '& :&))
 (defun car-all? (s) (and (listp s) (all? (car s))))
-(defun car-get? (s) (and (listp s) (get? (car s))))
+(defun car-kvget? (s) (and (listp s) (kvget? (car s))))
 (defun car-itr? (d) (and (listp d) (itr? (car d))))
 (defun car-kv? (d)  (and (listp d) (kv?  (car d))))
 

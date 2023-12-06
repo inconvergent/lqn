@@ -20,7 +20,7 @@
 (subtest "jqn qry"
   (is (jqn:qryf *test-data-fn*
         :q (*  _id (+@things (* name id))
-                   (+@msg (string-downcase (@ :msg)))))
+                   (+@msg (string-downcase (*@ :msg)))))
       #(((:_ID . "65679d23d38d711eaf999e89")
          (:THINGS . #(((:NAME . "Chris") (:ID . 0))))
          (:MSG . "this is a message"))
@@ -36,9 +36,9 @@
          :test #'equalp)
 
   (is (jqn:ldnout (jqn:qryf *test-data-fn*
-        :q (*  _id (+@things (* name id)) (+@msg (string-downcase (@ :msg))))))
+        :q (*  _id (+@things (* name id)) (+@msg (string-downcase (*@ :msg))))))
       (jqn:qryf *test-data-fn*
-        :q (*  _id (+@things (* name id)) (+@msg (string-downcase (@ :msg)))))
+        :q (*  _id (+@things (* name id)) (+@msg (string-downcase (*@ :msg)))))
       :test #'equalp)
 
   (is (jqn:ldnout (jqn:qryf *test-data-fn* :q (* things)))

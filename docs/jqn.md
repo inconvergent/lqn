@@ -1,13 +1,28 @@
-#### JQN:@
+#### JQN:&@
 
 ```
- ; JQN:@
+ ; JQN:&@
  ;   [symbol]
  ; 
- ; @ names a macro:
+ ; &@ names a macro:
  ;   Lambda-list: (O K &OPTIONAL DEFAULT)
  ;   Documentation:
  ;     get k from dict o; or default
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:\*@
+
+```
+ ; JQN:*@
+ ;   [symbol]
+ ; 
+ ; *@ names a macro:
+ ;   Lambda-list: (O SEL)
+ ;   Documentation:
+ ;     get index or range from json array (vector).
+ ;     if sel is an atom: (aref o ,sel)
+ ;     if sel is cons: (subseq o ,@sel)
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
