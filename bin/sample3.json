@@ -1,0 +1,34 @@
+{
+  "credit": "Mega Corp.",
+  "credit_URL": "http://fax.megacorp",
+  "disclaimer_url": null,
+  "copyright_url": "http://fax.megacorp/about/terms.asp",
+  "ll": {
+    "list": [1, 2, 3],
+    "title": "Mega Corp"
+  },
+  "qq": [
+      {
+        "id": 10,
+        "name": "Winters",
+        "extra": "extra1"
+      },
+      {
+        "id": 11,
+        "name": "Haii",
+        "extra": "extra2"
+      },
+      {
+        "id": 12,
+        "name": "Klein"
+      }
+    ],
+  "sugg": "15 minutes after the hour",
+  "obs": "Last Updated on Dec 5 2023, 9:37 pm CET",
+  "curr": {
+    "name": "Gulhuset",
+    "month": -9,
+    "year": -9
+  },
+  "secs": 0.012046
+}

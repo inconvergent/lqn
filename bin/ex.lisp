@@ -12,17 +12,9 @@
 
 (defun main ()
   (print
-   (jqn:ldnout
+   (jqn:jsnout
      (jqn:qryf "./sample.json"
-               :db t
-        :q (*  _id
-                (+@things (* name id))
-                   (+@msg (string-downcase (*@ :msg)))
-                   ))
-          ))
-  ; (print
-  ;   (qryf "./sample2.json" :db t
-  ;     :q _))
-  )
+        :q (* (things )))
+          )))
 
 (main)

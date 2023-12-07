@@ -19,8 +19,9 @@
   (let ((yason:*symbol-key-encoder* 'yason:encode-symbol-as-lowercase)
         (yason:*symbol-encoder* 'yason:encode-symbol-as-lowercase)
         (yason:*list-encoder* 'yason:encode-alist))
+    (format s "~&")
     (yason:encode o (yason:make-json-output-stream s :indent indent))
-    (format s "~%")
+    (format s "~&")
     (finish-output s)))
 
 (defun jsnout* (o &key indent (s (make-string-output-stream)))
@@ -29,7 +30,7 @@
   (get-output-stream-string s))
 
 (defun ldnout (o &optional (kvkeys t))
-  "serialize internal json representation to readable lisp data."
+  "serialize internal json representation to readable lisp data (ldn)."
   (etypecase o (string o)
                (hash-table (loop for k being the hash-keys of o using (hash-value v)
                                  collect `(,(kv k) . ,(ldnout v kvkeys))))

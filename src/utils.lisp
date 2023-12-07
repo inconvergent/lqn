@@ -33,11 +33,11 @@
 (defun nil-as-empty-ht (v)
   (if (not v) (make-hash-table :test #'equal) v))
 
-(defmacro *@ (o k &optional default)
+(defmacro @ (o k &optional default)
   "get k from dict o; or default"
   (if default `(gethash ,k (nil-as-empty-ht ,o) ,default)
               `(gethash ,k (nil-as-empty-ht ,o))))
-; (defmacro *@ (o sel)
+; (defmacro @ (o sel) ; rename
 ;   "get index or range from json array (vector).
 ; if sel is an atom: (aref o ,sel)
 ; if sel is cons: (subseq o ,@sel)"
@@ -128,13 +128,15 @@
 
 ; TODO: fix this mess
 (defun all? (s)   (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
-(defun kvget? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*@)))
+(defun kvget? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :@)))
 (defun itr? (s)   (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
 (defun kv? (s)    (and (or (symbolp s) (stringp s)) (eq (kv s) :&)))
+(defun itrmap? (s)  (and (or (symbolp s) (stringp s)) (eq (kv s) :*map)))
 (defun car-all? (s)   (and (listp s) (all? (car s))))
 (defun car-kvget? (s) (and (listp s) (kvget? (car s))))
 (defun car-itr? (d)   (and (listp d) (itr? (car d))))
 (defun car-kv? (d)    (and (listp d) (kv?  (car d))))
+(defun car-itrmap? (d)    (and (listp d) (itrmap? (car d))))
 
 (defun jqn/show (q compiled)
  (format t "

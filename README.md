@@ -39,6 +39,16 @@ jqn sample.json '(* _id (items (* name id (+@val 77))))'
 ]
 ```
 
+## opts
+
+Command lind options
+
+```
+-v show compiled code
+-m minify output [indented is default]
+-l use ldn output format [json is default]
+```
+
 ## expressions [expr]:
 ```
   _               -> select everything [default]

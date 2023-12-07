@@ -1,28 +1,22 @@
 #### JQN:&@
 
 ```
+:missing:todo:
+
  ; JQN:&@
  ;   [symbol]
+```
+
+#### JQN:@
+
+```
+ ; JQN:@
+ ;   [symbol]
  ; 
- ; &@ names a macro:
+ ; @ names a macro:
  ;   Lambda-list: (O K &OPTIONAL DEFAULT)
  ;   Documentation:
  ;     get k from dict o; or default
- ;   Source file: /data/x/jqn/src/utils.lisp
-```
-
-#### JQN:\*@
-
-```
- ; JQN:*@
- ;   [symbol]
- ; 
- ; *@ names a macro:
- ;   Lambda-list: (O SEL)
- ;   Documentation:
- ;     get index or range from json array (vector).
- ;     if sel is an atom: (aref o ,sel)
- ;     if sel is cons: (subseq o ,@sel)
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -84,7 +78,8 @@
  ; 
  ; JSNOUT names a compiled function:
  ;   Lambda-list: (O &KEY (S *STANDARD-OUTPUT*) INDENT)
- ;   Derived type: (FUNCTION (T &KEY (:S STREAM) (:INDENT BOOLEAN)) *)
+ ;   Derived type: (FUNCTION (T &KEY (:S STREAM) (:INDENT BOOLEAN))
+ ;                  (VALUES NULL &OPTIONAL))
  ;   Documentation:
  ;     stream encoded json from o to s; or *standard-output*
  ;   Source file: /data/x/jqn/src/io.lisp
@@ -100,7 +95,7 @@
  ;   Lambda-list: (O &OPTIONAL (KVKEYS T))
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     serialize internal json representation to readable lisp data.
+ ;     serialize internal json representation to readable lisp data (ldn).
  ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
@@ -111,8 +106,8 @@
  ;   [symbol]
  ; 
  ; PROC-QRY names a compiled function:
- ;   Lambda-list: (DAT Q)
- ;   Derived type: (FUNCTION (T T) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (CONF* Q)
+ ;   Derived type: (FUNCTION (T T) (VALUES CONS &OPTIONAL))
  ;   Documentation:
  ;     compile jqn query
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -125,7 +120,7 @@
  ;   [symbol]
  ; 
  ; QRYD names a macro:
- ;   Lambda-list: (DAT &KEY (Q _) DB)
+ ;   Lambda-list: (DAT &KEY (Q _) CONF DB)
  ;   Documentation:
  ;     run jqn query on dat
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -151,8 +146,8 @@
  ;   [symbol]
  ; 
  ; QRYL names a compiled function:
- ;   Lambda-list: (DAT &KEY (Q _) DB)
- ;   Derived type: (FUNCTION (T &KEY (:Q T) (:DB T)) *)
+ ;   Lambda-list: (DAT &KEY (Q _) CONF DB)
+ ;   Derived type: (FUNCTION (T &KEY (:Q T) (:CONF T) (:DB T)) *)
  ;   Documentation:
  ;     compile jqn query and run on dat
  ;   Source file: /data/x/jqn/src/jqn.lisp
