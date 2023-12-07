@@ -60,13 +60,15 @@
                              (compile/kv  conf (compile/itr/preproc (cdr d)))))
              ((car-itr? d) (expr-all-shortcut d dat
                              (compile/itr conf (compile/itr/preproc (cdr d)))))
-             (t (error "compile error for: ~a ~a" conf d)))))
+             (t (error "compile error for: ~a" d)))))
 
-    (rec conf* q)))
+    `(labels ((fn () ,(gk conf* :fn t))
+              (ctx () ,(gk conf* :ctx t)))
+     ,(rec conf* q))))
 
-(defmacro qryd (dat &key (q :_) db)
+(defmacro qryd (dat &key (q :_) conf db)
   (declare (boolean db)) "run jqn query on dat"
-  (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) (:dattype)) q)))
+  (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) (:dattype) ,@conf) q)))
                 (when db (jqn/show q compiled))
                 `(let ((,dat* ,dat)) ,compiled))))
 
@@ -74,7 +76,7 @@
   (declare (boolean db)) "run jqn query on file, fn"
   `(qryd (jsnloadf ,fn) :q ,q :db ,db))
 
-(defun qryl (dat &key (q :_) db)
+(defun qryl (dat &key (q :_) conf db)
   "compile jqn query and run on dat"
-  (eval `(qryd ,dat :q ,q :db ,db)))
+  (eval `(qryd ,dat :q ,q :db ,db :conf ,conf)))
 

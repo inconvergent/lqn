@@ -20,7 +20,8 @@
         (yason:*symbol-encoder* 'yason:encode-symbol-as-lowercase)
         (yason:*list-encoder* 'yason:encode-alist))
     (yason:encode o (yason:make-json-output-stream s :indent indent))
-    (format s "~%")))
+    (format s "~%")
+    (finish-output s)))
 
 (defun jsnout* (o &key indent (s (make-string-output-stream)))
   (declare (boolean indent)) "serialize o as json string"
