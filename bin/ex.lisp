@@ -13,12 +13,12 @@
 (defun main ()
   (print
    (jqn:ldnout
-     (jqn:qryf "./sample.json" :db t
-               :q (* _id (+@xxx (*@ things))) ; make a generic current dat getter?
-                ; (*  _id
-                ;       (+@things (* name id))
-                ;       (+@msg (string-downcase (@ :msg))))
-                )
+     (jqn:qryf "./sample.json"
+               :db t
+        :q (*  _id
+                (+@things (* name id))
+                   ; (+@msg (string-downcase (*@ :msg)))
+                   ))
           ))
   ; (print
   ;   (qryf "./sample2.json" :db t

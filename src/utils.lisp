@@ -29,6 +29,16 @@
   (declare (string path))
   (namestring (asdf:system-relative-pathname pkg path)))
 
+(defun gk (p k &optional silent &aux (hit (cdr (assoc k p))))
+  (declare (list p) (keyword k))
+  (if (or silent hit) hit (warn "JQN: missing conf key: ~a~%conf: ~s" k p)))
+; (defun gk+ (p &rest keys)
+;   (declare (list p keys))
+;   (every (lambda (k) (> (gk p k) 0)) keys))
+; (defun gk0 (p &rest keys)
+;   (declare (list p keys))
+;   (every (lambda (k) (= (gk p k) 0)) keys))
+
 (defmacro *@ (o k &optional default)
   "get k from dict o; or default"
   (if default `(gethash ,k ,o ,default) `(gethash ,k ,o)))

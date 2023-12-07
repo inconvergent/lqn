@@ -12,6 +12,7 @@
   (labels
     ((unpack-cons (k &aux (ck (car k)))
        (declare (list k))
+       ; (print k)
        (case (length k)
          (0 (warn "empty selector"))
          (1 `(,@(unpack-mode ck *qmodes*) :_))             ; ?/m [m]@key _
@@ -30,16 +31,16 @@
 ; TODO: default to "(& key)" for "key"
 
  ; this is hacky, and will break if we add negation
-(defmacro expr-all-shortcut (d dat body)
-  `(if (all? (cadr ,d)) ,dat ,body))
+(defmacro expr-all-shortcut (d o body)
+  `(if (all? (cadr ,d)) ,o ,body))
 
-(defun proc-qry (dat q)
+(defun proc-qry (conf* q)
   "compile jqn query"
   (labels
     ((compile/expr/rec (kk o expr)
        (cond ((all? expr) `(*@ ,o ,kk))
              ((atom expr) expr)
-             ((car-itr? expr) (rec `(*@ ,o ,kk) expr))
+             ((car-itr? expr) (rec `((:datsym *@ ,o ,kk)) expr))
              ((car-kvget? expr)
               `(*@ ,o ,(ensure-string (second expr)) ,@(cddr expr)))
              ((consp expr) (cons (compile/expr/rec kk o (car expr))
@@ -49,31 +50,32 @@
        (case mode (:? 'apsh?) (:+ 'apsh+)
          (otherwise (error "unexpected mode in selector: ~a ~a~%expr: ~a"
                            mode kk expr))))
-     (do-op-body (kvres dat d)
+     (do-op-body (kvres conf d)
        (loop for (mode kk expr) in (reverse d)
              collect `(,(psh mode kk expr) ,kvres ,kk
-                       ,(compile/expr/rec (ensure-string kk) dat expr))))
-     (compile/kv (dat d)
-       (awg (kvres) `(let ((,kvres (list))) ,@(do-op-body kvres dat d) ,kvres)))
-     (compile/itr (dat d)
+                       ,(compile/expr/rec (ensure-string kk) conf expr))))
+     (compile/kv (conf d)
+       (awg (kvres) `(let ((,kvres (list))) ,@(do-op-body kvres conf d) ,kvres)))
+     (compile/itr (conf d)
+        (print d)
        (awg (kvres itrlst o)
          `(loop with ,itrlst = (mav) for ,kvres = (list)
-                for ,o across (ensure-vector ,dat)
+                for ,o across (ensure-vector ,(gk conf :datsym))
                 do (progn ,@(do-op-body kvres o d) (vextend ,kvres ,itrlst))
                 finally (return ,itrlst))))
-     (rec (dat d)
+     (rec (conf d &aux (dat (gk conf :datsym)))
        (cond ((all? d) dat) ((atom d) d)
              ((car-kv? d)  (expr-all-shortcut d dat
-                             (compile/kv  dat (compile/itr/preproc (cdr d)))))
+                             (compile/kv  conf (compile/itr/preproc (cdr d)))))
              ((car-itr? d) (expr-all-shortcut d dat
-                             (compile/itr dat (compile/itr/preproc (cdr d)))))
-             (t (error "compile error for: ~a ~a" dat d)))))
+                             (compile/itr conf (compile/itr/preproc (cdr d)))))
+             (t (error "compile error for: ~a ~a" conf d)))))
 
-    (rec dat q)))
+    (rec conf* q)))
 
 (defmacro qryd (dat &key (q :_) db)
   (declare (boolean db)) "run jqn query on dat"
-  (awg (dat*) (let ((compiled (proc-qry dat* q)))
+  (awg (dat*) (let ((compiled (proc-qry `((:datsym . ,dat*)) q)))
                 (when db (jqn/show q compiled))
                 `(let ((,dat* ,dat)) ,compiled))))
 
