@@ -9,7 +9,9 @@
 
 (defun jsnloadf (fn)
   (declare (string fn)) "parse json from file, fn"
-  (with-open-file (f fn :direction :input) (jsnloads f)))
+  (with-open-file (f fn :direction :input)
+    (handler-case (jsnloads f)
+      (end-of-file (e) nil))))
 
 (defun jsnout (o &key (s *standard-output*) indent)
   (declare (stream s) (boolean indent))
@@ -17,7 +19,8 @@
   (let ((yason:*symbol-key-encoder* 'yason:encode-symbol-as-lowercase)
         (yason:*symbol-encoder* 'yason:encode-symbol-as-lowercase)
         (yason:*list-encoder* 'yason:encode-alist))
-    (yason:encode o (yason:make-json-output-stream s :indent indent))))
+    (yason:encode o (yason:make-json-output-stream s :indent indent))
+    (format s "~%")))
 
 (defun jsnout* (o &key indent (s (make-string-output-stream)))
   (declare (boolean indent)) "serialize o as json string"

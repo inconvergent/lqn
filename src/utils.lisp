@@ -30,21 +30,22 @@
   (declare (list p) (keyword k))
   (if (or silent hit) hit (warn "JQN: missing conf key: ~a~%conf: ~s" k p)))
 
+(defun nil-as-empty-ht (v)
+  (if (not v) (make-hash-table :test #'equal) v))
+
 (defmacro *@ (o k &optional default)
   "get k from dict o; or default"
-  (if default `(gethash ,k ,o ,default) `(gethash ,k ,o)))
-
+  (if default `(gethash ,k (nil-as-empty-ht ,o) ,default)
+              `(gethash ,k (nil-as-empty-ht ,o))))
 ; (defmacro *@ (o sel)
 ;   "get index or range from json array (vector).
 ; if sel is an atom: (aref o ,sel)
 ; if sel is cons: (subseq o ,@sel)"
-;   (etypecase sel (cons `(subseq o ,@sel))
-;                  (atom `(aref ,o ,sel))))
+;   (etypecase sel (cons `(subseq o ,@sel)) (atom `(aref ,o ,sel))))
 
 (defmacro apsh? (lst k v)
   (declare (symbol lst)) "push (k . v) to lst if v"
   (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
-
 (defmacro apsh+ (lst k v &optional default)
   (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
   (awg (v*) `(let ((,v* ,v))

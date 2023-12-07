@@ -36,7 +36,8 @@ examples:
 (defun run-files (opts q files)
   (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
   (unless (< 0 (length files)) (exit-with-msg 2 "jqn: missing files.~%~a~&" *ex*))
-  (out (execute-query (jsnloadf (car files)) (parse-query q))))
+  (loop for f in files
+        do (out (execute-query (jsnloadf f) (parse-query q))) ))
 
 (defun run-pipe (opts q)
   (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
