@@ -1,7 +1,6 @@
 (in-package #:jqn)
 
-; https://phmarek.github.io/yason/
-; (defvar *opt* '(optimize (safety 1) (speed 3) debug space))
+; YASON DOCS https://phmarek.github.io/yason/
 
 (defun d? (s) "describe symbol." (describe s)) (defun i? (s) "inspect s" (inspect s))
 (defun v? (&optional (silent t) &aux (v (slot-value (asdf:find-system 'jqn) 'asdf:version)))
@@ -9,8 +8,6 @@
   (unless silent (format t "~&JQN version: ~a~%." v))
   v)
 
-; (defmacro eq* (v &rest rest &aux (v* (gensym "V*")))
-;   `(let ((,v* ,v)) (or ,@(loop for r in rest collect `(eq ,v* (the symbol ,r))))))
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s))))
                  syms)
@@ -32,12 +29,6 @@
 (defun gk (p k &optional silent &aux (hit (cdr (assoc k p))))
   (declare (list p) (keyword k))
   (if (or silent hit) hit (warn "JQN: missing conf key: ~a~%conf: ~s" k p)))
-; (defun gk+ (p &rest keys)
-;   (declare (list p keys))
-;   (every (lambda (k) (> (gk p k) 0)) keys))
-; (defun gk0 (p &rest keys)
-;   (declare (list p keys))
-;   (every (lambda (k) (= (gk p k) 0)) keys))
 
 (defmacro *@ (o k &optional default)
   "get k from dict o; or default"
@@ -135,16 +126,22 @@
   (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
 
 ; TODO: fix this mess
-(defun all? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
+(defun all? (s)   (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
 (defun kvget? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*@)))
-(defun itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
-; (defun itr? (s) (eq* s '* :*))
-(defun kv? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :&)))
-; (defun kv?  (s) (eq* s '& :&))
-(defun car-all? (s) (and (listp s) (all? (car s))))
+(defun itr? (s)   (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
+(defun kv? (s)    (and (or (symbolp s) (stringp s)) (eq (kv s) :&)))
+(defun car-all? (s)   (and (listp s) (all? (car s))))
 (defun car-kvget? (s) (and (listp s) (kvget? (car s))))
-(defun car-itr? (d) (and (listp d) (itr? (car d))))
-(defun car-kv? (d)  (and (listp d) (kv?  (car d))))
+(defun car-itr? (d)   (and (listp d) (itr? (car d))))
+(defun car-kv? (d)    (and (listp d) (kv?  (car d))))
+
+(defun jqn/show (q compiled)
+ (format t "
+██ COMPILED ██████████████████████████
+██ q:   ~s
+██ ---
+   ~s
+██ ██████████████████████████~%" q compiled))
 
 (defun unpack-mode (sym &optional (modes *qmodes*) (default :?))
   (loop for mode in modes

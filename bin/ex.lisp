@@ -17,7 +17,7 @@
                :db t
         :q (*  _id
                 (+@things (* name id))
-                   ; (+@msg (string-downcase (*@ :msg)))
+                   (+@msg (string-downcase (*@ :msg)))
                    ))
           ))
   ; (print
