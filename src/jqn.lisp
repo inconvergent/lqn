@@ -1,13 +1,9 @@
 (in-package :jqn)
 
 (defun compile/itr/preproc (q)
+  ; (veq:vp q)
   (labels
-    ((expand-exprs (sel)
-      (loop for (mode kk expr) in sel
-            for gh = `(@ :_ ,(ensure-string kk))
-            collect `(,mode ,kk
-                       ,(if (all? expr) gh
-                          (tree-replace-fx expr #'all? (lambda (o) gh))))))
+    (
      (unpack-cons (k &aux (ck (car k)))
        (declare (list k))
        (case (length k)
@@ -23,7 +19,7 @@
          (cons   (unpack-cons k))
          (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
     (let* ((q* (remove-if #'all? q))
-           (res (expand-exprs (mapcar #'unpack q*))))
+           (res (mapcar #'unpack q*)))
       (if (not (= (length q) (length q*)))
           (cons :_ res) res))))
 
@@ -35,43 +31,41 @@
 (defun new-ht () (make-hash-table :test #'equal))
 (defun strip-all (d) (if (car-all? d) (cdr d) d))
 
-(defun itr-select-dat (conf dat expr kk)
- (if (or (car-*$itr? expr)
-         (car-$itr? expr)
-         (car-*itr? expr)) ; this is probably incorrect
-  `((:dat . (@ ,dat ,kk)) ,@conf)
-  `((:dat . ,dat) ,@conf)
-  ))
+(defun itr-select-dat (conf dat kk) `((:dat . (@ ,dat ,kk)) ,@conf))
 
 (defun proc-qry (conf* q)
   "compile jqn query"
   (labels
-    (
-     (compile/$itr (conf d)
-       (error "$itr not implemented "))
+    ((compile/$itr (conf d)
+       (awg (ires kres dat)
+         `(let* ((,dat ,(gk conf :dat))
+                 (,kres ,(if (car-all? d) `(copy-ht ,dat) `(new-ht))))
+            ,@(loop for (mode kk expr) in (strip-all d)
+                    for kk* = (ensure-string kk)
+                    for comp-expr = (rec (itr-select-dat conf dat kk*) expr)
+                    collect `(setf (gethash ,kk* ,kres) ,comp-expr))
+            ,kres)))
 
      (compile/*itr (conf d)
-       (veq:vp :* conf d)
-       (awg (ires kres dat) ; incomplete
+       (awg (ires kres dat)
          `(loop with ,ires = (mav)
                 for ,dat across (ensure-vector ,(gk conf :dat))
                 do (progn
                      ,@(loop for (mode kk expr) in (strip-all d)
                              for kk* = (ensure-string kk)
-                             for com-expr = (rec (itr-select-dat conf dat expr kk*)
+                             for comp-expr = (rec (itr-select-dat conf dat kk*)
                                                  expr)
                              collect `(vextend ,comp-expr ,ires)))
                 finally (return ,ires))))
      (compile/*$itr (conf d)
-       (veq:vp :*$ conf d)
        (awg (ires kres dat)
          `(loop with ,ires = (mav)
                 for ,dat across (ensure-vector ,(gk conf :dat))
                 for ,kres = ,(if (car-all? d) `(copy-ht ,dat) `(new-ht))
-                do (progn ; TODO: this fails when expr has nested iterator
+                do (progn
                      ,@(loop for (mode kk expr) in (strip-all d)
                              for kk* = (ensure-string kk)
-                             for comp-expr = (rec (itr-select-dat conf dat expr kk*)
+                             for comp-expr = (rec (itr-select-dat conf dat kk*)
                                                   expr)
                              collect `(setf (gethash ,kk* ,kres) ,comp-expr))
                      (vextend ,kres ,ires))
