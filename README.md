@@ -9,7 +9,7 @@ JSON query and transform utilities
 ## example
 
 ```bash
-jqn sample.json '(* _id (items (* name id (+@val 77))))'
+jqn sample.json '(*$ _id (items (* name id)))'
 
 [
   {
@@ -17,8 +17,7 @@ jqn sample.json '(* _id (items (* name id (+@val 77))))'
     "items": [
       {
         "name": "Chris",
-        "id": 0,
-        "val": 77
+        "id": 0
       }
     ]
   },
@@ -27,13 +26,11 @@ jqn sample.json '(* _id (items (* name id (+@val 77))))'
     "items": [
       {
         "name": "Nina",
-        "id": 10,
-        "val": 77
+        "id": 10
       },
       {
         "name": "Ian",
-        "id": 11,
-        "val": 77
+        "id": 11
       }
   }
 ]
@@ -44,23 +41,19 @@ jqn sample.json '(* _id (items (* name id (+@val 77))))'
 Command lind options
 
 ```
--v show compiled code
--m minify output [indented is default]
--l use ldn output format [json is default]
+  -v show compiled code
+  -m minify output [indented is default]
+  -l use ldn output format [json is default]
 ```
 
-## expressions [expr]:
+## iterators:
 ```
-  _               -> select everything [default]
-  (* s1 [... sn]) -> iterate list of objects and select these selectors
-  (& s1 [... sn]) -> select these selectors from object
+  _                -> select everything [default]
+  (*$ s1 [... sn]) -> iterate list of objects and select
+  (* s1 [... sn])  -> iterate list and select
+  ($ s1 [... sn])  -> select these keys from object
 ```
 
-## modes [m]
-```
-  ? include selector if key is present or expr is (not null) [default]
-  + always include this selector
-```
 
 ## selectors [sel]
 ```
@@ -79,30 +72,8 @@ if you need case sensitive keys you can use strings instead:
   (+ "Key" expr) -> mode: +; "Key": expr
 ```
 
-## TODO/NOTES
-
-current example of compiled query.
-
-```lisp
-  ██ COMPILED ██████████████████████████
-  ██ q:   (* _ID (+@THINGS (* NAME ID)) (+@NEW-FIELD (PRINT (@ :MSG))))
-  ██ ---
-     (LOOP WITH #:ITRLST5 = (MAV)
-           FOR #:O6 ACROSS (ENSURE-VECTOR #:DAT*3)
-           FOR #:KVRES4 = (LIST)
-           DO (PROGN
-               (APSH+ #:KVRES4 :NEW-FIELD (PRINT (@ #:O6 "msg")))
-               (APSH+ #:KVRES4 :THINGS
-                      (LOOP WITH #:ITRLST8 = (MAV)
-                            FOR #:O9 ACROSS (ENSURE-VECTOR (@ #:O6 "things"))
-                            FOR #:KVRES7 = (LIST)
-                            DO (PROGN
-                                (APSH? #:KVRES7 ID (@ #:O9 "id"))
-                                (APSH? #:KVRES7 NAME (@ #:O9 "name"))
-                                (VEXTEND #:KVRES7 #:ITRLST8))
-                            FINALLY (RETURN #:ITRLST8)))
-               (APSH? #:KVRES4 _ID (@ #:O6 "_id"))
-               (VEXTEND #:KVRES4 #:ITRLST5))
-           FINALLY (RETURN #:ITRLST5))
+## modes [m]
 ```
-
+  ? include selector if key is present or expr is (not null) [default]
+  + always include this selector
+```

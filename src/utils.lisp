@@ -43,14 +43,14 @@
 ; if sel is cons: (subseq o ,@sel)"
 ;   (etypecase sel (cons `(subseq o ,@sel)) (atom `(aref ,o ,sel))))
 
-(defmacro apsh? (lst k v)
-  (declare (symbol lst)) "push (k . v) to lst if v"
-  (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
-(defmacro apsh+ (lst k v &optional default)
-  (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
-  (awg (v*) `(let ((,v* ,v))
-               (if ,v* (push `(,,(kv k) . ,,v*) ,lst)
-                       (push `(,,k . ,,default) ,lst)))))
+; (defmacro apsh? (lst k v)
+;   (declare (symbol lst)) "push (k . v) to lst if v"
+;   (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
+; (defmacro apsh+ (lst k v &optional default)
+;   (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
+;   (awg (v*) `(let ((,v* ,v))
+;                (if ,v* (push `(,,(kv k) . ,,v*) ,lst)
+;                        (push `(,,k . ,,default) ,lst)))))
 
 (defun mapqt (l) (declare (list l)) "new list with quoted items." (mapcar (lambda (s) `(quote ,s)) l))
 (defun mkstr (&rest args) "coerce this to string."
@@ -67,6 +67,21 @@
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 
+(defun tree-replace (tree from to &optional (comparefx #'equal))
+  "compares tree to from (with comparefx); replaces matches with to."
+  (cond ((funcall comparefx tree from) to)
+        ((null tree) nil) ((atom tree) tree)
+        (t (mapcar (lambda (x) (tree-replace x from to))
+                   tree))))
+
+(defun tree-replace-fx (tree fxmatch fxtransform)
+  "compares elements with (comparefx); repaces matches with (fxmatch hit)."
+  (cond ((funcall fxmatch tree) (funcall fxtransform tree))
+        ((null tree) nil)
+        ((atom tree) tree)
+        (t (mapcar (lambda (x) (tree-replace-fx x fxmatch fxtransform))
+                   tree))))
+
 (defun strcat (s)
   (declare (optimize speed) (list s))
   (apply #'concatenate 'string s))
@@ -77,6 +92,7 @@
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to))
                                 (split-substr from s)))))
     (subseq s 0 (1- (length s)))))
+
 
 (defun split-substr (x s &key prune &aux (lx (length x)))
   (declare (optimize speed) (string x s) (boolean prune))
@@ -127,16 +143,18 @@
   (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
 
 ; TODO: fix this mess
-(defun all? (s)   (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
-(defun kvget? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :@)))
-(defun itr? (s)   (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
-(defun kv? (s)    (and (or (symbolp s) (stringp s)) (eq (kv s) :&)))
-(defun itrmap? (s)  (and (or (symbolp s) (stringp s)) (eq (kv s) :*map)))
-(defun car-all? (s)   (and (listp s) (all? (car s))))
-(defun car-kvget? (s) (and (listp s) (kvget? (car s))))
-(defun car-itr? (d)   (and (listp d) (itr? (car d))))
-(defun car-kv? (d)    (and (listp d) (kv?  (car d))))
-(defun car-itrmap? (d)    (and (listp d) (itrmap? (car d))))
+(defun $itr? (s) (and (symbolp s) (eq (kv s) :$)))
+(defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
+(defun *itr? (s) (and (symbolp s) (eq (kv s) :*)))
+(defun @get? (s) (and (symbolp s) (eq (kv s) :@)))
+(defun all? (s) (and (symbolp s) (eq (kv s) :_)))
+
+(defun car-$itr? (d) (and (listp d) ($itr? (car d))))
+(defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
+(defun car-*itr? (d) (and (listp d) (*itr? (car d))))
+(defun car-@get? (s) (and (listp s) (@get? (car s))))
+(defun car-all? (s) (and (listp s) (all? (car s))))
+
 
 (defun jqn/show (q compiled)
  (format t "
