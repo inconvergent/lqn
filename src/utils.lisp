@@ -127,16 +127,18 @@
   (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
 
 ; TODO: fix this mess
-(defun all? (s)   (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
-(defun kvget? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :@)))
-(defun itr? (s)   (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
-(defun kv? (s)    (and (or (symbolp s) (stringp s)) (eq (kv s) :&)))
-(defun itrmap? (s)  (and (or (symbolp s) (stringp s)) (eq (kv s) :*map)))
-(defun car-all? (s)   (and (listp s) (all? (car s))))
-(defun car-kvget? (s) (and (listp s) (kvget? (car s))))
-(defun car-itr? (d)   (and (listp d) (itr? (car d))))
-(defun car-kv? (d)    (and (listp d) (kv?  (car d))))
-(defun car-itrmap? (d)    (and (listp d) (itrmap? (car d))))
+(defun $itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :$)))
+(defun *$itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*$)))
+(defun *itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
+(defun @get? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :@)))
+(defun all? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
+
+(defun car-$itr? (d) (and (listp d) ($itr? (car d))))
+(defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
+(defun car-*itr? (d) (and (listp d) (*itr? (car d))))
+(defun car-@get? (s) (and (listp s) (@get? (car s))))
+(defun car-all? (s) (and (listp s) (all? (car s))))
+
 
 (defun jqn/show (q compiled)
  (format t "

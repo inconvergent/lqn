@@ -1,7 +1,6 @@
 (in-package :jqn)
 
 (defun compile/itr/preproc (q)
-  ; (veq:vp q)
   (labels
     ((unpack-cons (k &aux (ck (car k)))
        (declare (list k))
@@ -17,70 +16,57 @@
          (string `(,@(unpack-mode k *qmodes*) :_))
          (cons   (unpack-cons k))
          (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
-    (mapcar #'unpack q)))
+    (let* ((q* (remove-if #'all? q))
+           (res (mapcar #'unpack q*)))
+      (if (not (= (length q) (length q*)))
+          (cons :_ res) res))))
 
- ; this is hacky, and will break if we add negation
-(defmacro expr-all-shortcut (d dat body)
-  `(if (all? (cadr ,d)) ,dat ,body))
-
-(defmacro with-kv ((res) &body body)
-  `(let ((,res (list))) ,@body ,res))
-
-
-; this is weird:
-; jqn -v '(* (& things))' sample.json
+(defun copy-ht (ht)
+  (loop with res = (make-hash-table :test #'equal)
+        for k being the hash-keys of ht using (hash-value v)
+        do (setf (gethash k res) (gethash k ht))
+        finally (return res)))
+(defun strip-all (d) (if (car-all? d) (cdr d) d))
 
 (defun proc-qry (conf* q)
   "compile jqn query"
   (labels
-    ((compile/expr/rec (kk conf expr &aux (dat (gk conf :dat)))
-       (cond ((all? expr) `(@ ,dat ,kk))
-             ((atom expr) expr)
-             ((car-itr? expr)
-                (rec `((:dat @ ,dat ,kk) ,@conf) expr))
-             ((car-kv? expr)
-                (rec `((:dat @ ,dat ,kk) ,@conf) expr))
-             ((car-itrmap? expr)
-                (rec `((:dat @ ,dat ,kk) ,@conf) expr))
-             ((car-kvget? expr)
-                `(@ ,dat ,(ensure-string (second expr)) ,@(cddr expr)))
-             ((consp expr) (cons (compile/expr/rec kk conf (car expr))
-                                 (compile/expr/rec kk conf (cdr expr))))
-             (t (warn "unexpected expr in selector: ~a~%expr: ~a" k expr))))
+    (
      (psh (mode kk expr)
        (case mode (:? 'apsh?) (:+ 'apsh+)
          (otherwise (error "unexpected mode in selector: ~a ~a~%expr: ~a"
                            mode kk expr))))
-     (make-selector-body (kvres conf d)
-       (loop for (mode kk expr) in (reverse d)
-             collect `(,(psh mode kk expr) ,kvres ,kk
-                       ,(compile/expr/rec
-                          (ensure-string kk) conf expr))))
-     (compile/kv (conf d)
-       (awg (kvres) `(with-kv (,kvres) ,@(make-selector-body kvres conf d))))
-     (compile/itr (conf d)
-       (awg (kvres itrlst dat)
-         `(loop with ,itrlst = (mav) for ,kvres = (list)
+     (compile/*$itr (conf d)
+       (awg (ires kres dat)
+         `(loop with ,ires = (mav)
                 for ,dat across (ensure-vector ,(gk conf :dat))
-                do (progn
-                     ,@(make-selector-body kvres `((:dat . ,dat) ,@conf) d)
-                     (vextend ,kvres ,itrlst))
-                finally (return ,itrlst))))
-     (compile/itrmap (cond d)
-                     (error "*map not implemented")
-                     )
+                for ,kres = ,(if (car-all? d) `(copy-ht ,dat)
+                                              `(make-hash-table :test #'equal))
+                do (progn ,@(loop for (mode kk expr) in (reverse (strip-all d))
+                                  for kk* = (ensure-string kk)
+                                  collect `(setf (gethash ,kk* ,kres)
+                                                 ,(rec `((:dat . (gethash ,kk* ,dat)) ,@conf)
+                                                       expr)))
+                          (vextend ,kres ,ires))
+                finally (return ,ires))))
+     (compile/$itr (conf d)
+      (error "$itr not implemented "))
+
+     (compile/*itr (conf d)
+       (awg (ires kres dat) ; incomplete
+         `(loop with ,ires = (mav)
+                for ,dat across (ensure-vector ,(gk conf :dat))
+                for ,kres = (list)
+                do (progn ,(if (car-all? d)
+                               `(push ,dat ,kres))
+                     (vextend ,kres ,ires))
+                finally (return ,ires))
+         ))
      (rec (conf d &aux (dat (gk conf :dat)))
-       (cond ((all? d) dat)
-             ((atom d) d)
-             ((car-itrmap? d)
-                (compile/itrmap conf (cdr d))
-              )
-             ((car-kv? d)
-                (expr-all-shortcut d dat
-                  (compile/kv conf (compile/itr/preproc (cdr d)))))
-             ((car-itr? d)
-                (expr-all-shortcut d dat
-                  (compile/itr conf (compile/itr/preproc (cdr d)))))
+       (cond ((all? d) dat) ((atom d) d)
+             ((car-*itr? d) (compile/*itr conf (compile/itr/preproc (cdr d))))
+             ((car-*$itr? d) (compile/*$itr conf (compile/itr/preproc (cdr d))))
+             ((car-$itr? d) (compile/$itr conf (compile/itr/preproc (cdr d))))
              (t (error "compile error for: ~a" d)))))
 
     `(labels ((fn () ,(gk conf* :fn t))
