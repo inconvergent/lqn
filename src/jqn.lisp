@@ -1,9 +1,8 @@
 (in-package :jqn)
 
 (defun compile/itr/preproc (q)
-  ; (veq:vp q)
   (labels
-    (
+    ((stringify-key (v) (dsb (a b c) v `(,a ,(ensure-string b) ,c)))
      (unpack-cons (k &aux (ck (car k)))
        (declare (list k))
        (case (length k)
@@ -19,7 +18,7 @@
          (cons   (unpack-cons k))
          (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
     (let* ((q* (remove-if #'all? q))
-           (res (mapcar #'unpack q*)))
+           (res (mapcar #'stringify-key (mapcar #'unpack q*))))
       (if (not (= (length q) (length q*)))
           (cons :_ res) res))))
 
@@ -37,25 +36,22 @@
   "compile jqn query"
   (labels
     ((compile/$itr (conf d)
-       (awg (ires kres dat)
+       (awg (kres dat)
          `(let* ((,dat ,(gk conf :dat))
                  (,kres ,(if (car-all? d) `(copy-ht ,dat) `(new-ht))))
             ,@(loop for (mode kk expr) in (strip-all d)
-                    for kk* = (ensure-string kk)
-                    for comp-expr = (rec (itr-select-dat conf dat kk*) expr)
-                    collect `(setf (gethash ,kk* ,kres) ,comp-expr))
+                    collect `(setf (gethash ,kk ,kres)
+                                   ,(rec (itr-select-dat conf dat kk) expr)))
             ,kres)))
-
      (compile/*itr (conf d)
-       (awg (ires kres dat)
+       (awg (ires dat)
          `(loop with ,ires = (mav)
                 for ,dat across (ensure-vector ,(gk conf :dat))
                 do (progn
                      ,@(loop for (mode kk expr) in (strip-all d)
-                             for kk* = (ensure-string kk)
-                             for comp-expr = (rec (itr-select-dat conf dat kk*)
-                                                 expr)
-                             collect `(vextend ,comp-expr ,ires)))
+                             collect `(vextend
+                                        ,(rec (itr-select-dat conf dat kk)
+                                              expr) ,ires)))
                 finally (return ,ires))))
      (compile/*$itr (conf d)
        (awg (ires kres dat)
@@ -64,10 +60,9 @@
                 for ,kres = ,(if (car-all? d) `(copy-ht ,dat) `(new-ht))
                 do (progn
                      ,@(loop for (mode kk expr) in (strip-all d)
-                             for kk* = (ensure-string kk)
-                             for comp-expr = (rec (itr-select-dat conf dat kk*)
+                             for comp-expr = (rec (itr-select-dat conf dat kk)
                                                   expr)
-                             collect `(setf (gethash ,kk* ,kres) ,comp-expr))
+                             collect `(setf (gethash ,kk ,kres) ,comp-expr))
                      (vextend ,kres ,ires))
                 finally (return ,ires))))
      (rec (conf d &aux (dat (gk conf :dat)))

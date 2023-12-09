@@ -9,7 +9,7 @@ JSON query and transform utilities
 ## example
 
 ```bash
-jqn sample.json '(*$ _id (items (* name id (+@val 77))))'
+jqn sample.json '(*$ _id (items (* name id)))'
 
 [
   {
@@ -17,8 +17,7 @@ jqn sample.json '(*$ _id (items (* name id (+@val 77))))'
     "items": [
       {
         "name": "Chris",
-        "id": 0,
-        "val": 77
+        "id": 0
       }
     ]
   },
@@ -27,13 +26,11 @@ jqn sample.json '(*$ _id (items (* name id (+@val 77))))'
     "items": [
       {
         "name": "Nina",
-        "id": 10,
-        "val": 77
+        "id": 10
       },
       {
         "name": "Ian",
-        "id": 11,
-        "val": 77
+        "id": 11
       }
   }
 ]
@@ -44,24 +41,19 @@ jqn sample.json '(*$ _id (items (* name id (+@val 77))))'
 Command lind options
 
 ```
--v show compiled code
--m minify output [indented is default]
--l use ldn output format [json is default]
+  -v show compiled code
+  -m minify output [indented is default]
+  -l use ldn output format [json is default]
 ```
 
-## expressions [expr]:
+## iterators:
 ```
-  _               -> select everything [default]
+  _                -> select everything [default]
   (*$ s1 [... sn]) -> iterate list of objects and select
-  (* s1 [... sn]) -> iterate list and select
-  ($ s1 [... sn]) -> select these keys from object
+  (* s1 [... sn])  -> iterate list and select
+  ($ s1 [... sn])  -> select these keys from object
 ```
 
-## modes [m]
-```
-  ? include selector if key is present or expr is (not null) [default]
-  + always include this selector
-```
 
 ## selectors [sel]
 ```
@@ -80,25 +72,8 @@ if you need case sensitive keys you can use strings instead:
   (+ "Key" expr) -> mode: +; "Key": expr
 ```
 
-## TODO/NOTES
-
-current example of compiled query.
-
-```lisp
-██ COMPILED ██████████████████████████
-██ q:   (*$ (?@THINGS (AREF _ 0)))
-██ ---
-   (LABELS ((JQN::FN ()
-              NIL)
-            (JQN::CTX ()
-              NIL))
-     (LOOP JQN::WITH #:IRES1 = (JQN::MAV)
-           JQN::FOR #:DAT3 JQN::ACROSS (JQN::ENSURE-VECTOR #:DAT*0)
-           JQN::FOR #:KRES2 = (JQN::NEW-HT)
-           DO (PROGN
-               (SETF (GETHASH "things" #:KRES2)
-                       (AREF (GETHASH "things" #:DAT3) 0))
-               (JQN::VEXTEND #:KRES2 #:IRES1))
-           JQN::FINALLY (RETURN #:IRES1)))
+## modes [m]
 ```
-
+  ? include selector if key is present or expr is (not null) [default]
+  + always include this selector
+```
