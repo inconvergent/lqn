@@ -4,7 +4,7 @@
   (labels
     ((expand-exprs (sel)
       (loop for (mode kk expr) in sel
-            for gh = `(gethash ,(ensure-string kk) :_)
+            for gh = `(@ :_ ,(ensure-string kk))
             collect `(,mode ,kk
                        ,(if (all? expr) gh
                           (tree-replace-fx expr #'all? (lambda (o) gh))))))
@@ -35,23 +35,32 @@
 (defun new-ht () (make-hash-table :test #'equal))
 (defun strip-all (d) (if (car-all? d) (cdr d) d))
 
+(defun itr-select-dat (conf dat expr kk)
+ (if (or (car-*$itr? expr)
+         (car-$itr? expr)
+         (car-*itr? expr)) ; this is probably incorrect
+  `((:dat . (@ ,dat ,kk)) ,@conf)
+  `((:dat . ,dat) ,@conf)
+  ))
+
 (defun proc-qry (conf* q)
   "compile jqn query"
   (labels
     (
-
      (compile/$itr (conf d)
-      (error "$itr not implemented "))
+       (error "$itr not implemented "))
 
      (compile/*itr (conf d)
        (veq:vp :* conf d)
        (awg (ires kres dat) ; incomplete
          `(loop with ,ires = (mav)
                 for ,dat across (ensure-vector ,(gk conf :dat))
-                do (progn ,@(loop for (mode kk expr) in (strip-all d)
-                                  for kk* = (ensure-string kk)
-                                  collect `(vextend ,(rec `((:dat . ,dat) ,@conf) expr)
-                                                    ,ires)))
+                do (progn
+                     ,@(loop for (mode kk expr) in (strip-all d)
+                             for kk* = (ensure-string kk)
+                             for com-expr = (rec (itr-select-dat conf dat expr kk*)
+                                                 expr)
+                             collect `(vextend ,comp-expr ,ires)))
                 finally (return ,ires))))
      (compile/*$itr (conf d)
        (veq:vp :*$ conf d)
@@ -59,12 +68,13 @@
          `(loop with ,ires = (mav)
                 for ,dat across (ensure-vector ,(gk conf :dat))
                 for ,kres = ,(if (car-all? d) `(copy-ht ,dat) `(new-ht))
-                do (progn ,@(loop for (mode kk expr) in (strip-all d)
-                                  for kk* = (ensure-string kk)
-                                  collect `(setf (gethash ,kk* ,kres)
-                                          ,(rec `((:dat . ,dat) ,@conf)
-                                                       expr)))
-                          (vextend ,kres ,ires))
+                do (progn ; TODO: this fails when expr has nested iterator
+                     ,@(loop for (mode kk expr) in (strip-all d)
+                             for kk* = (ensure-string kk)
+                             for comp-expr = (rec (itr-select-dat conf dat expr kk*)
+                                                  expr)
+                             collect `(setf (gethash ,kk* ,kres) ,comp-expr))
+                     (vextend ,kres ,ires))
                 finally (return ,ires))))
      (rec (conf d &aux (dat (gk conf :dat)))
        (cond ((all? d) dat) ((atom d) d)

@@ -43,14 +43,14 @@
 ; if sel is cons: (subseq o ,@sel)"
 ;   (etypecase sel (cons `(subseq o ,@sel)) (atom `(aref ,o ,sel))))
 
-(defmacro apsh? (lst k v)
-  (declare (symbol lst)) "push (k . v) to lst if v"
-  (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
-(defmacro apsh+ (lst k v &optional default)
-  (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
-  (awg (v*) `(let ((,v* ,v))
-               (if ,v* (push `(,,(kv k) . ,,v*) ,lst)
-                       (push `(,,k . ,,default) ,lst)))))
+; (defmacro apsh? (lst k v)
+;   (declare (symbol lst)) "push (k . v) to lst if v"
+;   (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
+; (defmacro apsh+ (lst k v &optional default)
+;   (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
+;   (awg (v*) `(let ((,v* ,v))
+;                (if ,v* (push `(,,(kv k) . ,,v*) ,lst)
+;                        (push `(,,k . ,,default) ,lst)))))
 
 (defun mapqt (l) (declare (list l)) "new list with quoted items." (mapcar (lambda (s) `(quote ,s)) l))
 (defun mkstr (&rest args) "coerce this to string."

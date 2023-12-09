@@ -9,7 +9,7 @@ JSON query and transform utilities
 ## example
 
 ```bash
-jqn sample.json '(* _id (items (* name id (+@val 77))))'
+jqn sample.json '(*$ _id (items (* name id (+@val 77))))'
 
 [
   {
@@ -52,8 +52,9 @@ Command lind options
 ## expressions [expr]:
 ```
   _               -> select everything [default]
-  (* s1 [... sn]) -> iterate list of objects and select these selectors
-  (& s1 [... sn]) -> select these selectors from object
+  (*$ s1 [... sn]) -> iterate list of objects and select
+  (* s1 [... sn]) -> iterate list and select
+  ($ s1 [... sn]) -> select these keys from object
 ```
 
 ## modes [m]
@@ -84,25 +85,20 @@ if you need case sensitive keys you can use strings instead:
 current example of compiled query.
 
 ```lisp
-  ██ COMPILED ██████████████████████████
-  ██ q:   (* _ID (+@THINGS (* NAME ID)) (+@NEW-FIELD (PRINT (@ :MSG))))
-  ██ ---
-     (LOOP WITH #:ITRLST5 = (MAV)
-           FOR #:O6 ACROSS (ENSURE-VECTOR #:DAT*3)
-           FOR #:KVRES4 = (LIST)
+██ COMPILED ██████████████████████████
+██ q:   (*$ (?@THINGS (AREF _ 0)))
+██ ---
+   (LABELS ((JQN::FN ()
+              NIL)
+            (JQN::CTX ()
+              NIL))
+     (LOOP JQN::WITH #:IRES1 = (JQN::MAV)
+           JQN::FOR #:DAT3 JQN::ACROSS (JQN::ENSURE-VECTOR #:DAT*0)
+           JQN::FOR #:KRES2 = (JQN::NEW-HT)
            DO (PROGN
-               (APSH+ #:KVRES4 :NEW-FIELD (PRINT (@ #:O6 "msg")))
-               (APSH+ #:KVRES4 :THINGS
-                      (LOOP WITH #:ITRLST8 = (MAV)
-                            FOR #:O9 ACROSS (ENSURE-VECTOR (@ #:O6 "things"))
-                            FOR #:KVRES7 = (LIST)
-                            DO (PROGN
-                                (APSH? #:KVRES7 ID (@ #:O9 "id"))
-                                (APSH? #:KVRES7 NAME (@ #:O9 "name"))
-                                (VEXTEND #:KVRES7 #:ITRLST8))
-                            FINALLY (RETURN #:ITRLST8)))
-               (APSH? #:KVRES4 _ID (@ #:O6 "_id"))
-               (VEXTEND #:KVRES4 #:ITRLST5))
-           FINALLY (RETURN #:ITRLST5))
+               (SETF (GETHASH "things" #:KRES2)
+                       (AREF (GETHASH "things" #:DAT3) 0))
+               (JQN::VEXTEND #:KRES2 #:IRES1))
+           JQN::FINALLY (RETURN #:IRES1)))
 ```
 
