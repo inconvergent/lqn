@@ -68,9 +68,9 @@
   (print
    (jqn:jsnout
      (jqn:qryf "./sample.json" :db t
-        :q (*$ ;_
-              (?@_id :hi)
-              ; (?@things ($ _))
+        :q (* ;_
+              ?@_id
+              (?@things (aref _ 0))
               ))
           :indent t)))
 

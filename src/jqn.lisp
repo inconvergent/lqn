@@ -32,10 +32,30 @@
   "compile jqn query"
   (labels
     (
-     (psh (mode kk expr)
-       (case mode (:? 'apsh?) (:+ 'apsh+)
-         (otherwise (error "unexpected mode in selector: ~a ~a~%expr: ~a"
-                           mode kk expr))))
+
+     (compile/$itr (conf d)
+      (error "$itr not implemented "))
+
+     (compile/*itr (conf d)
+      (veq:vp conf d)
+       (awg (ires kres dat) ; incomplete
+         `(loop with ,ires = (mav)
+                for ,dat across (ensure-vector ,(gk conf :dat))
+                ; for ,kres = (list)
+                do (progn
+                     ,@(loop for (mode kk expr) in (reverse (strip-all d))
+                             for kk* = (ensure-string kk)
+                             collect `(vextend
+                                   ; ,(rec `((:dat . ())) expr)
+                                   (gethash ,kk* ,dat)
+                                   ,ires)
+                     ))
+
+                    ; (progn ,(if (car-all? d)
+                    ;            `(push ,dat ,kres))
+                    ;  (vextend ,kres ,ires))
+                finally (return ,ires))
+         ))
      (compile/*$itr (conf d)
        (awg (ires kres dat)
          `(loop with ,ires = (mav)
@@ -49,19 +69,6 @@
                                                        expr)))
                           (vextend ,kres ,ires))
                 finally (return ,ires))))
-     (compile/$itr (conf d)
-      (error "$itr not implemented "))
-
-     (compile/*itr (conf d)
-       (awg (ires kres dat) ; incomplete
-         `(loop with ,ires = (mav)
-                for ,dat across (ensure-vector ,(gk conf :dat))
-                for ,kres = (list)
-                do (progn ,(if (car-all? d)
-                               `(push ,dat ,kres))
-                     (vextend ,kres ,ires))
-                finally (return ,ires))
-         ))
      (rec (conf d &aux (dat (gk conf :dat)))
        (cond ((all? d) dat) ((atom d) d)
              ((car-*itr? d) (compile/*itr conf (compile/itr/preproc (cdr d))))

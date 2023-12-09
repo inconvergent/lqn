@@ -127,11 +127,11 @@
   (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
 
 ; TODO: fix this mess
-(defun $itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :$)))
-(defun *$itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*$)))
-(defun *itr? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :*)))
-(defun @get? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :@)))
-(defun all? (s) (and (or (symbolp s) (stringp s)) (eq (kv s) :_)))
+(defun $itr? (s) (and (symbolp s) (eq (kv s) :$)))
+(defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
+(defun *itr? (s) (and (symbolp s) (eq (kv s) :*)))
+(defun @get? (s) (and (symbolp s) (eq (kv s) :@)))
+(defun all? (s) (and (symbolp s) (eq (kv s) :_)))
 
 (defun car-$itr? (d) (and (listp d) ($itr? (car d))))
 (defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
