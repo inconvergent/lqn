@@ -2,7 +2,13 @@
 
 (defun compile/itr/preproc (q)
   (labels
-    ((unpack-cons (k &aux (ck (car k)))
+    ((expand-exprs (sel)
+      (loop for (mode kk expr) in sel
+            for gh = `(gethash ,(ensure-string kk) :_)
+            collect `(,mode ,kk
+                       ,(if (all? expr) gh
+                          (tree-replace-fx expr #'all? (lambda (o) gh))))))
+     (unpack-cons (k &aux (ck (car k)))
        (declare (list k))
        (case (length k)
          (0 (warn "empty selector"))
@@ -17,7 +23,7 @@
          (cons   (unpack-cons k))
          (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
     (let* ((q* (remove-if #'all? q))
-           (res (mapcar #'unpack q*)))
+           (res (expand-exprs (mapcar #'unpack q*))))
       (if (not (= (length q) (length q*)))
           (cons :_ res) res))))
 
@@ -41,21 +47,11 @@
        (awg (ires kres dat) ; incomplete
          `(loop with ,ires = (mav)
                 for ,dat across (ensure-vector ,(gk conf :dat))
-                ; for ,kres = (list)
-                do (progn
-                     ,@(loop for (mode kk expr) in (reverse (strip-all d))
-                             for kk* = (ensure-string kk)
-                             collect `(vextend
-                                   ; ,(rec `((:dat . ())) expr)
-                                   (gethash ,kk* ,dat)
-                                   ,ires)
-                     ))
-
-                    ; (progn ,(if (car-all? d)
-                    ;            `(push ,dat ,kres))
-                    ;  (vextend ,kres ,ires))
-                finally (return ,ires))
-         ))
+                do (progn ,@(loop for (mode kk expr) in (reverse (strip-all d))
+                                  for kk* = (ensure-string kk)
+                                  collect `(vextend ,(rec `((:dat . ,dat) ,@conf) expr)
+                                                    ,ires)))
+                finally (return ,ires))))
      (compile/*$itr (conf d)
        (awg (ires kres dat)
          `(loop with ,ires = (mav)
@@ -74,6 +70,9 @@
              ((car-*itr? d) (compile/*itr conf (compile/itr/preproc (cdr d))))
              ((car-*$itr? d) (compile/*$itr conf (compile/itr/preproc (cdr d))))
              ((car-$itr? d) (compile/$itr conf (compile/itr/preproc (cdr d))))
+             ((consp d)
+              (cons (rec conf (car d))
+                    (rec conf (cdr d))))
              (t (error "compile error for: ~a" d)))))
 
     `(labels ((fn () ,(gk conf* :fn t))

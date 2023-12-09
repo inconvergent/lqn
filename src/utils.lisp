@@ -67,6 +67,21 @@
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 
+(defun tree-replace (tree from to &optional (comparefx #'equal))
+  "compares tree to from (with comparefx); replaces matches with to."
+  (cond ((funcall comparefx tree from) to)
+        ((null tree) nil) ((atom tree) tree)
+        (t (mapcar (lambda (x) (tree-replace x from to))
+                   tree))))
+
+(defun tree-replace-fx (tree fxmatch fxtransform)
+  "compares elements with (comparefx); repaces matches with (fxmatch hit)."
+  (cond ((funcall fxmatch tree) (funcall fxtransform tree))
+        ((null tree) nil)
+        ((atom tree) tree)
+        (t (mapcar (lambda (x) (tree-replace-fx x fxmatch fxtransform))
+                   tree))))
+
 (defun strcat (s)
   (declare (optimize speed) (list s))
   (apply #'concatenate 'string s))
@@ -77,6 +92,7 @@
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to))
                                 (split-substr from s)))))
     (subseq s 0 (1- (length s)))))
+
 
 (defun split-substr (x s &key prune &aux (lx (length x)))
   (declare (optimize speed) (string x s) (boolean prune))

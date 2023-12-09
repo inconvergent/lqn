@@ -64,6 +64,8 @@
 ;                  (+@ _id (string-upcase ))
 ;                  )
 
+; TODO: expand expressions in pre compiler.
+
 (defun main ()
   (print
    (jqn:jsnout
