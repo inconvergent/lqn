@@ -4,7 +4,10 @@
   (:export
     #:jsnloads #:jsnloadf #:jsnout #:ldnout
     #:proc-qry
+    #:maybe
     #:qryd #:qryf #:qryl
-    #:kvadd+ #:kvadd? #:vvadd+ #:vvadd?
+    #:kvdel #:nilop
+    #:kvadd+ #:kvadd?  #:kvadd%
+    #:vvadd+ #:vvadd? #:vvadd%
     #:@ #:ind))
 

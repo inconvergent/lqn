@@ -33,44 +33,15 @@
 (defun nil-as-empty-ht (v)
   (if (not v) (make-hash-table :test #'equal) v))
 
-(defmacro @ (o k &optional default)
-  "get k from dict o; or default"
-  (if default `(gethash ,k (nil-as-empty-ht ,o) ,default)
-              `(gethash ,k (nil-as-empty-ht ,o))))
-(defmacro ind (o sel) ; rename
-  "get index or range from json array (vector).
-if sel is an atom: (aref o ,sel)
-if sel is cons: (subseq o ,@sel)"
-  (etypecase sel (cons `(subseq o ,@sel)) (atom `(aref ,o ,sel))))
-
-(defun kvadd (mode) (ecase mode (:+ 'kvadd+) (:? 'kvadd?) (:- 'kvdel)))
-(defun vvadd (mode) (ecase mode (:+ 'vvadd+) (:? 'vvadd?) (:- 'nilop)))
-
-(defmacro kvadd? (lft k v)
-  (declare (symbol lft)) "do (setf lft v) if v is not nil"
-  (awg (v*) `(let ((,v* ,v)) (when ,v* (setf (gethash ,k ,lft) ,v*)))))
-(defmacro kvadd+ (lft k v &optional default)
-  (declare (symbol lft)) "do (setf lft (or v default))"
-  `(setf (gethash ,k ,lft) (or ,v ,default)))
-(defmacro kvdel (lft k v &optional default)
-  (declare (symbol lft)) "delete key"
-  `(remhash ,k ,lft))
-
-(defmacro vvadd? (lft v)
-  (declare (symbol lft)) "do (vextend v lft) if v is not nil"
-  (awg (v*) `(let ((,v* ,v)) (when ,v* (vextend ,v* ,lft)))))
-(defmacro vvadd+ (lft v &optional default)
-  (declare (symbol lft)) "do (vextend (or v default) lft)"
-  `(vextend (or ,v ,default) ,lft))
-(defmacro nilop (&rest rest) (declare (ignore rest)) "do nothing" nil)
 
 (defun mapqt (l) (declare (list l)) "new list with quoted items." (mapcar (lambda (s) `(quote ,s)) l))
 (defun mkstr (&rest args) "coerce this to string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
 (defun reread (&rest args) "mkstr then read from string." (values (read-from-string (apply #'mkstr args))))
 (defun kv (s) "mkstr, upcase, keyword."
-  (intern (string-upcase (etypecase s (symbol (symbol-name s))
-                                      (string s)))
+  (intern (string-upcase (etypecase s (string s)
+                                      (symbol (symbol-name s))
+                                      (number (mkstr s))))
           :keyword))
 (defun last* (l) (declare (list l)) "last item in list." (first (last l)))
 (defun close-path (l) (declare (list l)) "cons last of to l." (cons (last* l) l))
@@ -155,18 +126,21 @@ if sel is cons: (subseq o ,@sel)"
   (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
 
 ; TODO: fix this mess
-(defun $itr? (s) (and (symbolp s) (eq (kv s) :$)))
+(defun $itr? (s)  (and (symbolp s) (eq (kv s) :$$)))
 (defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
-(defun *itr? (s) (and (symbolp s) (eq (kv s) :*)))
-(defun @get? (s) (and (symbolp s) (eq (kv s) :@)))
-(defun all? (s) (and (symbolp s) (eq (kv s) :_)))
+(defun *itr? (s)  (and (symbolp s) (eq (kv s) :**)))
+(defun all? (s)   (and (symbolp s) (eq (kv s) :_)))
 
-(defun car-$itr? (d) (and (listp d) ($itr? (car d))))
+(defun $new? (s) (and (symbolp s) (eq (kv s) :$new)))
+(defun *new? (s) (and (symbolp s) (eq (kv s) :*new)))
+
+(defun car-$itr? (d)  (and (listp d) ($itr? (car d))))
 (defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
-(defun car-*itr? (d) (and (listp d) (*itr? (car d))))
-(defun car-@get? (s) (and (listp s) (@get? (car s))))
-(defun car-all? (s) (and (listp s) (all? (car s))))
+(defun car-*itr? (d)  (and (listp d) (*itr? (car d))))
+(defun car-all? (s)   (and (listp s) (all? (car s))))
 
+(defun car-*new? (d) (and (listp d) (*new? (car d))))
+(defun car-$new? (d) (and (listp d) ($new? (car d))))
 
 (defun jqn/show (q compiled)
  (format t "

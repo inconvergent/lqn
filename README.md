@@ -27,9 +27,9 @@ echo '[
                 { "id": 32, "name": "Ball" } ],
     "msg": "Hello, undefined! You have 5 unread messages."
   }
-]' | jqn '(*$ _id
-             (things (* name ?@extra))
-             (msg (string-upcase _)))'
+]' | jqn '#{_id
+            (things {name ?@extra})
+            (msg (string-upcase _))}'
 ```
 which returns:
 ```json
@@ -46,20 +46,23 @@ below.
 
 ## Iterators:
 
-Currently there are three Iterator types:
+Currently there are three Iterators, both have two alternative notations. The
+first notation relies on a reader macro for convenience.
 
-  - `(*$ s1 [... sn])` iterate list of objects and select into a new object
-  - `(*  s1 [... sn])` iterate list and select into array
-  - `($  s1 [... sn])` select from object into new object
+  - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate list of objects and select into a new object
+  - ` [s1 ... sn]` or `(** s1 ... sn)` iterate list and select into array
+  - ` {s1 ... sn}` or `($$ s1 ... sn)` select from object into new object
+
 
 ## Selectors
 
 A Selector is a triple `(mode key expr)`. Where only the key is required. The
 mode is either:
 
-  - `+` always include this selector [default]
-  - `?` include selector if key is present or expr is not nil
-  - `-` drop this key in `*$` and `$` modes; ignore selector entirely in `*`
+  - `+` always include this selector (evaluate `expr`) [default]
+  - `?` include selector (evaluate `expr`) if key is present and not `nil`
+  - `%` include selector if key is present or `expr` is not `nil`.
+  - `-` drop this key in `*$` and `$$` modes; ignore selector entirely in `**`
         mode.
 
 Selectors can either be written out in full, or they can be be written in short
@@ -84,9 +87,9 @@ the selected key). `expr` can also be a new Selector.
 ```
 To select everything, but replace some keys with new values or drop keys entirely:
 ```lisp
-(*$ _ (value (+ _ 22))           ; add 22 to current value
-      (name (string-downcase _)) ; lowercase name
-      -@meta)                    ; drop this key
+#{_ (value (+ _ 22))           ; add 22 to current value
+  (name (string-downcase _)) ; lowercase name
+  -@meta}                    ; drop this key
 ```
 If you need case sensitive keys you can use strings instead:
 ```lisp
@@ -96,12 +99,43 @@ If you need case sensitive keys you can use strings instead:
 (+ "Key" expr) ; same as ("?@Key" expr)
 ```
 
+## Query Utility Functions
+
+Internally JSON `objects` are represented as `hash tables`, and JSON `arrays`
+are represented as `vectors`. Which means you can use the regular CL utilities
+such as `gethash` and `aref`, `subseq` etc.
+
+But for convenience there are a few special functions defined in `jqn`.
+
+ - `(@ o k)` get key `k` from object `o`. Equivalent to `gethash`.
+ - `(ind v i)` get `i` from vector `v`. Equivalent to `aref`.
+ - `(ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
+
+There are also some context dependent functions:
+
+Global:
+
+ - `(fn)` get name of the file that is the source for the current thing being
+   iterated; or nil
+ - `(fi [k])` get index of the file that is the source for the current thing being
+   iterated; or `0`. Starts at `k`
+ - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`
+
+Selector local:
+
+ - `(i [k])` returns array index (starts at `0`; or `k`). Available in `**` and `*$`.
+ - `(num)` returns length of the array being iterated. Available in `**` and `*$`.
+ - `(dat)` returns the current data object. Available in all selectors.
+ - `(par)` returns the parent data object. Available in `**` and `*$`.
+
+TODO: add example.
+
 ## Options
 
 Command line options:
   - `-v` show compiled query
   - `-m` minify output [indented is default]
-  - `-l` use ldn output format [json is default]
+  - `-l` use `ldn` output format [`json` is default]
 
 ## Install
 

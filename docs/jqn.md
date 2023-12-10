@@ -8,7 +8,7 @@
  ;   Lambda-list: (O K &OPTIONAL DEFAULT)
  ;   Documentation:
  ;     get k from dict o; or default
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:IND
@@ -23,7 +23,7 @@
  ;     get index or range from json array (vector).
  ;     if sel is an atom: (aref o ,sel)
  ;     if sel is cons: (subseq o ,@sel)
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:JSNLOADF
@@ -69,6 +69,19 @@
  ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
+#### JQN:KVADD%
+
+```
+ ; JQN:KVADD%
+ ;   [symbol]
+ ; 
+ ; KVADD% names a macro:
+ ;   Lambda-list: (DAT LFT K V)
+ ;   Documentation:
+ ;     do (setf lft v) if v is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
 #### JQN:KVADD+
 
 ```
@@ -76,10 +89,10 @@
  ;   [symbol]
  ; 
  ; KVADD+ names a macro:
- ;   Lambda-list: (LFT K V &OPTIONAL DEFAULT)
+ ;   Lambda-list: (DAT LFT K V &OPTIONAL DEFAULT)
  ;   Documentation:
  ;     do (setf lft (or v default))
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:KVADD?
@@ -89,10 +102,23 @@
  ;   [symbol]
  ; 
  ; KVADD? names a macro:
- ;   Lambda-list: (LFT K V)
+ ;   Lambda-list: (DAT LFT K V)
  ;   Documentation:
- ;     do (setf lft v) if v is not nil
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;     do (setf lft v) if (gethash k dat) is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:KVDEL
+
+```
+ ; JQN:KVDEL
+ ;   [symbol]
+ ; 
+ ; KVDEL names a macro:
+ ;   Lambda-list: (DAT LFT K V)
+ ;   Documentation:
+ ;     delete key
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:LDNOUT
@@ -107,6 +133,32 @@
  ;   Documentation:
  ;     serialize internal json representation to readable lisp data (ldn).
  ;   Source file: /data/x/jqn/src/io.lisp
+```
+
+#### JQN:MAYBE
+
+```
+ ; JQN:MAYBE
+ ;   [symbol]
+ ; 
+ ; MAYBE names a macro:
+ ;   Lambda-list: (FX ARG)
+ ;   Documentation:
+ ;     run (fx arg) only if arg is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:NILOP
+
+```
+ ; JQN:NILOP
+ ;   [symbol]
+ ; 
+ ; NILOP names a macro:
+ ;   Lambda-list: (&REST REST)
+ ;   Documentation:
+ ;     do nothing
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:PROC-QRY
@@ -163,6 +215,19 @@
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
+#### JQN:VVADD%
+
+```
+ ; JQN:VVADD%
+ ;   [symbol]
+ ; 
+ ; VVADD% names a macro:
+ ;   Lambda-list: (DAT LFT K V)
+ ;   Documentation:
+ ;     do (vextend v lft) if v is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
 #### JQN:VVADD+
 
 ```
@@ -170,10 +235,10 @@
  ;   [symbol]
  ; 
  ; VVADD+ names a macro:
- ;   Lambda-list: (LFT V &OPTIONAL DEFAULT)
+ ;   Lambda-list: (DAT LFT K V &OPTIONAL DEFAULT)
  ;   Documentation:
  ;     do (vextend (or v default) lft)
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:VVADD?
@@ -183,9 +248,9 @@
  ;   [symbol]
  ; 
  ; VVADD? names a macro:
- ;   Lambda-list: (LFT V)
+ ;   Lambda-list: (DAT LFT K V)
  ;   Documentation:
- ;     do (vextend v lft) if v is not nil
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;     do (vextend v lft) if (gethash k dat) is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 

@@ -42,3 +42,31 @@
 ;                (JQN::VEXTEND #:KRES2 #:IRES1))
 ;            JQN::FINALLY (RETURN #:IRES1)))
 
+
+  ; jqn -v '#{ (things
+  ;              #{(%@extra (maybe string-upcase _))})}' bin/sample.json
+
+  ; {
+  ;   "things": [
+  ;     {
+  ;       "extra": "EXTRA99"
+  ;     }
+  ;   ]
+  ; },
+  ; {
+  ;   "things": [
+  ;     {
+  ;       "extra": "EXTRA1"
+  ;     },
+  ;     {
+  ;       "extra": "EXTRA2"
+  ;     },
+  ;     null
+  ;   ]
+  ; },
+  ; {
+  ;   "things": [
+  ;     null,
+  ;     null
+  ;   ]
+  ; }

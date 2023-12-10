@@ -26,18 +26,22 @@ examples:
   jqn _ sample.json
 
   # get key1, key2 from list of objects:
-  jqn '(*$ key1 key2)' sample.json
+  jqn '#{key1 key2}' sample.json
 
   # get key1, key2 from object:
-  jqn '($ key1 key2)' sample.json
+  jqn '{key1 key2}' sample.json
 
   # query data from pipe:
-  echo '{\"_id\": 1}' | jqn '($ _id)'")
+  echo '{\"_id\": 1}' | jqn '{_id}'")
 
 (defmacro exit-with-msg (i &rest rest)
   (declare (fixnum i))
   `(progn (format *error-output* ,@rest)
           (terminate ,i t)))
+
+(defun jsnloadf-with-err (f)
+  (handler-case (jsnloadf f)
+    (error (e) (exit-with-msg 2 "jqn: failed to read json file: ~a~%~a" f e))))
 
 (defun parse-query (args)
   (handler-case (read-str args)
@@ -65,8 +69,9 @@ examples:
   (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
   (unless (< 0 (length files)) (exit-with-msg 2 "jqn: missing files.~%~a~&" *ex*))
   (loop for f in files
-        do (out (execute-query (jsnloadf f) (parse-query q)
-                  :conf `((:fn . ,f) (:ctx . :file))
+        for i from 0
+        do (out (execute-query (jsnloadf-with-err f) (parse-query q)
+                  :conf `((:fn . ,f) (:fi . ,i) (:ctx . :file))
                   :db (verbose? opts))
                 (indent? opts)
                 (format? opts))))
