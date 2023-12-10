@@ -51,6 +51,7 @@
          `(loop with ,ires = (mav)
                 for ,dat across (ensure-vector ,(gk conf :dat))
                 do (progn
+                     ,(when (car-all? d) `(vvadd+ ,ires ,dat))
                      ,@(loop for (mode kk expr) in (strip-all d)
                              collect `(,(vvadd mode) ,ires
                                        ,(rec (new-conf conf dat kk) expr))))

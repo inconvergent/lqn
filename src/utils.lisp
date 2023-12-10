@@ -172,7 +172,7 @@ if sel is cons: (subseq o ,@sel)"
    ~s
 ██ ██████████████████████████~%" q compiled))
 
-(defun unpack-mode (sym &optional (modes *qmodes*) (default :?))
+(defun unpack-mode (sym &optional (modes *qmodes*) (default :+))
   (loop for mode in modes
         for ind = (match-substr (mkstr mode) (mkstr sym))
         if (and ind (= ind 0))
