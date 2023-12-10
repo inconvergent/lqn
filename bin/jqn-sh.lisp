@@ -3,9 +3,9 @@
 
 (defvar *ex* "
 
-  jqn [options] <qry> [files...]
+  jqn [options] <qry> [files ...]
 
-  or:
+or:
 
   cat sample.json | jqn [options] <qry>
 
@@ -15,9 +15,9 @@ options:
   -v prints the full compiled qry to stdout before the result
   -l output to readable lisp data (ldn)
 
-  options can be write as -i -v or -iv
+options can be write as -i -v or -iv
 
-  not implemented yet:
+  TODO: not implemented yet:
   -r read ldn. eg. use -rl to read en return ldn
 
 examples:
@@ -26,13 +26,13 @@ examples:
   jqn _ sample.json
 
   # get key1, key2 from list of objects:
-  jqn '(* key1 key2)' sample.json
+  jqn '(*$ key1 key2)' sample.json
 
   # get key1, key2 from object:
-  jqn '(& key1 key2)' sample.json
+  jqn '($ key1 key2)' sample.json
 
   # query data from pipe:
-  echo '{\"_id\": 1}' | jqn '(& _id)'")
+  echo '{\"_id\": 1}' | jqn '($ _id)'")
 
 (defmacro exit-with-msg (i &rest rest)
   (declare (fixnum i))

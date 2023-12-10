@@ -5,6 +5,6 @@
     #:jsnloads #:jsnloadf #:jsnout #:ldnout
     #:proc-qry
     #:qryd #:qryf #:qryl
-    #:kvadd? #:vvadd? #:kvadd+ #:vvadd+
+    #:kvadd+ #:kvadd? #:vvadd+ #:vvadd?
     #:@ #:ind))
 
