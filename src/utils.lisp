@@ -44,7 +44,7 @@ if sel is cons: (subseq o ,@sel)"
   (etypecase sel (cons `(subseq o ,@sel)) (atom `(aref ,o ,sel))))
 
 (defun kvadd (mode) (ecase mode (:+ 'kvadd+) (:? 'kvadd?) (:- 'kvdel)))
-(defun vvadd (mode) (ecase mode (:+ 'vvadd+) (:? 'vvadd?) (:- 'vvignore)))
+(defun vvadd (mode) (ecase mode (:+ 'vvadd+) (:? 'vvadd?) (:- 'nilop)))
 
 (defmacro kvadd? (lft k v)
   (declare (symbol lft)) "do (setf lft v) if v is not nil"
@@ -62,10 +62,7 @@ if sel is cons: (subseq o ,@sel)"
 (defmacro vvadd+ (lft v &optional default)
   (declare (symbol lft)) "do (vextend (or v default) lft)"
   `(vextend (or ,v ,default) ,lft))
-(defmacro vvignore (lft v &optional default)
-  (declare (symbol lft)) "do nothing"
-  ; do nothing
-  nil)
+(defmacro nilop (&rest rest) (declare (ignore rest)) "do nothing" nil)
 
 (defun mapqt (l) (declare (list l)) "new list with quoted items." (mapcar (lambda (s) `(quote ,s)) l))
 (defun mkstr (&rest args) "coerce this to string."
