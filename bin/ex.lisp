@@ -6,13 +6,11 @@
 (ql:quickload :jqn :silent t)
 ; (in-package :jqn)
 
-; TODO: expand expressions in pre compiler.
-
 (defun main ()
   (print
    (jqn:jsnout
-     (jqn:qryf "./sample3.json" :db t
-        :q ($ credit qq))
+     (jqn:qryf "./sample.json" :db t
+        :q (* +@_id ))
         :indent t)))
 
 (main)

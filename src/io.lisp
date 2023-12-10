@@ -11,7 +11,7 @@
   (declare (string fn)) "parse json from file, fn"
   (with-open-file (f fn :direction :input)
     (handler-case (jsnloads f)
-      (end-of-file (e) nil))))
+      (end-of-file (e) (declare (ignore e)) nil))))
 
 (defun jsnout (o &key (s *standard-output*) indent)
   (declare (stream s) (boolean indent))

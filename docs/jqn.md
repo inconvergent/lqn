@@ -1,12 +1,3 @@
-#### JQN:&@
-
-```
-:missing:todo:
-
- ; JQN:&@
- ;   [symbol]
-```
-
 #### JQN:@
 
 ```
@@ -20,25 +11,18 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:APSH!
+#### JQN:IND
 
 ```
-:missing:todo:
-
- ; JQN:APSH!
- ;   [symbol]
-```
-
-#### JQN:APSH?
-
-```
- ; JQN:APSH?
+ ; JQN:IND
  ;   [symbol]
  ; 
- ; APSH? names a macro:
- ;   Lambda-list: (LST K V)
+ ; IND names a macro:
+ ;   Lambda-list: (O SEL)
  ;   Documentation:
- ;     push (k . v) to lst if v
+ ;     get index or range from json array (vector).
+ ;     if sel is an atom: (aref o ,sel)
+ ;     if sel is cons: (subseq o ,@sel)
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -83,6 +67,32 @@
  ;   Documentation:
  ;     stream encoded json from o to s; or *standard-output*
  ;   Source file: /data/x/jqn/src/io.lisp
+```
+
+#### JQN:KVADD+
+
+```
+ ; JQN:KVADD+
+ ;   [symbol]
+ ; 
+ ; KVADD+ names a macro:
+ ;   Lambda-list: (LFT K V &OPTIONAL DEFAULT)
+ ;   Documentation:
+ ;     do (setf lft (or v default))
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:KVADD?
+
+```
+ ; JQN:KVADD?
+ ;   [symbol]
+ ; 
+ ; KVADD? names a macro:
+ ;   Lambda-list: (LFT K V)
+ ;   Documentation:
+ ;     do (setf lft v) if v is not nil
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:LDNOUT
@@ -151,5 +161,31 @@
  ;   Documentation:
  ;     compile jqn query and run on dat
  ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:VVADD+
+
+```
+ ; JQN:VVADD+
+ ;   [symbol]
+ ; 
+ ; VVADD+ names a macro:
+ ;   Lambda-list: (LFT V &OPTIONAL DEFAULT)
+ ;   Documentation:
+ ;     do (vextend (or v default) lft)
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:VVADD?
+
+```
+ ; JQN:VVADD?
+ ;   [symbol]
+ ; 
+ ; VVADD? names a macro:
+ ;   Lambda-list: (LFT V)
+ ;   Documentation:
+ ;     do (vextend v lft) if v is not nil
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 

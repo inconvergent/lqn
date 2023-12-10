@@ -37,20 +37,28 @@
   "get k from dict o; or default"
   (if default `(gethash ,k (nil-as-empty-ht ,o) ,default)
               `(gethash ,k (nil-as-empty-ht ,o))))
-; (defmacro @ (o sel) ; rename
-;   "get index or range from json array (vector).
-; if sel is an atom: (aref o ,sel)
-; if sel is cons: (subseq o ,@sel)"
-;   (etypecase sel (cons `(subseq o ,@sel)) (atom `(aref ,o ,sel))))
+(defmacro ind (o sel) ; rename
+  "get index or range from json array (vector).
+if sel is an atom: (aref o ,sel)
+if sel is cons: (subseq o ,@sel)"
+  (etypecase sel (cons `(subseq o ,@sel)) (atom `(aref ,o ,sel))))
 
-; (defmacro apsh? (lst k v)
-;   (declare (symbol lst)) "push (k . v) to lst if v"
-;   (awg (v*) `(let ((,v* ,v)) (when ,v* (push `(,',(kv k) . ,,v*) ,lst)))))
-; (defmacro apsh+ (lst k v &optional default)
-;   (declare (symbol lst)) "push (k . v) to lst if v; otherwise push (k . default)"
-;   (awg (v*) `(let ((,v* ,v))
-;                (if ,v* (push `(,,(kv k) . ,,v*) ,lst)
-;                        (push `(,,k . ,,default) ,lst)))))
+(defun kvadd (mode) (ecase mode (:+ 'kvadd+) (:? 'kvadd?)))
+(defun vvadd (mode) (ecase mode (:+ 'vvadd+) (:? 'vvadd?)))
+
+(defmacro kvadd? (lft k v)
+  (declare (symbol lft)) "do (setf lft v) if v is not nil"
+  (awg (v*) `(let ((,v* ,v)) (when ,v* (setf (gethash ,k ,lft) ,v*)))))
+(defmacro kvadd+ (lft k v &optional default)
+  (declare (symbol lft)) "do (setf lft (or v default))"
+  `(setf (gethash ,k ,lft) (or ,v ,default)))
+
+(defmacro vvadd? (lft v)
+  (declare (symbol lft)) "do (vextend v lft) if v is not nil"
+  (awg (v*) `(let ((,v* ,v)) (when ,v* (vextend ,v* ,lft)))))
+(defmacro vvadd+ (lft v &optional default)
+  (declare (symbol lft)) "do (vextend (or v default) lft)"
+  `(vextend (or ,v ,default) ,lft))
 
 (defun mapqt (l) (declare (list l)) "new list with quoted items." (mapcar (lambda (s) `(quote ,s)) l))
 (defun mkstr (&rest args) "coerce this to string."

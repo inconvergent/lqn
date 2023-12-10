@@ -7,10 +7,7 @@
 ; --------- ~a~%" ',dev-vals))
 ;     `(progn (defvar *dev* nil) (defvar *opt* ',vals))))
 
-(defvar *qmodes* `(:+@ :?@
-                    :+%
-
-                       ))
+(defvar *qmodes* `(:+@ :?@))
 
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*
