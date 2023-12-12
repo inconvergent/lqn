@@ -47,7 +47,7 @@ below.
 ## Iterators:
 
 Currently there are three Iterators, both have two alternative notations. The
-first notation relies on a reader macro for convenience.
+first notation is a little more readable and compact.
 
   - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate list of objects and select into a new object
   - ` [s1 ... sn]` or `(** s1 ... sn)` iterate list and select into array
@@ -59,9 +59,11 @@ first notation relies on a reader macro for convenience.
 A Selector is a triple `(mode key expr)`. Where only the key is required. The
 mode is either:
 
-  - `+` always include this selector (evaluate `expr`) [default]
-  - `?` include selector (evaluate `expr`) if key is present and not `nil`
-  - `%` include selector if key is present or `expr` is not `nil`.
+  - `+` always include this selector (evaluate `expr` if defined) [default]
+  - `?` include selector (evaluate `expr` if defined) if key is present
+        and not `nil`
+  - `%` include selector if key is present and not `nil`; or: include `expr`
+        if it does not evaluate to `nil`.
   - `-` drop this key in `*$` and `$$` modes; ignore selector entirely in `**`
         mode.
 
@@ -71,11 +73,11 @@ examples is used to append a mode to a key without having to wrap the selector
 in `(...)`:
 ```lisp
 _            ; select everything [default]
-key          ; select key
+key          ; select key [+ mode is default]
 +@key        ; same as key
 ?@key        ; optionally select key
-(key expr)   ; assign expr to key
-(?@key expr) ; optionally assign expr to key
+(key expr)   ; select expr as key
+(?@key expr) ; select expr if key is not nil
 (? key expr) ; same as (?@key expr)
 ```
 An `expr` is any valid CL code (where you can use `_` to refer to the value of
@@ -87,9 +89,10 @@ the selected key). `expr` can also be a new Selector.
 ```
 To select everything, but replace some keys with new values or drop keys entirely:
 ```lisp
-#{_ (value (+ _ 22))           ; add 22 to current value
-  (name (string-downcase _)) ; lowercase name
-  -@meta}                    ; drop this key
+#{_                           ; select all keys, then override these:
+   (value (+ _ 22))           ; add 22 to current value
+   (name (string-downcase _)) ; lowercase name
+   -@meta}                    ; drop this key
 ```
 If you need case sensitive keys you can use strings instead:
 ```lisp
@@ -110,6 +113,8 @@ But for convenience there are a few special functions defined in `jqn`.
  - `(@ o k)` get key `k` from object `o`. Equivalent to `gethash`.
  - `(ind v i)` get `i` from vector `v`. Equivalent to `aref`.
  - `(ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
+ - `(maybe fx arg)` execute `(fx arg)` only if `arg` is not `nil`.
+
 
 There are also some context dependent functions:
 
