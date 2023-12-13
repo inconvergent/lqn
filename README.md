@@ -1,4 +1,4 @@
-# JQN
+# JQN - JSON Query Notation
 
 JQN is a terminal utility (and Common Lisp library) to query and transform
 JSON.
@@ -28,7 +28,7 @@ echo '[
     "msg": "Hello, undefined! You have 5 unread messages."
   }
 ]' | jqn '#{_id
-            (things {name ?@extra})
+            (things [name ?@extra])
             (msg (string-upcase _))}'
 ```
 which returns:
@@ -49,8 +49,9 @@ below.
 Currently there are three Iterators, both have two alternative notations. The
 first notation is a little more readable and compact.
 
-  - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate list of objects and select into a new object
-  - ` [s1 ... sn]` or `(** s1 ... sn)` iterate list and select into array
+  - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate list of objects and select into
+    a new list of objects
+  - ` [s1 ... sn]` or `(** s1 ... sn)` iterate list and select into new array
   - ` {s1 ... sn}` or `($$ s1 ... sn)` select from object into new object
 
 
