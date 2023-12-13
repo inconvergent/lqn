@@ -38,6 +38,8 @@
 (defun mkstr (&rest args) "coerce this to string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
 (defun reread (&rest args) "mkstr then read from string." (values (read-from-string (apply #'mkstr args))))
+(defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
+(defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
 (defun kv (s) "mkstr, upcase, keyword."
   (intern (string-upcase (etypecase s (string s)
                                       (symbol (symbol-name s))
@@ -138,6 +140,8 @@
 (defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
 (defun car-*itr? (d)  (and (listp d) (*itr? (car d))))
 (defun car-all? (s)   (and (listp s) (all? (car s))))
+(defun car-jqnfx? (s) (and (listp s) (symbolp (car s))
+                           (member (kv (car s)) *fxns*)))
 
 (defun car-*new? (d) (and (listp d) (*new? (car d))))
 (defun car-$new? (d) (and (listp d) ($new? (car d))))

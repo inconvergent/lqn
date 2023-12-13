@@ -66,14 +66,14 @@ mode is either:
   - `%` include selector if key is present and not `nil`; or: include `expr`
         if it does not evaluate to `nil`.
   - `-` drop this key in `*$` and `$$` modes; ignore selector entirely in `**`
-        mode.
+        mode. E.g. `{_ -@key}` to select everything except `key`.
 
 Selectors can either be written out in full, or they can be be written in short
 form depending on what you want to achieve. Note that the `@` in the following
 examples is used to append a mode to a key without having to wrap the selector
 in `(...)`:
 ```lisp
-_            ; select everything [default]
+_            ; select everything.
 key          ; select key [+ mode is default]
 +@key        ; same as key
 ?@key        ; optionally select key
@@ -114,7 +114,11 @@ But for convenience there are a few special functions defined in `jqn`.
  - `(@ o k)` get key `k` from object `o`. Equivalent to `gethash`.
  - `(ind v i)` get `i` from vector `v`. Equivalent to `aref`.
  - `(ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
- - `(maybe fx arg)` execute `(fx arg)` only if `arg` is not `nil`.
+ - `(?? fx arg ...)` execute `(fx arg ...)` only if `arg` is not `nil`.
+ - `(>< a)` condense `a`. Remove `none`/`nil`, empty `objects`/`hash-tables`
+   or keys with empty objects.
+ - `(sup s ...)` stringify and upcase.
+ - `(sdwn s ...)` stringify and downcase.
 
 
 There are also some context dependent functions:
@@ -129,9 +133,13 @@ Global:
 
 Selector local:
 
- - `(i [k])` returns array index (starts at `0`; or `k`). Available in `**` and `*$`.
- - `(num)` returns length of the array being iterated. Available in `**` and `*$`.
+ - `(i [k])` returns array index (starts at `0`; or `k`). Available in `**` and
+   `*$`.
+ - `(num)` returns length of the array being iterated. Available in `**` and
+   `*$`.
  - `(dat)` returns the current data object. Available in all selectors.
+ - `(@dat k [default])` returns this key from current `(dat)`; or default.
+   Available in all selectors.
  - `(par)` returns the parent data object. Available in `**` and `*$`.
 
 TODO: add example.

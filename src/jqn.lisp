@@ -2,10 +2,38 @@
 
 ; QRY RUNTIME
 
-(defmacro maybe (fx arg)
+(defmacro something? (v &body body) ; ??
+  (declare (symbol v))
+  `(typecase ,v (vector (when (> (length ,v) 0) (progn ,@body)))
+                (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
+                (otherwise (when ,v (progn ,@body)))))
+(defmacro maybe (fx arg &rest args) ; ?!
   (declare (symbol fx)) "run (fx arg) only if arg is not nil"
+  "execute (fx arg ...) only if arg is not nil.
+qry abbrev ??."
   (awg (arg*) `(let ((,arg* ,arg))
-                 (if (null ,arg*) nil (,fx ,arg*)))))
+                 (if (null ,arg*) nil (,fx ,arg* ,@args)))))
+(abbrev ?? maybe)
+
+; list/vector: remove if not someting
+; hash-table: remove key if value not something
+(defun condense (o)
+  "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
+qry abbrev ><. "
+  (typecase o
+    (sequence (remove-if-not (lambda (o*) (something? o* t)) o))
+    (hash-table (loop with keys = (list)
+                      for k being the hash-keys of o using (hash-value v)
+                      do (unless (progn
+                                   (print (list k v))
+                                   (something? v t)) (push k keys))
+                      finally (loop for k in keys do (remhash k o)))
+                o)
+    (otherwise (warn "condense/>< works on sequence (json array) or hash-table (json object).
+got: ~a.
+did nothing." seq))))
+(abbrev >< condense)
+
 (defun copy-ht (ht)
   (declare (hash-table ht))
   (loop with res = (make-hash-table :test #'equal)
@@ -40,7 +68,7 @@ if sel is cons: (subseq o ,@sel)"
   `(when (gethash ,k ,dat) (setf (gethash ,k ,lft) ,v)))
 (defmacro kvadd% (dat lft k v)
   (declare (ignore dat) (symbol lft)) "do (setf lft v) if v is not nil"
-  (awg (v*) `(let ((,v* ,v)) (when ,v* (setf (gethash ,k ,lft) ,v*)))))
+  (awg (v*) `(let ((,v* ,v)) (something? ,v* (setf (gethash ,k ,lft) ,v*)))))
 
 (defmacro kvdel (dat lft k v)
   (declare (ignore dat v) (symbol lft)) "delete key"
@@ -53,8 +81,8 @@ if sel is cons: (subseq o ,@sel)"
   (declare (symbol lft)) "do (vextend v lft) if (gethash k dat) is not nil"
   `(when (gethash ,k ,dat) (vextend ,v ,lft)))
 (defmacro vvadd% (dat lft k v)
-  (declare (ignore dat) (symbol lft)) "do (vextend v lft) if v is not nil"
-  (awg (v*) `(let ((,v* ,v)) (when ,v* (vextend ,v* ,lft)))))
+  (declare (ignore dat) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
+  (awg (v*) `(let ((,v* ,v)) (something? ,v* (vextend ,v* ,lft)))))
 
 
 ; COMPILER
@@ -72,9 +100,7 @@ if sel is cons: (subseq o ,@sel)"
     ((stringify (a)
       (handler-case
         (ensure-string a)
-        (error (e) (error "failed to stringify key: ~a. try \"a\"" a))
-        )
-                )
+        (error (e) (error "failed to stringify key: ~a. try \"a\"" a))))
      (stringify-key (v) (dsb (a b c) v `(,a ,(stringify b) ,c)))
      (unpack-cons (k &aux (ck (car k)))
        (declare (list k))
@@ -168,6 +194,8 @@ if sel is cons: (subseq o ,@sel)"
              ((car-*$itr? d) (compile/*$itr conf (compile/itr/preproc (cdr d))))
              ((car-*new? d) (compile/*new conf (compile/itr/preproc (cdr d))))
              ((car-$new? d) (compile/$new conf (compile/itr/preproc (cdr d))))
+             ((car-jqnfx? d) `(,(psymb 'jqn (car d))
+                               ,@(rec conf (cdr d))))
              ((consp d) (cons (rec conf (car d))
                               (rec conf (cdr d))))
              (t (error "jqn compile error for: ~a" d)))))

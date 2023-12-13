@@ -9,5 +9,7 @@
     #:kvdel #:nilop
     #:kvadd+ #:kvadd?  #:kvadd%
     #:vvadd+ #:vvadd? #:vvadd%
+    #:>< #:condense
+    #:sup #:sdwn
     #:@ #:ind))
 

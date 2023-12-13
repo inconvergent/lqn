@@ -1,3 +1,16 @@
+#### JQN:><
+
+```
+:missing:todo:
+
+ ; JQN:><
+ ;   [symbol]
+ ; 
+ ; >< names a macro:
+ ;   Lambda-list: (&REST ARGS)
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
 #### JQN:@
 
 ```
@@ -8,6 +21,25 @@
  ;   Lambda-list: (O K &OPTIONAL DEFAULT)
  ;   Documentation:
  ;     get k from dict o; or default
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:CONDENSE
+
+```
+ ; JQN:CONDENSE
+ ;   [symbol]
+ ; 
+ ; CONDENSE names a compiled function:
+ ;   Lambda-list: (O)
+ ;   Derived type: (FUNCTION (T)
+ ;                  (VALUES
+ ;                   (OR LIST HASH-TABLE (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
+ ;     qry abbrev ><.
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
@@ -142,7 +174,7 @@
  ;   [symbol]
  ; 
  ; MAYBE names a macro:
- ;   Lambda-list: (FX ARG)
+ ;   Lambda-list: (FX ARG &REST ARGS)
  ;   Documentation:
  ;     run (fx arg) only if arg is not nil
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -215,6 +247,34 @@
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
+#### JQN:SDWN
+
+```
+ ; JQN:SDWN
+ ;   [symbol]
+ ; 
+ ; SDWN names a compiled function:
+ ;   Lambda-list: (&REST REST)
+ ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
+ ;   Documentation:
+ ;     mkstr and downcase
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:SUP
+
+```
+ ; JQN:SUP
+ ;   [symbol]
+ ; 
+ ; SUP names a compiled function:
+ ;   Lambda-list: (&REST REST)
+ ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
+ ;   Documentation:
+ ;     mkstr and upcase
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:VVADD%
 
 ```
@@ -224,7 +284,7 @@
  ; VVADD% names a macro:
  ;   Lambda-list: (DAT LFT K V)
  ;   Documentation:
- ;     do (vextend v lft) if v is not nil
+ ;     do (vextend v lft) if v is not nil or empty
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 

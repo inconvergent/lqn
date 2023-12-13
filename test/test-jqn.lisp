@@ -83,5 +83,17 @@
       "[\"65679d23d38d711eaf999e89\",[\"Chris\",0],\"this is a message\",\"65679d23fe33bc4c240675c0\",[\"Winters\",10,\"Haii\",11,\"Klein\",12],\"hello, undefined! you have 1 unread messages.\",\"65679d235b4143d2932ea17a\",[\"Star\",31,\"Ball\",32],\"hello, undefined! you have 5 unread messages.\"]
 "     :test #'equalp))
 
+(subtest "jqn condense, %"
+  (is (jqn::jsnout* (jqn:qryf *test-data-fn*
+                     :q (>< #{(%@things
+                                (>< #{(%@extra (?? string-upcase _))}))})))
+"[{\"things\":[{\"extra\":\"EXTRA99\"}]},{\"things\":[{\"extra\":\"EXTRA1\"},{\"extra\":\"EXTRA2\"}]}]
+")
+  (is (jqn::jsnout* (jqn:qryf *test-data-fn*
+                     :q #{(%@things
+                            (>< #{(%@extra (?? string-upcase _))}))}))
+"[{\"things\":[{\"extra\":\"EXTRA99\"}]},{\"things\":[{\"extra\":\"EXTRA1\"},{\"extra\":\"EXTRA2\"}]},null]
+"))
+
 (unless (finalize) (error "error in jqn"))
 
