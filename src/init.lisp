@@ -1,7 +1,8 @@
 (in-package :jqn)
 
 (defvar *qmodes* '(:+@ :?@ :-@ :%@))
-(defvar *fxns* '(:>< :??))
+(defvar *fxns* '(:>< :?? :sup :sdwn))
+; (defvar *itrs* '(:** :$$ :*$))
 
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*

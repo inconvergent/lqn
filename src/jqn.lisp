@@ -2,6 +2,21 @@
 
 ; QRY RUNTIME
 
+(defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
+(defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
+
+(defmacro @ (o k &optional default)
+  "get k from dict o; or default"
+  (if default `(gethash ,k (nil-as-empty-ht ,o) ,default)
+              `(gethash ,k (nil-as-empty-ht ,o))))
+(defmacro ind (o sel) ; rename
+  "get index or range from json array (vector).
+if sel is an atom: (aref o ,sel)
+if sel is cons: (subseq o ,@sel)"
+  (typecase sel (cons `(subseq o ,@sel))
+                (atom `(aref ,o ,sel))
+                (otherwise (error "ind: wanted atom or (atom atom). got: ~a" sel))))
+
 (defmacro something? (v &body body) ; ??
   (declare (symbol v))
   `(typecase ,v (vector (when (> (length ,v) 0) (progn ,@body)))
@@ -14,6 +29,31 @@ qry abbrev ??."
   (awg (arg*) `(let ((,arg* ,arg))
                  (if (null ,arg*) nil (,fx ,arg* ,@args)))))
 (abbrev ?? maybe)
+
+(defmacro nilop (&rest rest) (declare (ignore rest)) "do nothing. return nil" nil)
+
+(defmacro kvadd+ (dat lft k v &optional default)
+  (declare (ignore dat) (symbol lft)) "do (setf lft (or v default))"
+  `(setf (gethash ,k ,lft) (or ,v ,default)))
+(defmacro kvadd? (dat lft k v)
+  (declare (symbol lft)) "do (setf lft v) if (gethash k dat) is not nil"
+  `(when (gethash ,k ,dat) (setf (gethash ,k ,lft) ,v)))
+(defmacro kvadd% (dat lft k v)
+  (declare (ignore dat) (symbol lft)) "do (setf lft v) if v is not nil"
+  (awg (v*) `(let ((,v* ,v)) (something? ,v* (setf (gethash ,k ,lft) ,v*)))))
+(defmacro kvdel (dat lft k v)
+  (declare (ignore dat v) (symbol lft)) "delete key"
+  `(remhash ,k ,lft))
+
+(defmacro vvadd+ (dat lft k v &optional default)
+  (declare (ignore dat) (symbol lft)) "do (vextend (or v default) lft)"
+  `(vextend (or ,v ,default) ,lft))
+(defmacro vvadd? (dat lft k v)
+  (declare (symbol lft)) "do (vextend v lft) if (gethash k dat) is not nil"
+  `(when (gethash ,k ,dat) (vextend ,v ,lft)))
+(defmacro vvadd% (dat lft k v)
+  (declare (ignore dat) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
+  (awg (v*) `(let ((,v* ,v)) (something? ,v* (vextend ,v* ,lft)))))
 
 ; list/vector: remove if not someting
 ; hash-table: remove key if value not something
@@ -34,56 +74,16 @@ got: ~a.
 did nothing." seq))))
 (abbrev >< condense)
 
-(defun copy-ht (ht)
-  (declare (hash-table ht))
-  (loop with res = (make-hash-table :test #'equal)
-        for k being the hash-keys of ht using (hash-value v)
+(defun copy-ht (ht &aux (res (make-hash-table :test #'equal)))
+  (declare (hash-table ht)) "soft copy ht"
+  (loop for k being the hash-keys of ht using (hash-value v)
         do (setf (gethash k res) (gethash k ht))
         finally (return res)))
-(defun new-ht () (make-hash-table :test #'equal))
+(defun new-ht () "new hash table" (make-hash-table :test #'equal))
 (defun kvnil (kv)
+  "return nil for emtpy hash-tables. otherwise return kv"
   (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
                (otherwise kv)))
-(defun itradd (itr v) (vextend (kvnil v) itr))
-
-(defmacro @ (o k &optional default)
-  "get k from dict o; or default"
-  (if default `(gethash ,k (nil-as-empty-ht ,o) ,default)
-              `(gethash ,k (nil-as-empty-ht ,o))))
-(defmacro ind (o sel) ; rename
-  "get index or range from json array (vector).
-if sel is an atom: (aref o ,sel)
-if sel is cons: (subseq o ,@sel)"
-  (typecase sel (cons `(subseq o ,@sel))
-                (atom `(aref ,o ,sel))
-                (otherwise (error "ind: wanted atom or (atom atom). got: ~a" sel))))
-
-(defmacro nilop (&rest rest) (declare (ignore rest)) "do nothing" nil)
-
-(defmacro kvadd+ (dat lft k v &optional default)
-  (declare (ignore dat) (symbol lft)) "do (setf lft (or v default))"
-  `(setf (gethash ,k ,lft) (or ,v ,default)))
-(defmacro kvadd? (dat lft k v)
-  (declare (symbol lft)) "do (setf lft v) if (gethash k dat) is not nil"
-  `(when (gethash ,k ,dat) (setf (gethash ,k ,lft) ,v)))
-(defmacro kvadd% (dat lft k v)
-  (declare (ignore dat) (symbol lft)) "do (setf lft v) if v is not nil"
-  (awg (v*) `(let ((,v* ,v)) (something? ,v* (setf (gethash ,k ,lft) ,v*)))))
-
-(defmacro kvdel (dat lft k v)
-  (declare (ignore dat v) (symbol lft)) "delete key"
-  `(remhash ,k ,lft))
-
-(defmacro vvadd+ (dat lft k v &optional default)
-  (declare (ignore dat) (symbol lft)) "do (vextend (or v default) lft)"
-  `(vextend (or ,v ,default) ,lft))
-(defmacro vvadd? (dat lft k v)
-  (declare (symbol lft)) "do (vextend v lft) if (gethash k dat) is not nil"
-  `(when (gethash ,k ,dat) (vextend ,v ,lft)))
-(defmacro vvadd% (dat lft k v)
-  (declare (ignore dat) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
-  (awg (v*) `(let ((,v* ,v)) (something? ,v* (vextend ,v* ,lft)))))
-
 
 ; COMPILER
 
@@ -142,7 +142,7 @@ if sel is cons: (subseq o ,@sel)"
                      collect `(,(kvadd mode) ,dat ,kres ,kk
                                ,(rec (new-conf conf dat kk) expr))))
             (kvnil ,kres))))
-     (compile/*itr (conf d)
+     (compile/*itr (conf d) ; incorrect select???
        (awg (ires dat i vv)
          `(loop with ,ires = (mav)
                 with ,vv = (ensure-vector ,(gk conf :dat))
@@ -165,7 +165,7 @@ if sel is cons: (subseq o ,@sel)"
                      ,@(loop for (mode kk expr) in (strip-all d)
                              for comp-expr = (rec (new-conf conf dat kk) expr)
                              collect `(,(kvadd mode) ,dat ,kres ,kk ,comp-expr))
-                     (itradd ,ires ,kres))
+                     (vextend (kvnil ,kres) ,ires))
                 finally (return ,ires))))
 
      ; TODO: incomplete
@@ -189,11 +189,11 @@ if sel is cons: (subseq o ,@sel)"
 
      (rec (conf d &aux (dat (gk conf :dat)))
        (cond ((all? d) dat) ((atom d) d)
-             ((car-$itr? d) (compile/$itr conf (compile/itr/preproc (cdr d))))
-             ((car-*itr? d) (compile/*itr conf (compile/itr/preproc (cdr d))))
              ((car-*$itr? d) (compile/*$itr conf (compile/itr/preproc (cdr d))))
-             ((car-*new? d) (compile/*new conf (compile/itr/preproc (cdr d))))
-             ((car-$new? d) (compile/$new conf (compile/itr/preproc (cdr d))))
+             ((car-$itr? d)  (compile/$itr conf (compile/itr/preproc (cdr d))))
+             ((car-*itr? d)  (compile/*itr conf (compile/itr/preproc (cdr d))))
+             ((car-*new? d)  (compile/*new conf (compile/itr/preproc (cdr d))))
+             ((car-$new? d)  (compile/$new conf (compile/itr/preproc (cdr d))))
              ((car-jqnfx? d) `(,(psymb 'jqn (car d))
                                ,@(rec conf (cdr d))))
              ((consp d) (cons (rec conf (car d))
