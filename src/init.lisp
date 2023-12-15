@@ -1,7 +1,7 @@
 (in-package :jqn)
 
 (defvar *qmodes* '(:+@ :?@ :-@ :%@))
-(defvar *fxns* '(:>< :?? :sup :sdwn))
+(defvar *fxns* '(:<> :>< :?? :sup :sdwn))
 ; (defvar *itrs* '(:** :$$ :*$))
 
 (defun cmd-args ()

@@ -30,6 +30,16 @@ qry abbrev ??."
                  (if (null ,arg*) nil (,fx ,arg* ,@args)))))
 (abbrev ?? maybe)
 
+(defun squeeze (&rest rest &aux (res (make-adjustable-vector)))
+  (labels ((do-arg (aa) (loop for a across aa
+                            do (loop for b across a do (vextend b res)))))
+    (loop for a in rest do (do-arg a)))
+  res)
+(abbrev <> squeeze)
+
+; (defmacro pipe (&body body))
+; (abbrev || pipe)
+
 (defmacro nilop (&rest rest) (declare (ignore rest)) "do nothing. return nil" nil)
 
 (defmacro kvadd+ (dat lft k v &optional default)
@@ -74,6 +84,8 @@ got: ~a.
 did nothing." seq))))
 (abbrev >< condense)
 
+(defun nil-as-empty-ht (v)
+  (if (not v) (make-hash-table :test #'equal) v))
 (defun copy-ht (ht &aux (res (make-hash-table :test #'equal)))
   (declare (hash-table ht)) "soft copy ht"
   (loop for k being the hash-keys of ht using (hash-value v)
@@ -106,9 +118,9 @@ did nothing." seq))))
        (declare (list k))
        (case (length k)
          (0 (warn "empty selector"))
-         (1 `(,@(unpack-mode ck *qmodes*) :_))             ; ?/m [m]@key _
-         (2 `(,@(unpack-mode ck *qmodes*) ,(second k)))    ; ?/m [m]@key expr
-         (3 `(,ck ,(stringify (second k)) ,(third k))) ; m       key expr
+         (1 `(,@(unpack-mode ck *qmodes*) :_))          ; ?/m [m]@key _
+         (2 `(,@(unpack-mode ck *qmodes*) ,(second k))) ; ?/m [m]@key expr
+         (3 `(,ck ,(stringify (second k)) ,(third k)))  ; m       key expr
          (otherwise (warn "bad # items in selector: ~a" k))))
      (unpack (k)
        (typecase k
@@ -128,10 +140,8 @@ did nothing." seq))))
   (labels
     ((*itr/labels (vv dat i)
        `((i (&optional (k 0)) (+ ,i k))
-         (num () (length ,vv))
-         (dat () ,dat)
-         (@dat (k &optional default) (@ (dat) k default))
-         (par () ,vv)))
+         (num () (length ,vv)) (dat () ,dat) (par () ,vv)
+         (@dat (k &optional default) (@ (dat) k default))))
      (compile/$itr (conf d)
        (awg (kres dat)
          `(let* ((,dat ,(gk conf :dat))
@@ -142,12 +152,11 @@ did nothing." seq))))
                      collect `(,(kvadd mode) ,dat ,kres ,kk
                                ,(rec (new-conf conf dat kk) expr))))
             (kvnil ,kres))))
-     (compile/*itr (conf d) ; incorrect select???
+     (compile/*itr (conf d)
        (awg (ires dat i vv)
          `(loop with ,ires = (mav)
                 with ,vv = (ensure-vector ,(gk conf :dat))
-                for ,dat across ,vv
-                for ,i from 0
+                for ,dat across ,vv for ,i from 0
                 do (labels (,@(*itr/labels vv dat i))
                      ,(when (car-all? d) `(vvadd+ nil ,ires nil ,dat))
                      ,@(loop for (mode kk expr) in (strip-all d)
@@ -158,8 +167,7 @@ did nothing." seq))))
        (awg (ires kres dat i vv)
          `(loop with ,ires = (mav)
                 with ,vv = (ensure-vector ,(gk conf :dat))
-                for ,i from 0
-                for ,dat across ,vv
+                for ,i from 0 for ,dat across ,vv
                 for ,kres = ,(if (car-all? d) `(copy-ht ,dat) `(new-ht))
                 do (labels (,@(*itr/labels vv dat i))
                      ,@(loop for (mode kk expr) in (strip-all d)
@@ -167,6 +175,11 @@ did nothing." seq))))
                              collect `(,(kvadd mode) ,dat ,kres ,kk ,comp-expr))
                      (vextend (kvnil ,kres) ,ires))
                 finally (return ,ires))))
+     (compile/pipe (conf d &aux (pipe (gensym "PIPE")))
+      `(let ((,pipe ,(gk conf :dat)))
+         ,@(loop for op in d
+                 collect `(setf ,pipe ,(rec `((:dat . ,pipe) ,@conf) op)))
+         ,pipe))
 
      ; TODO: incomplete
      ; TODO: what happens with selector inside *new/$new?
@@ -174,10 +187,9 @@ did nothing." seq))))
        (awg (ires)
          `(let ((,ires (mav))) ;
             ,@(loop for (mode kk expr) in (strip-all d)
-                    collect `(,(vvadd mode) nil ,ires
+                    collect `(,(vvadd mode) nil ,ires ,kk
                               ,(rec conf expr)))
             ,ires)))
-
      (compile/$new (conf d) ; ignores _
        (awg (kres dat)
          `(let* ((,dat ,(gk conf :dat))
@@ -194,6 +206,7 @@ did nothing." seq))))
              ((car-*itr? d)  (compile/*itr conf (compile/itr/preproc (cdr d))))
              ((car-*new? d)  (compile/*new conf (compile/itr/preproc (cdr d))))
              ((car-$new? d)  (compile/$new conf (compile/itr/preproc (cdr d))))
+             ((car-pipe? d)  (compile/pipe conf (cdr d)))
              ((car-jqnfx? d) `(,(psymb 'jqn (car d))
                                ,@(rec conf (cdr d))))
              ((consp d) (cons (rec conf (car d))

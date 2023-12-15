@@ -93,6 +93,9 @@
                      :q #{(%@things
                             (>< #{(%@extra (?? string-upcase _))}))}))
 "[{\"things\":[{\"extra\":\"EXTRA99\"}]},{\"things\":[{\"extra\":\"EXTRA1\"},{\"extra\":\"EXTRA2\"}]},null]
+")
+  (is (jqn::jsnout* (jqn:qryf *test-data-fn* :q (|| (<> [things]) [id] _)))
+      "[0,10,11,12,31,32]
 "))
 
 (unless (finalize) (error "error in jqn"))

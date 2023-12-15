@@ -30,10 +30,6 @@
   (declare (list p) (keyword k))
   (if (or silent hit) hit (warn "JQN: missing conf key: ~a~%conf: ~s" k p)))
 
-(defun nil-as-empty-ht (v)
-  (if (not v) (make-hash-table :test #'equal) v))
-
-
 (defun mapqt (l) (declare (list l)) "new list with quoted items." (mapcar (lambda (s) `(quote ,s)) l))
 (defun mkstr (&rest args) "coerce this to string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
@@ -73,9 +69,8 @@
   (declare (string s to from))
   "replace from with to in s"
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to))
-                                (split-substr from s)))))
+                           (split-substr from s)))))
     (subseq s 0 (1- (length s)))))
-
 
 (defun split-substr (x s &key prune &aux (lx (length x)))
   (declare (optimize speed) (string x s) (boolean prune))
@@ -130,6 +125,7 @@
 (defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
 (defun *itr? (s)  (and (symbolp s) (eq (kv s) :**)))
 (defun all? (s)   (and (symbolp s) (eq (kv s) :_)))
+(defun pipe? (s)  (and (symbolp s) (eq (kv s) :||)))
 
 (defun $new? (s) (and (symbolp s) (eq (kv s) :$new)))
 (defun *new? (s) (and (symbolp s) (eq (kv s) :*new)))
@@ -138,6 +134,7 @@
 (defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
 (defun car-*itr? (d)  (and (listp d) (*itr? (car d))))
 (defun car-all? (s)   (and (listp s) (all? (car s))))
+(defun car-pipe? (s)  (and (listp s) (pipe? (car s))))
 
 ; convert known jqn functions to a symbol in jqn pkg
 (defun car-jqnfx? (s) (and (listp s) (symbolp (car s))

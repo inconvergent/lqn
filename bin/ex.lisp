@@ -10,7 +10,12 @@
   (print
    (jqn:jsnout
      (jqn:qryf "./sample.json" :db t
-        :q (*$ _ -@_id))
+        :q (|| {(a 1) (b 2)}
+               {a b}
+               ; (<> [things])
+               ; [id]
+               ; _
+               ))
         :indent t)))
 
 (main)

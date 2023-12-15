@@ -189,7 +189,7 @@
  ; NILOP names a macro:
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
- ;     do nothing
+ ;     do nothing. return nil
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
@@ -258,7 +258,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and downcase
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:SUP
@@ -272,7 +272,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and upcase
- ;   Source file: /data/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:VVADD%

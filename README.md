@@ -90,10 +90,10 @@ the selected key). `expr` can also be a new Selector.
 ```
 To select everything, but replace some keys with new values or drop keys entirely:
 ```lisp
-#{_                           ; select all keys, then override these:
-   (value (+ _ 22))           ; add 22 to current value
-   (name (string-downcase _)) ; lowercase name
-   -@meta}                    ; drop this key
+#{_                          ; select all keys, then override these:
+  (value (+ _ 22))           ; add 22 to current value
+  (name (string-downcase _)) ; lowercase name
+  -@meta}                    ; drop this key
 ```
 If you need case sensitive keys you can use strings instead:
 ```lisp
@@ -111,15 +111,17 @@ such as `gethash` and `aref`, `subseq` etc.
 
 But for convenience there are a few special functions defined in `jqn`.
 
+ - `(|| itr1 itr2 ...)` pipe the results from `itr1` into `itr2` etc. returns
+   the result of the last iterator.
+ - `(?? fx arg ...)` execute `(fx arg ...)` only if `arg` is not `nil`.
+ - `(<> a)` concatenate all vectors in in vector `a`,
+ - `(>< a)` condense `a`. Remove `none`/`nil`, empty `objects`/`hash-tables`
+   or keys with empty objects.
  - `(@ o k)` get key `k` from object `o`. Equivalent to `gethash`.
  - `(ind v i)` get `i` from vector `v`. Equivalent to `aref`.
  - `(ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
- - `(?? fx arg ...)` execute `(fx arg ...)` only if `arg` is not `nil`.
- - `(>< a)` condense `a`. Remove `none`/`nil`, empty `objects`/`hash-tables`
-   or keys with empty objects.
- - `(sup s ...)` stringify and upcase.
  - `(sdwn s ...)` stringify and downcase.
-
+ - `(sup s ...)` stringify and upcase.
 
 There are also some context dependent functions:
 
@@ -127,16 +129,14 @@ Global:
 
  - `(fn)` get name of the file that is the source for the current thing being
    iterated; or nil
- - `(fi [k])` get index of the file that is the source for the current thing being
-   iterated; or `0`. Starts at `k`
+ - `(fi [k])` get index of the file that is the source for the current thing
+   being iterated; or `0`. Starts at `k`
  - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`
 
 Selector local:
 
- - `(i [k])` returns array index (starts at `0`; or `k`). Available in `**` and
-   `*$`.
- - `(num)` returns length of the array being iterated. Available in `**` and
-   `*$`.
+ - `(i [k])` returns array index (starts at `0`; or `k`). Available in `**` and `*$`.
+ - `(num)` returns length of the array being iterated. Available in `**` and `*$`.
  - `(dat)` returns the current data object. Available in all selectors.
  - `(@dat k [default])` returns this key from current `(dat)`; or default.
    Available in all selectors.
