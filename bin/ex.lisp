@@ -6,11 +6,11 @@
 (ql:quickload :jqn :silent t)
 ; (in-package :jqn)
 
+
 (defun main ()
   (print
-    (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}"
-                  )
-              :q (|| (@dat "a") (@dat "b") )
+    (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
+              :q (|| (@_ "a") (@_ "b"))
               :db t
               )
    ; (jqn:jsnout

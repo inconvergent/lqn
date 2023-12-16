@@ -11,5 +11,5 @@
     #:vvadd+ #:vvadd? #:vvadd%
     #:>< #:condense
     #:sup #:sdwn
-    #:@ :@dat #:ind))
+    #:@ :@_ #:ind))
 

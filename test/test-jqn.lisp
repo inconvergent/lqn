@@ -83,7 +83,7 @@
       "[\"65679d23d38d711eaf999e89\",[\"Chris\",0],\"this is a message\",\"65679d23fe33bc4c240675c0\",[\"Winters\",10,\"Haii\",11,\"Klein\",12],\"hello, undefined! you have 1 unread messages.\",\"65679d235b4143d2932ea17a\",[\"Star\",31,\"Ball\",32],\"hello, undefined! you have 5 unread messages.\"]
 "     :test #'equalp))
 
-(subtest "jqn condense, >< <> || @dat"
+(subtest "jqn condense, >< <> || @_"
   (is (jqn::jsnout* (jqn:qryf *test-data-fn*
                      :q (>< #{(%@things
                                 (>< #{(%@extra (?? sup _))}))})))
@@ -98,14 +98,14 @@
       "[0,10,11,12,31,32]
 ")
   (is (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
-                :q (|| (@dat "a") (@dat "b")))
+                :q (|| (@_ "a") (@_ "b")))
       3)
   (is (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
-                :q (|| (@dat "a") (@dat "b")))
+                :q (|| (@_ "a") (@_ "b")))
       3)
 
   (is (jqn::jsnout* (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
-                              :q (|| (@dat "a") {_ (b (+ 10 _))})))
+                              :q (|| (@_ "a") {_ (b (+ 10 _))})))
       "{\"b\":13,\"c\":7}
 ")
 

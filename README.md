@@ -137,8 +137,7 @@ Selector local:
 
  - `(i [k])` returns array index (starts at `0`; or `k`). Available in `**` and `*$`.
  - `(num)` returns length of the array being iterated. Available in `**` and `*$`.
- - `(dat)` returns the current data object. Available in all selectors.
- - `(@dat k [default])` returns this key from current `(dat)`; or default.
+ - `(@_ k [default])` returns this key from `_` (current data object) ; or default.
    Available in all selectors.
  - `(par)` returns the parent data object. Available in `**` and `*$`.
 
