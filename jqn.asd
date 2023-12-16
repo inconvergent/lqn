@@ -1,6 +1,6 @@
 (asdf:defsystem #:jqn
   :description "JSON query language"
-  :version "0.1.0"
+  :version "0.2.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :in-order-to ((asdf:test-op (asdf:test-op #:jqn/tests)))
   :licence "MIT" :pathname "src/" :serial nil
@@ -14,8 +14,8 @@
                (:file "jqn" :depends-on ("io" "utils" "docs"))))
 
 (asdf:defsystem #:jqn/tests
-  :depends-on (#:veq #:jqn #:prove #+:jqn-parallel #:lparallel #:uiop #:asdf)
-  :version "0.1.0"
+  :depends-on (#:jqn #:prove #:uiop #:asdf)
+  :version "0.2.0"
   :perform (asdf:test-op (o s) (uiop:symbol-call ':jqn-tests '#:run-tests))
   :pathname "test/" :serial t
   :components ((:file "run")))

@@ -42,7 +42,7 @@
 (defun last* (l) (declare (list l)) "last item in list." (first (last l)))
 (defun close-path (l) (declare (list l)) "cons last of to l." (cons (last* l) l))
 (defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
-(defun psymb (&optional (pkg 'grph) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
+(defun psymb (&optional (pkg 'jqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 

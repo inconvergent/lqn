@@ -1,0 +1,17 @@
+name: Docker Image for Testing
+
+on: [pull_request]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build the Docker image
+        run: docker build . --file ./Dockerfile --tag tests:latest
+      - name: Run tests
+        run: docker run tests:latest
+
