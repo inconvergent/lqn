@@ -176,7 +176,8 @@
  ; MAYBE names a macro:
  ;   Lambda-list: (FX ARG &REST ARGS)
  ;   Documentation:
- ;     run (fx arg) only if arg is not nil
+ ;     run (fx arg) only if arg is not nil.
+ ;     qry abbrev ??.
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 

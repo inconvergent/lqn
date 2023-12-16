@@ -23,8 +23,7 @@ if sel is cons: (subseq o ,@sel)"
                 (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
                 (otherwise (when ,v (progn ,@body)))))
 (defmacro maybe (fx arg &rest args) ; ?!
-  (declare (symbol fx)) "run (fx arg) only if arg is not nil"
-  "execute (fx arg ...) only if arg is not nil.
+  (declare (symbol fx)) "run (fx arg) only if arg is not nil.
 qry abbrev ??."
   (awg (arg*) `(let ((,arg* ,arg))
                  (if (null ,arg*) nil (,fx ,arg* ,@args)))))
@@ -56,13 +55,13 @@ qry abbrev ??."
   `(remhash ,k ,lft))
 
 (defmacro vvadd+ (dat lft k v &optional default)
-  (declare (ignore dat) (symbol lft)) "do (vextend (or v default) lft)"
+  (declare (ignore dat k) (symbol lft)) "do (vextend (or v default) lft)"
   `(vextend (or ,v ,default) ,lft))
 (defmacro vvadd? (dat lft k v)
   (declare (symbol lft)) "do (vextend v lft) if (gethash k dat) is not nil"
   `(when (gethash ,k ,dat) (vextend ,v ,lft)))
 (defmacro vvadd% (dat lft k v)
-  (declare (ignore dat) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
+  (declare (ignore dat k) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
   (awg (v*) `(let ((,v* ,v)) (something? ,v* (vextend ,v* ,lft)))))
 
 ; list/vector: remove if not someting
@@ -81,7 +80,7 @@ qry abbrev ><. "
                 o)
     (otherwise (warn "condense/>< works on sequence (json array) or hash-table (json object).
 got: ~a.
-did nothing." seq))))
+did nothing." o))))
 (abbrev >< condense)
 
 (defun nil-as-empty-ht (v)
@@ -112,7 +111,7 @@ did nothing." seq))))
     ((stringify (a)
       (handler-case
         (ensure-string a)
-        (error (e) (error "failed to stringify key: ~a. try \"a\"" a))))
+        (error (e) (error "failed to stringify key: ~a.~%err: ~a" a e))))
      (stringify-key (v) (dsb (a b c) v `(,a ,(stringify b) ,c)))
      (unpack-cons (k &aux (ck (car k)))
        (declare (list k))
