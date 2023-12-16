@@ -7,7 +7,7 @@
   (let ((d (with-output-to-string (*standard-output*)
              (describe sym))))
     (strcat (mapcar (lambda (s) (mkstr " ; " s #\Newline))
-                         (butlast (split-string #\Newline d))))))
+                         (butlast (split-substr d (mkstr #\Newline)))))))
 
 (defun docstrings (sym)
   (strcat
@@ -36,7 +36,7 @@
            #'string-lessp :key #'car)))
 
 (defun -md-sanitize (d)
-  (let ((sp (split-string #\* d)))
+  (let ((sp (split-substr d "*")))
     (strcat `(,@(mapcar (lambda (s) (mkstr s "\\*")) (butlast sp))
                              ,@(last sp)))))
 

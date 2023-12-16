@@ -41,19 +41,27 @@ which returns:
     "msg": "HELLO, UNDEFINED! YOU HAVE 5 UNREAD MESSAGES." } ]
 ```
 
-JQN queries consist of "Iterators" and "Selectors". As explained in more detail
+JQN queries consist of "Clauses" and "Selectors". As explained in more detail
 below.
 
-## Iterators:
+## Object Representation
 
-Currently there are three Iterators, both have two alternative notations. The
+Internally JSON arrays are represented as `vector`. JSON objects/dicts are
+represented as `hash-table`. The terms `vector` and `kv` (key/value) are used
+in the documentation, if the context makes it clear whether it is a reference
+to a JSON data structure or an internal lisp structure.
+
+## Clauses
+
+Currently there are four Clauses, both have two alternative notations. The
 first notation is a little more readable and compact.
 
-  - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate list of objects and select into
-    a new list of objects
-  - ` [s1 ... sn]` or `(** s1 ... sn)` iterate list and select into new array
-  - ` {s1 ... sn}` or `($$ s1 ... sn)` select from object into new object
-
+  - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate vector of `kvs` and select into
+    a new list of `kvs`
+  - `[s1 ... sn]` or `(** s1 ... sn)` iterate `vector` and select into new `vector`
+  - `{s1 ... sn}` or `($$ s1 ... sn)` select from `kv` into new `kv`
+  - `(|| itr1 itr2 ...)` pipe the results from `itr1` into `itr2` etc. returns
+   the result of the last Clause.
 
 ## Selectors
 
@@ -105,43 +113,40 @@ If you need case sensitive keys you can use strings instead:
 
 ## Query Utility Functions
 
-Internally JSON `objects` are represented as `hash tables`, and JSON `arrays`
-are represented as `vectors`. Which means you can use the regular CL utilities
-such as `gethash` and `aref`, `subseq` etc.
+The internal representation of JSON data as `vectors` and `kvs` in `jqn` means
+you can use the regular CL utilities such as `gethash`, `aref`, `subseq`,
+`length` etc.
 
 But for convenience there are a few special functions defined in `jqn`.
 
- - `(|| itr1 itr2 ...)` pipe the results from `itr1` into `itr2` etc. returns
-   the result of the last iterator.
- - `(?? fx arg ...)` execute `(fx arg ...)` only if `arg` is not `nil`.
+ - `(?? fx a ...)` execute `(fx a ...)` only if `a` is not `nil`; otherwise `nil`.
  - `(<> a)` concatenate all vectors in in vector `a`,
- - `(>< a)` condense `a`. Remove `none`/`nil`, empty `objects`/`hash-tables`
-   or keys with empty objects.
- - `(@ o k)` get key `k` from object `o`. Equivalent to `gethash`.
+ - `(>< a)` condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
+ - `(@ kv k)` get key `k` from `kv`. Equivalent to `gethash`.
  - `(ind v i)` get `i` from vector `v`. Equivalent to `aref`.
  - `(ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
  - `(sdwn s ...)` stringify and downcase.
  - `(sup s ...)` stringify and upcase.
+ - `(mkstr a ...)` stringify and concatenate all arguments.
+ - `(strcat s ...)` concatenate all strings or `vectors`, `lists` of strings.
+ - `(repl s from to)` replace `from` with `to` in string `s`.
 
 There are also some context dependent functions:
 
-Global:
+### Global:
 
- - `(fn)` get name of the file that is the source for the current thing being
-   iterated; or nil
- - `(fi [k])` get index of the file that is the source for the current thing
-   being iterated; or `0`. Starts at `k`
+ - `(fn)` get name of the file that is the source for the current data; or nil
+ - `(fi [k])` get index of the file that is the source for the current data;
+   or `0`. Starts at `k`
  - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`
 
-Selector local:
+### Local to Clause:
 
  - `(i [k])` returns array index (starts at `0`; or `k`). Available in `**` and `*$`.
  - `(num)` returns length of the array being iterated. Available in `**` and `*$`.
  - `(@_ k [default])` returns this key from `_` (current data object) ; or default.
    Available in all selectors.
  - `(par)` returns the parent data object. Available in `**` and `*$`.
-
-TODO: add example.
 
 ## Options
 

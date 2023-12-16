@@ -10,6 +10,6 @@
     #:kvadd+ #:kvadd?  #:kvadd%
     #:vvadd+ #:vvadd? #:vvadd%
     #:>< #:condense
-    #:sup #:sdwn
+    #:sup #:sdwn #:strcat #:repl #:mkstr
     #:@ :@_ #:ind))
 

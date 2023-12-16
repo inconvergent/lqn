@@ -7,8 +7,8 @@
 
 (defmacro @ (o k &optional default)
   "get k from dict o; or default"
-  (if default `(gethash ,k (nil-as-empty-ht ,o) ,default)
-              `(gethash ,k (nil-as-empty-ht ,o))))
+  (if default `(gethash (ensure-string ,k) (nil-as-empty-ht ,o) ,default)
+              `(gethash (ensure-string ,k) (nil-as-empty-ht ,o))))
 (defmacro ind (o sel) ; rename
   "get index or range from json array (vector).
 if sel is an atom: (aref o ,sel)
@@ -192,7 +192,7 @@ did nothing." o))))
             ,ires)))
      (compile/$new (conf d) ; ignores _
        (awg (kres dat)
-         `(let* ((,kres (new-ht)))
+         `(let ((,kres (new-ht)))
             ,@(loop for (mode kk expr) in (strip-all d)
                     collect `(,(kvadd mode) ,dat ,kres ,kk
                               ,(rec conf expr)))

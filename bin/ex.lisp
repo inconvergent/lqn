@@ -10,7 +10,7 @@
 (defun main ()
   (print
     (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
-              :q (|| (@_ "a") (@_ "b"))
+              :q (|| (@_ :a) (@_ (jqn:mkstr :B)))
               :db t
               )
    ; (jqn:jsnout

@@ -190,6 +190,20 @@
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
+#### JQN:MKSTR
+
+```
+ ; JQN:MKSTR
+ ;   [symbol]
+ ; 
+ ; MKSTR names a compiled function:
+ ;   Lambda-list: (&REST ARGS)
+ ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
+ ;   Documentation:
+ ;     coerce all arguments to a string.
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:NILOP
 
 ```
@@ -257,6 +271,21 @@
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
+#### JQN:REPL
+
+```
+ ; JQN:REPL
+ ;   [symbol]
+ ; 
+ ; REPL names a compiled function:
+ ;   Lambda-list: (S FROM TO)
+ ;   Derived type: (FUNCTION (STRING STRING STRING)
+ ;                  (VALUES SIMPLE-STRING &OPTIONAL))
+ ;   Documentation:
+ ;     replace from with to in string s
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:SDWN
 
 ```
@@ -269,6 +298,20 @@
  ;   Documentation:
  ;     mkstr and downcase
  ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:STRCAT
+
+```
+ ; JQN:STRCAT
+ ;   [symbol]
+ ; 
+ ; STRCAT names a compiled function:
+ ;   Lambda-list: (&REST REST)
+ ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
+ ;   Documentation:
+ ;     concatenate all strings in sequences rest
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:SUP
