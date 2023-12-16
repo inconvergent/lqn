@@ -24,6 +24,15 @@
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
+#### JQN:@DAT
+
+```
+:missing:todo:
+
+ ; JQN:@DAT
+ ;   [symbol]
+```
+
 #### JQN:CONDENSE
 
 ```

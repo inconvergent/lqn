@@ -8,15 +8,21 @@
 
 (defun main ()
   (print
-   (jqn:jsnout
-     (jqn:qryf "./sample.json" :db t
-        :q (|| {(a 1) (b 2)}
-               {a b}
-               ; (<> [things])
-               ; [id]
-               ; _
-               ))
-        :indent t)))
+    (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}"
+                  )
+              :q (|| (@dat "a") (@dat "b") )
+              :db t
+              )
+   ; (jqn:jsnout
+   ;   (jqn:qryf "./sample.json" :db t
+   ;      :q (|| {(a 1) (b 2)}
+   ;             {a b}
+   ;             ; (<> [things])
+   ;             ; [id]
+   ;             ; _
+   ;             ))
+   ;      :indent t)
+   ))
 
 (main)
 

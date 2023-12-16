@@ -163,5 +163,9 @@ Unfortunately this will tend to be quite slow. To get around this you can
 create an image that has `jqn` preloaded and dump it using
 `sb-ext:save-lisp-and-die`. Then use your image in the alias instead of SBCL.
 
-TODO: add full example.
+## TODO
 
+ - add full examples
+ - merge dicts
+ - merge vector?
+ - fix `*new`

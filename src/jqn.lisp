@@ -137,10 +137,10 @@ did nothing." o))))
 (defun proc-qry (conf* q)
   "compile jqn query"
   (labels
-    ((*itr/labels (vv dat i)
-       `((i (&optional (k 0)) (+ ,i k))
-         (num () (length ,vv)) (dat () ,dat) (par () ,vv)
-         (@dat (k &optional default) (@ (dat) k default))))
+    ((labels/dat (dat) `((dat () ,dat) (@dat (k &optional default) (@ (dat) k default))))
+     (*itr/labels (vv dat i)
+       `((i (&optional (k 0)) (+ ,i k)) (num () (length ,vv))  (par () ,vv)
+         ,@(labels/dat dat)))
      (compile/$itr (conf d)
        (awg (kres dat)
          `(let* ((,dat ,(gk conf :dat))
@@ -174,11 +174,13 @@ did nothing." o))))
                              collect `(,(kvadd mode) ,dat ,kres ,kk ,comp-expr))
                      (vextend (kvnil ,kres) ,ires))
                 finally (return ,ires))))
-     (compile/pipe (conf d &aux (pipe (gensym "PIPE")))
-      `(let ((,pipe ,(gk conf :dat)))
-         ,@(loop for op in d
-                 collect `(setf ,pipe ,(rec `((:dat . ,pipe) ,@conf) op)))
-         ,pipe))
+     (compile/pipe (conf d )
+       (awg (pipe)
+         `(let ((,pipe ,(gk conf :dat)))
+           ,@(loop for op in d for i from 0
+                   collect `(labels (,@(labels/dat pipe))
+                             (setf ,pipe ,(rec `((:dat . ,pipe) ,@conf) op))))
+           ,pipe)))
 
      ; TODO: incomplete
      ; TODO: what happens with selector inside *new/$new?
@@ -213,7 +215,8 @@ did nothing." o))))
              (t (error "jqn compile error for: ~a" d)))))
     `(labels ((fn () ,(gk conf* :fn t))
               (fi (&optional (k 0)) (+ k ,(or (gk conf* :fi t))))
-              (ctx () ,(gk conf* :ctx t)))
+              (ctx () ,(gk conf* :ctx t))
+              ,@(labels/dat (gk conf* :dat)))
      ,(rec conf* q))))
 
 (defmacro qryd (dat &key (q :_) conf db)
