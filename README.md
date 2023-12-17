@@ -57,11 +57,11 @@ Currently there are four Clauses, both have two alternative notations. The
 first notation is a little more readable and compact.
 
   - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate vector of `kvs` and select into
-    a new list of `kvs`
+    a new vector of `kvs`
   - `[s1 ... sn]` or `(** s1 ... sn)` iterate `vector` and select into new `vector`
   - `{s1 ... sn}` or `($$ s1 ... sn)` select from `kv` into new `kv`
-  - `(|| itr1 itr2 ...)` pipe the results from `itr1` into `itr2` etc. returns
-   the result of the last Clause.
+  - `(|| c1 c2 ...)` pipe the results from `c1` into `c2` etc. returns
+    the result of the last clause.
 
 ## Selectors
 
@@ -120,31 +120,30 @@ you can use the regular CL utilities such as `gethash`, `aref`, `subseq`,
 But for convenience there are a few special functions defined in `jqn`.
 
  - `(?? fx a ...)` execute `(fx a ...)` only if `a` is not `nil`; otherwise `nil`.
- - `(<> a)` concatenate all vectors in in vector `a`,
+ - `(<> a)` concatenate all vectors in vector `a`,
  - `(>< a)` condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
  - `(@ kv k)` get key `k` from `kv`. Equivalent to `gethash`.
  - `(ind v i)` get `i` from vector `v`. Equivalent to `aref`.
  - `(ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
- - `(sdwn s ...)` stringify and downcase.
- - `(sup s ...)` stringify and upcase.
  - `(mkstr a ...)` stringify and concatenate all arguments.
- - `(strcat s ...)` concatenate all strings or `vectors`, `lists` of strings.
+ - `(sdwn s ...)` `mkstr` and downcase.
+ - `(sup s ...)` `mkstr` and upcase.
+ - `(strcat s ...)` concatenate all strings and `vectors`/`lists` of strings.
  - `(repl s from to)` replace `from` with `to` in string `s`.
 
 There are also some context dependent functions:
 
 ### Global:
 
- - `(fn)` get name of the file that is the source for the current data; or nil
- - `(fi [k])` get index of the file that is the source for the current data;
-   or `0`. Starts at `k`
+ - `(fn)` name of the file that is the source for the current data; or nil
+ - `(fi)` index of the file that is the source for the current data; or `0`.
  - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`
 
 ### Local to Clause:
 
- - `(i [k])` returns array index (starts at `0`; or `k`). Available in `**` and `*$`.
- - `(num)` returns length of the array being iterated. Available in `**` and `*$`.
- - `(@_ k [default])` returns this key from `_` (current data object) ; or default.
+ - `(num)` returns length of the `vector` being iterated. Available in `**` and `*$`.
+ - `(i)` counts from 0 to `(1- (num))`.
+ - `(@_ k [default])` returns this key from `_` (current data object); or default.
    Available in all selectors.
  - `(par)` returns the parent data object. Available in `**` and `*$`.
 
