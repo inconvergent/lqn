@@ -145,7 +145,7 @@
  ; KVADD? names a macro:
  ;   Lambda-list: (DAT LFT K V)
  ;   Documentation:
- ;     do (setf lft v) if (gethash k dat) is not nil
+ ;     do (setf lft v) if (@_ k) is not nil
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 

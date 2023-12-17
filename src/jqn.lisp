@@ -5,10 +5,16 @@
 (defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
 (defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
 
+(defun ht-recursive-get (o pp &key default)
+  (labels ((rec (o pp)
+             (unless pp (return-from rec (or o default)))
+             (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
+                         (otherwise (return-from rec (or o default))))))
+    (rec o (split-substr pp "/"))))
 (defmacro @ (o k &optional default)
   "get k from dict o; or default"
-  (if default `(gethash (ensure-string ,k) (nil-as-empty-ht ,o) ,default)
-              `(gethash (ensure-string ,k) (nil-as-empty-ht ,o))))
+  `(ht-recursive-get ,o (ensure-string ,k) :default ,default))
+
 (defmacro ind (o sel) ; rename
   "get index or range from json array (vector).
 if sel is an atom: (aref o ,sel)
@@ -36,20 +42,19 @@ qry abbrev ??."
   res)
 (abbrev <> squeeze)
 
-; (defmacro pipe (&body body))
-; (abbrev || pipe)
-
 (defmacro nilop (&rest rest) (declare (ignore rest)) "do nothing. return nil" nil)
+(defun path-to-key (pp) (first (last (split-substr pp "/"))))
 
 (defmacro kvadd+ (dat lft k v &optional default)
   (declare (ignore dat) (symbol lft)) "do (setf lft (or v default))"
-  `(setf (gethash ,k ,lft) (or ,v ,default)))
+  `(setf (gethash ,(path-to-key k) ,lft) (or ,v ,default)))
 (defmacro kvadd? (dat lft k v)
-  (declare (symbol lft)) "do (setf lft v) if (gethash k dat) is not nil"
-  `(when (gethash ,k ,dat) (setf (gethash ,k ,lft) ,v)))
+  (declare (symbol lft)) "do (setf lft v) if (@_ k) is not nil"
+  `(when (@ ,dat ,k) (setf (gethash ,(path-to-key k) ,lft) ,v)))
 (defmacro kvadd% (dat lft k v)
   (declare (ignore dat) (symbol lft)) "do (setf lft v) if v is not nil"
-  (awg (v*) `(let ((,v* ,v)) (something? ,v* (setf (gethash ,k ,lft) ,v*)))))
+  (awg (v*) `(let ((,v* ,v))
+               (something? ,v* (setf (gethash (path-to-key ,k) ,lft) ,v*)))))
 (defmacro kvdel (dat lft k v)
   (declare (ignore dat v) (symbol lft)) "delete key"
   `(remhash ,k ,lft))
@@ -59,7 +64,7 @@ qry abbrev ??."
   `(vextend (or ,v ,default) ,lft))
 (defmacro vvadd? (dat lft k v)
   (declare (symbol lft)) "do (vextend v lft) if (gethash k dat) is not nil"
-  `(when (gethash ,k ,dat) (vextend ,v ,lft)))
+  `(when (@ ,dat ,k) (vextend ,v ,lft)))
 (defmacro vvadd% (dat lft k v)
   (declare (ignore dat k) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
   (awg (v*) `(let ((,v* ,v)) (something? ,v* (vextend ,v* ,lft)))))

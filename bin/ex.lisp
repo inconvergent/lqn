@@ -9,10 +9,10 @@
 
 (defun main ()
   (print
-    (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
-              :q (|| (@_ :a) (@_ (jqn:mkstr :B)))
+    (jqn:ldnout (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
+              :q (|| {:a/b})
               :db t
-              )
+              ))
    ; (jqn:jsnout
    ;   (jqn:qryf "./sample.json" :db t
    ;      :q (|| {(a 1) (b 2)}
