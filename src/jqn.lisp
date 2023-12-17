@@ -189,12 +189,15 @@ did nothing." o))))
      ; TODO: incomplete
      ; TODO: what happens with selector inside *new/$new?
      (compile/*new (conf d) ; ignores _, simpler expr pre processor
-       (awg (ires)
-         `(let ((,ires (mav))) ;
-            ,@(loop for (mode kk expr) in (strip-all d)
-                    collect `(,(vvadd mode) nil ,ires ,kk
-                              ,(rec conf expr)))
-            ,ires)))
+        `(vector ,@(loop for o in d collect (rec conf o)))
+       ; (awg (ires)
+       ;   `(let ((,ires (mav))) ;
+       ;      ,@(loop for (mode kk expr) in (strip-all d)
+       ;              collect `(,(vvadd mode) nil ,ires ,kk
+       ;                        ,(rec conf expr)))
+       ;      ,ires)
+       ;   )
+       )
      (compile/$new (conf d) ; ignores _
        (awg (kres dat)
          `(let ((,kres (new-ht)))
@@ -208,7 +211,7 @@ did nothing." o))))
              ((car-*$itr? d) (compile/*$itr conf (compile/itr/preproc (cdr d))))
              ((car-$itr? d)  (compile/$itr conf (compile/itr/preproc (cdr d))))
              ((car-*itr? d)  (compile/*itr conf (compile/itr/preproc (cdr d))))
-             ((car-*new? d)  (compile/*new conf (compile/itr/preproc (cdr d))))
+             ((car-*new? d)  (compile/*new conf (cdr d)))
              ((car-$new? d)  (compile/$new conf (compile/itr/preproc (cdr d))))
              ((car-pipe? d)  (compile/pipe conf (cdr d)))
              ((car-jqnfx? d) `(,(psymb 'jqn (car d))

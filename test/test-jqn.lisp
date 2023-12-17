@@ -90,7 +90,15 @@
 
   (is-str (jqn::jsnout* (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
                           :q (|| (@_ "a") {_ (b (+ 10 _))})))
-          "{\"b\":13,\"c\":7}"))
+          "{\"b\":13,\"c\":7}")
+  (is-str (jqn::jsnout* (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
+                          :q {a/b}))
+          "{\"b\":3}")
+  (is-str (jqn::jsnout* (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
+                          :q (@_ :a/b)))
+          "3")
+  )
+
 
 (unless (finalize) (error "error in jqn"))
 
