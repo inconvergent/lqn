@@ -53,7 +53,7 @@ to a JSON data structure or an internal lisp structure.
 
 ## Clauses
 
-Currently there are four Clauses, both have two alternative notations. The
+Currently there are four Clauses, the first three have two notations. The
 first notation is a little more readable and compact.
 
   - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate vector of `kvs` and select into
