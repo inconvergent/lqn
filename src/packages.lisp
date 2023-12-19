@@ -4,12 +4,14 @@
   (:export
     #:jsnloads #:jsnloadf #:jsnout #:ldnout
     #:proc-qry
-    #:maybe
     #:qryd #:qryf #:qryl
-    #:kvdel #:nilop
-    #:kvadd+ #:kvadd?  #:kvadd%
-    #:vvadd+ #:vvadd? #:vvadd%
-    #:>< #:condense
+    #:|| #:?? #:>< #:<> #:@ :@_
+    #:$stack
+    #:$del #:noop
+    #:$add+ #:$add? #:$add%
+    #:*add+ #:*add? #:*add%
+    #:*ind
+    #:*new #:$new
     #:sup #:sdwn #:strcat #:repl #:mkstr
-    #:@ :@_ #:ind))
+    ))
 

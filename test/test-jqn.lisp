@@ -60,7 +60,7 @@
 (subtest "jqn qry 2"
   (is-str (jqn::jsnout* (jqn:qryf *test-data-fn* :q (*$ _ -@_id -@things)))
 "[{\"index\":0,\"msg\":\"this is a message\",\"fave\":\"strawberry\"},{\"index\":1,\"msg\":\"Hello, undefined! You have 1 unread messages.\",\"fave\":\"strawberry\"},{\"msg\":\"Hello, undefined! You have 5 unread messages.\",\"fave\":\"blueberry\"}]")
-  (is-str (jqn::jsnout* (jqn:qryf *test-data-fn* :q (** (things (jqn:ind (*$ _ -@extra) 0)))))
+  (is-str (jqn::jsnout* (jqn:qryf *test-data-fn* :q (** (things (jqn:*ind (*$ _ -@extra) 0)))))
 "[{\"id\":0,\"name\":\"Chris\"},{\"id\":10,\"name\":\"Winters\"},{\"id\":31,\"name\":\"Star\"}]"))
 
 (subtest "jqn qry reader macros"
@@ -79,7 +79,7 @@
                      :q #{(%@things
                             (>< #{(%@extra (?? sup _))}))}))
 "[{\"things\":[{\"extra\":\"EXTRA99\"}]},{\"things\":[{\"extra\":\"EXTRA1\"},{\"extra\":\"EXTRA2\"}]},null]")
-  (is-str (jqn::jsnout* (jqn:qryf *test-data-fn* :q (|| (<> [things]) [id] _)))
+  (is-str (jqn::jsnout* (jqn:qryf *test-data-fn* :q (|| (*cat [things]) [id] _)))
           "[0,10,11,12,31,32]")
   (is (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
                 :q (|| (@_ "a") (@_ "b"))) 3)

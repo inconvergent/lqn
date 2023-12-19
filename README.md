@@ -119,33 +119,45 @@ you can use the regular CL utilities such as `gethash`, `aref`, `subseq`,
 
 But for convenience there are a few special functions defined in `jqn`.
 
+### Global Context
+
+ - `(fn)` name of the file that is the source for the current data; or nil
+ - `(fi)` index of the file that is the source for the current data; or `0`.
+ - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`
+
+### Clause Context
+
+ - `(@_ k [default])` returns this key from `_` (current data object); or default.
+   equivalent to `(@ _ k [default])` (see below).
+ - `(par)` returns the parent data object. Available in `**` and `*$`.
+ - `(num)` returns length of the `vector` being iterated. Available in `**` and `*$`.
+ - `(i)` counts from 0 to `(1- (num))`.
+
+### Generic
+
  - `(?? fx a ...)` execute `(fx a ...)` only if `a` is not `nil`; otherwise `nil`.
- - `(<> a)` concatenate all vectors in vector `a`,
  - `(>< a)` condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
- - `(@ kv k)` get key `k` from `kv`. Equivalent to `gethash`.
- - `(ind v i)` get `i` from vector `v`. Equivalent to `aref`.
- - `(ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
+ - `(@ kv k [default])` get key `k` from `kv`. Equivalent to `gethash`.
+
+### Strings
+
  - `(mkstr a ...)` stringify and concatenate all arguments.
  - `(sdwn s ...)` `mkstr` and downcase.
  - `(sup s ...)` `mkstr` and upcase.
  - `(strcat s ...)` concatenate all strings and `vectors`/`lists` of strings.
  - `(repl s from to)` replace `from` with `to` in string `s`.
 
-There are also some context dependent functions:
+### Kvs
 
-### Global:
+ - `($new (k1 expr1) ...)` new `kv` with these keys and expressions
+ - `($stack ...)` add all keys from these `kvs` to a new `kv`. left to right.
 
- - `(fn)` name of the file that is the source for the current data; or nil
- - `(fi)` index of the file that is the source for the current data; or `0`.
- - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`
+### Vectors
 
-### Local to Clause:
-
- - `(num)` returns length of the `vector` being iterated. Available in `**` and `*$`.
- - `(i)` counts from 0 to `(1- (num))`.
- - `(@_ k [default])` returns this key from `_` (current data object); or default.
-   Available in all selectors.
- - `(par)` returns the parent data object. Available in `**` and `*$`.
+ - `(*cat a)` concatenate all vectors in vector `a`,
+ - `(*ind v i)` get `i` from vector `v`. Equivalent to `aref`.
+ - `(*ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
+ - `(*new ...)` new `vector` with these elements
 
 ## Options
 

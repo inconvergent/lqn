@@ -1,13 +1,188 @@
-#### JQN:><
+#### JQN:
 
 ```
 :missing:todo:
 
+ ; JQN:||
+ ;   [symbol]
+```
+
+#### JQN:$ADD%
+
+```
+ ; JQN:$ADD%
+ ;   [symbol]
+ ; 
+ ; $ADD% names a macro:
+ ;   Lambda-list: (DAT LFT K V)
+ ;   Documentation:
+ ;     do (setf lft v) if v is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:$ADD+
+
+```
+ ; JQN:$ADD+
+ ;   [symbol]
+ ; 
+ ; $ADD+ names a macro:
+ ;   Lambda-list: (DAT LFT K V &OPTIONAL DEFAULT)
+ ;   Documentation:
+ ;     do (setf lft (or v default))
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:$ADD?
+
+```
+ ; JQN:$ADD?
+ ;   [symbol]
+ ; 
+ ; $ADD? names a macro:
+ ;   Lambda-list: (DAT LFT K V)
+ ;   Documentation:
+ ;     do (setf lft v) if (@_ k) is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:$DEL
+
+```
+ ; JQN:$DEL
+ ;   [symbol]
+ ; 
+ ; $DEL names a macro:
+ ;   Lambda-list: (DAT LFT K V)
+ ;   Documentation:
+ ;     delete key
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:$NEW
+
+```
+:missing:todo:
+
+ ; JQN:$NEW
+ ;   [symbol]
+```
+
+#### JQN:$STACK
+
+```
+ ; JQN:$STACK
+ ;   [symbol]
+ ; 
+ ; $STACK names a compiled function:
+ ;   Lambda-list: (&REST REST &AUX
+ ;                 (RES (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
+ ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
+ ;   Documentation:
+ ;     add all keys from all hash tables in rest. left to right.
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:\*ADD%
+
+```
+ ; JQN:*ADD%
+ ;   [symbol]
+ ; 
+ ; *ADD% names a macro:
+ ;   Lambda-list: (DAT LFT K V)
+ ;   Documentation:
+ ;     do (vextend v lft) if v is not nil or empty
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:\*ADD+
+
+```
+ ; JQN:*ADD+
+ ;   [symbol]
+ ; 
+ ; *ADD+ names a macro:
+ ;   Lambda-list: (DAT LFT K V &OPTIONAL DEFAULT)
+ ;   Documentation:
+ ;     do (vextend (or v default) lft)
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:\*ADD?
+
+```
+ ; JQN:*ADD?
+ ;   [symbol]
+ ; 
+ ; *ADD? names a macro:
+ ;   Lambda-list: (DAT LFT K V)
+ ;   Documentation:
+ ;     do (vextend v lft) if (gethash k dat) is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:\*IND
+
+```
+ ; JQN:*IND
+ ;   [symbol]
+ ; 
+ ; *IND names a macro:
+ ;   Lambda-list: (O SEL)
+ ;   Documentation:
+ ;     get index or range from json array (vector).
+ ;     if sel is an atom: (aref o ,sel)
+ ;     if sel is cons: (subseq o ,@sel)
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:\*NEW
+
+```
+:missing:todo:
+
+ ; JQN:*NEW
+ ;   [symbol]
+```
+
+#### JQN:<>
+
+```
+:missing:todo:
+
+ ; JQN:<>
+ ;   [symbol]
+```
+
+#### JQN:><
+
+```
  ; JQN:><
  ;   [symbol]
  ; 
- ; >< names a macro:
- ;   Lambda-list: (&REST ARGS)
+ ; >< names a compiled function:
+ ;   Lambda-list: (O)
+ ;   Derived type: (FUNCTION (T)
+ ;                  (VALUES
+ ;                   (OR LIST HASH-TABLE (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:??
+
+```
+ ; JQN:??
+ ;   [symbol]
+ ; 
+ ; ?? names a macro:
+ ;   Lambda-list: (FX ARG &REST ARGS)
+ ;   Documentation:
+ ;     run (fx arg) only if arg is not nil.
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
@@ -31,40 +206,6 @@
 
  ; JQN:@_
  ;   [symbol]
-```
-
-#### JQN:CONDENSE
-
-```
- ; JQN:CONDENSE
- ;   [symbol]
- ; 
- ; CONDENSE names a compiled function:
- ;   Lambda-list: (O)
- ;   Derived type: (FUNCTION (T)
- ;                  (VALUES
- ;                   (OR LIST HASH-TABLE (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
- ;   Documentation:
- ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
- ;     qry abbrev ><.
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
-#### JQN:IND
-
-```
- ; JQN:IND
- ;   [symbol]
- ; 
- ; IND names a macro:
- ;   Lambda-list: (O SEL)
- ;   Documentation:
- ;     get index or range from json array (vector).
- ;     if sel is an atom: (aref o ,sel)
- ;     if sel is cons: (subseq o ,@sel)
- ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:JSNLOADF
@@ -110,58 +251,6 @@
  ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
-#### JQN:KVADD%
-
-```
- ; JQN:KVADD%
- ;   [symbol]
- ; 
- ; KVADD% names a macro:
- ;   Lambda-list: (DAT LFT K V)
- ;   Documentation:
- ;     do (setf lft v) if v is not nil
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
-#### JQN:KVADD+
-
-```
- ; JQN:KVADD+
- ;   [symbol]
- ; 
- ; KVADD+ names a macro:
- ;   Lambda-list: (DAT LFT K V &OPTIONAL DEFAULT)
- ;   Documentation:
- ;     do (setf lft (or v default))
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
-#### JQN:KVADD?
-
-```
- ; JQN:KVADD?
- ;   [symbol]
- ; 
- ; KVADD? names a macro:
- ;   Lambda-list: (DAT LFT K V)
- ;   Documentation:
- ;     do (setf lft v) if (@_ k) is not nil
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
-#### JQN:KVDEL
-
-```
- ; JQN:KVDEL
- ;   [symbol]
- ; 
- ; KVDEL names a macro:
- ;   Lambda-list: (DAT LFT K V)
- ;   Documentation:
- ;     delete key
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
 #### JQN:LDNOUT
 
 ```
@@ -174,20 +263,6 @@
  ;   Documentation:
  ;     serialize internal json representation to readable lisp data (ldn).
  ;   Source file: /data/x/jqn/src/io.lisp
-```
-
-#### JQN:MAYBE
-
-```
- ; JQN:MAYBE
- ;   [symbol]
- ; 
- ; MAYBE names a macro:
- ;   Lambda-list: (FX ARG &REST ARGS)
- ;   Documentation:
- ;     run (fx arg) only if arg is not nil.
- ;     qry abbrev ??.
- ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:MKSTR
@@ -204,13 +279,13 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:NILOP
+#### JQN:NOOP
 
 ```
- ; JQN:NILOP
+ ; JQN:NOOP
  ;   [symbol]
  ; 
- ; NILOP names a macro:
+ ; NOOP names a macro:
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
  ;     do nothing. return nil
@@ -325,45 +400,6 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and upcase
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
-#### JQN:VVADD%
-
-```
- ; JQN:VVADD%
- ;   [symbol]
- ; 
- ; VVADD% names a macro:
- ;   Lambda-list: (DAT LFT K V)
- ;   Documentation:
- ;     do (vextend v lft) if v is not nil or empty
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
-#### JQN:VVADD+
-
-```
- ; JQN:VVADD+
- ;   [symbol]
- ; 
- ; VVADD+ names a macro:
- ;   Lambda-list: (DAT LFT K V &OPTIONAL DEFAULT)
- ;   Documentation:
- ;     do (vextend (or v default) lft)
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
-#### JQN:VVADD?
-
-```
- ; JQN:VVADD?
- ;   [symbol]
- ; 
- ; VVADD? names a macro:
- ;   Lambda-list: (DAT LFT K V)
- ;   Documentation:
- ;     do (vextend v lft) if (gethash k dat) is not nil
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
