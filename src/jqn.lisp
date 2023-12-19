@@ -16,7 +16,7 @@
   (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
                (otherwise kv)))
 
-(defun $stack (&rest rest &aux (res (make-hash-table :test #'equal)))
+(defun $cat (&rest rest &aux (res (make-hash-table :test #'equal)))
   "add all keys from all hash tables in rest. left to right."
   (loop for ht of-type hash-table in rest
             do (loop for k being the hash-keys of ($make ht)
@@ -24,18 +24,18 @@
                      do (setf (gethash k res) (gethash k ht))))
   res)
 
-(defun $rec-get (o pp &key default)
+(defun $rec-get (o pp d)
   (labels ((rec (o pp)
-             (unless pp (return-from rec (or o default)))
+             (unless pp (return-from rec (or o d)))
              (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
-                         (otherwise (return-from rec (or o default))))))
+                         (otherwise (return-from rec (or o d))))))
     (rec o (split-substr pp "/"))))
-(defmacro @ (o k &optional default)
+(defmacro @ (o k &optional d)
   "get k from dict o; or default"
-  `($rec-get ,o (ensure-string ,k) :default ,default))
+  `($rec-get ,o (ensure-string ,k) ,d))
 
 (defmacro *ind (o sel) ; rename
-  "get index or range from json array (vector).
+  "get index or range from vector.
 if sel is an atom: (aref o ,sel)
 if sel is cons: (subseq o ,@sel)"
   (typecase sel (cons `(subseq o ,@sel))
@@ -52,38 +52,41 @@ if sel is cons: (subseq o ,@sel)"
   (awg (arg*) `(let ((,arg* ,arg))
                  (if (null ,arg*) nil (,fx ,arg* ,@args)))))
 
-; TODO: rename
+; TODO: handle non vectors
 (defun *cat (&rest rest &aux (res (make-adjustable-vector)))
+  "concatenate all vectors in these vectors.
+non-vectors are included in their position"
   (labels ((do-arg (aa) (loop for a across aa
-                            do (loop for b across a do (vextend b res)))))
-    (loop for a in rest do (do-arg a)))
+                              do (loop for b across a do (vextend b res)))))
+    (loop for a in rest do (typecase a (vector (do-arg a))
+                                       (otherwise (vextend a res)))))
   res)
 
 (defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil" nil)
 (defun path-to-key (pp) (first (last (split-substr pp "/"))))
 
-(defmacro $add+ (dat lft k v &optional default)
-  (declare (ignore dat) (symbol lft)) "do (setf lft (or v default))"
-  `(setf (gethash ,(path-to-key k) ,lft) (or ,v ,default)))
-(defmacro $add? (dat lft k v)
+(defmacro $add+ (lft k v &optional d)
+  (declare (symbol lft)) "do (setf lft (or v default))"
+  `(setf (gethash ,(path-to-key k) ,lft) (or ,v ,d)))
+(defmacro $add? (lft k v)
   (declare (symbol lft)) "do (setf lft v) if (@_ k) is not nil"
-  `(when (@ ,dat ,k) (setf (gethash ,(path-to-key k) ,lft) ,v)))
-(defmacro $add% (dat lft k v)
-  (declare (ignore dat) (symbol lft)) "do (setf lft v) if v is not nil"
+  `(when (@_ ,k) (setf (gethash ,(path-to-key k) ,lft) ,v)))
+(defmacro $add% (lft k v)
+  (declare (symbol lft)) "do (setf lft v) if v is not nil"
   (awg (v*) `(let ((,v* ,v))
                (something? ,v* (setf (gethash (path-to-key ,k) ,lft) ,v*)))))
-(defmacro $del (dat lft k v)
-  (declare (ignore dat v) (symbol lft)) "delete key"
+(defmacro $del (lft k v)
+  (declare (ignore v) (symbol lft)) "delete key"
   `(remhash ,k ,lft))
 
-(defmacro *add+ (dat lft k v &optional default)
+(defmacro *add+ (lft k v &optional d)
   (declare (ignore dat k) (symbol lft)) "do (vextend (or v default) lft)"
-  `(vextend (or ,v ,default) ,lft))
-(defmacro *add? (dat lft k v)
+  `(vextend (or ,v ,d) ,lft))
+(defmacro *add? (lft k v)
   (declare (symbol lft)) "do (vextend v lft) if (gethash k dat) is not nil"
-  `(when (@ ,dat ,k) (vextend ,v ,lft)))
-(defmacro *add% (dat lft k v)
-  (declare (ignore dat k) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
+  `(when (@_ ,k) (vextend ,v ,lft)))
+(defmacro *add% (lft k v)
+  (declare (ignore k) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
   (awg (v*) `(let ((,v* ,v)) (something? ,v* (vextend ,v* ,lft)))))
 
 ; list/vector: remove if not someting
@@ -99,39 +102,36 @@ if sel is cons: (subseq o ,@sel)"
                                    (something? v t)) (push k keys))
                       finally (loop for k in keys do (remhash k o)))
                 o)
-    (otherwise (warn ">< works on sequence (json array) or hash-table (json object).
-got: ~a.
-did nothing." o))))
+    (otherwise (warn ">< works on sequence/vector or hash-table.
+got: ~a" o))))
 
 ; COMPILER
 
 (defun $add (mode) (ecase mode (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
 (defun *add (mode) (ecase mode (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
 
-(defun new-conf (conf dat kk) `((:dat . (@ ,dat ,kk)) ,@conf))
+(defun new-conf (conf kk) `((:dat . (@_ ,kk)) ,@conf))
 (defun strip-all (d) (declare (list d)) (if (car-all? d) (cdr d) d))
 
 (defun compile/itr/preproc (q)
   (labels
     ((stringify (a)
-      (handler-case
-        (ensure-string a)
-        (error (e) (error "failed to stringify key: ~a.~%err: ~a" a e))))
+      (handler-case (ensure-string a)
+                    (error (e) (error "failed to stringify key: ~a.~%err: ~a" a e))))
      (stringify-key (v) (dsb (a b c) v `(,a ,(stringify b) ,c)))
      (unpack-cons (k &aux (ck (car k)))
        (declare (list k))
-       (case (length k)
-         (0 (warn "empty selector"))
+       (case (length k) (0 (warn "empty selector"))
          (1 `(,@(unpack-mode ck *qmodes*) :_))          ; ?/m [m]@key _
          (2 `(,@(unpack-mode ck *qmodes*) ,(second k))) ; ?/m [m]@key expr
          (3 `(,ck ,(stringify (second k)) ,(third k)))  ; m       key expr
          (otherwise (warn "bad # items in selector: ~a" k))))
      (unpack (k)
-       (typecase k
-         (symbol `(,@(unpack-mode k *qmodes*) :_))
-         (string `(,@(unpack-mode k *qmodes*) :_))
-         (cons   (unpack-cons k))
-         (otherwise (error "selector should be symbol, string or list. got: ~a" k)))))
+       (typecase k (symbol `(,@(unpack-mode k *qmodes*) :_))
+                   (string `(,@(unpack-mode k *qmodes*) :_))
+                   (cons   (unpack-cons k))
+                   (otherwise (error "selector should be symbol, string, list.
+got: ~a" k)))))
     (let* ((q* (remove-if #'all? q))
            (res (mapcar #'stringify-key (mapcar #'unpack q*))))
       (if (not (= (length q) (length q*)))
@@ -139,50 +139,49 @@ did nothing." o))))
 
 ; TODO: interpret expr => empty dict/vec as nil and drop in %mode
 
-(defun proc-qry (conf* q)
-  "compile jqn query"
+(defun proc-qry (conf* q) "compile jqn query"
   (labels
-    ((labels/@_ (dat) `((@_ (k &optional default) (@ ,dat k default))))
+    ((labels/@_ (dat) `((@_ (k &optional d) (@ ,dat k d))))
      (*itr/labels (vv dat i)
-       `((i (&optional (k 0)) (+ ,i k)) (num () (length ,vv))  (par () ,vv)
+       `((cnt (&optional (k 0)) (+ ,i k)) (num () (length ,vv))  (par () ,vv)
          ,@(labels/@_ dat)))
      (compile/*new (conf d) `(vector ,@(loop for o in d collect (rec conf o))))
      (compile/$new (conf d)
-       (awg (kres dat) `(let ((,kres ($make)))
+       (awg (kv dat) `(let ((,kv ($make)))
                           ,@(loop for (kk expr) in (strip-all d)
-                                  collect `($add+ nil ,kres ,kk ,(rec conf expr)))
-                          ($nil ,kres))))
+                                  collect `($add+ ,kv ,kk ,(rec conf expr)))
+                          ($nil ,kv))))
      (compile/$itr (conf d)
-       (awg (kres dat)
+       (awg (kv dat)
          `(let* ((,dat ,(gk conf :dat))
-                 (,kres ,(if (car-all? d) `($make ,dat) `($make))))
-            (labels ((@_ (k &optional default) (@ ,dat k default)))
+                 (,kv ,(if (car-all? d) `($make ,dat) `($make))))
+            (labels ((@_ (k &optional d) (@ ,dat k d)))
              ,@(loop for (mode kk expr) in (strip-all d)
-                     collect `(,($add mode) ,dat ,kres ,kk
-                               ,(rec (new-conf conf dat kk) expr))))
-            ($nil ,kres))))
+                     collect `(,($add mode) ,kv ,kk
+                               ,(rec (new-conf conf kk) expr))))
+            ($nil ,kv))))
      (compile/*itr (conf d)
        (awg (ires dat i vv)
-         `(loop with ,ires = (mav)
-                with ,vv = (ensure-vector ,(gk conf :dat))
+         `(loop with ,ires of-type vector = (mav)
+                with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
                 for ,dat across ,vv for ,i from 0
                 do (labels (,@(*itr/labels vv dat i))
-                     ,(when (car-all? d) `(*add+ nil ,ires nil ,dat))
+                     ,(when (car-all? d) `(*add+ ,ires nil ,dat))
                      ,@(loop for (mode kk expr) in (strip-all d)
-                             collect `(,(*add mode) ,dat ,ires ,kk
-                                       ,(rec (new-conf conf dat kk) expr))))
+                             collect `(,(*add mode) ,ires ,kk
+                                       ,(rec (new-conf conf kk) expr))))
                 finally (return ,ires))))
      (compile/*$itr (conf d)
-       (awg (ires kres dat i vv)
-         `(loop with ,ires = (mav)
-                with ,vv = (ensure-vector ,(gk conf :dat))
-                for ,i from 0 for ,dat across ,vv
-                for ,kres = ,(if (car-all? d) `($make ,dat) `($make))
+       (awg (ires kv dat i vv)
+         `(loop with ,ires of-type vector = (mav)
+                with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
+                for ,i from 0 for ,dat of-type hash-table across ,vv
+                for ,kv of-type hash-table = ,(if (car-all? d) `($make ,dat) `($make))
                 do (labels (,@(*itr/labels vv dat i))
                      ,@(loop for (mode kk expr) in (strip-all d)
-                             for comp-expr = (rec (new-conf conf dat kk) expr)
-                             collect `(,($add mode) ,dat ,kres ,kk ,comp-expr))
-                     (vextend ($nil ,kres) ,ires))
+                             for comp-expr = (rec (new-conf conf kk) expr)
+                             collect `(,($add mode) ,kv ,kk ,comp-expr))
+                     (vextend ($nil ,kv) ,ires))
                 finally (return ,ires))))
      (compile/pipe (conf d)
        (awg (pipe)
@@ -210,17 +209,14 @@ did nothing." o))))
               ,@(labels/@_ (gk conf* :dat)))
        ,(rec conf* q))))
 
-(defmacro qryd (dat &key (q :_) conf db)
-  (declare (boolean db)) "run jqn query on dat"
-  (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) (:dattype) ,@conf) q)))
+(defmacro qryd (dat &key (q :_) conf db) "run jqn query on dat"
+  (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) ,@conf) q)))
                 (when db (jqn/show q compiled))
                 `(let ((,dat* ,dat)) ,compiled))))
 
-(defmacro qryf (fn &key (q :_) db)
-  (declare (boolean db)) "run jqn query on file, fn"
+(defmacro qryf (fn &key (q :_) db) "run jqn query on file, fn"
   `(qryd (jsnloadf ,fn) :q ,q :db ,db))
 
-(defun qryl (dat &key (q :_) conf db)
-  "compile jqn query and run on dat"
+(defun qryl (dat &key (q :_) conf db) "compile jqn query and run on dat"
   (eval `(qryd ,dat :q ,q :db ,db :conf ,conf)))
 

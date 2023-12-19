@@ -121,50 +121,51 @@ But for convenience there are a few special functions defined in `jqn`.
 
 ### Global Context
 
- - `(fn)` name of the file that is the source for the current data; or nil
- - `(fi)` index of the file that is the source for the current data; or `0`.
- - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`
+ - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`.
+ - `(fn)` name of the file that is the source for the current data; or `nil`.
+ - `(fi [k])` index of the file that is the source for the current data; or `0`.
 
 ### Clause Context
 
- - `(@_ k [default])` returns this key from `_` (current data object); or default.
-   equivalent to `(@ _ k [default])` (see below).
+ - `(@_ k [default])` returns this key from current data object (`_`).
  - `(par)` returns the parent data object. Available in `**` and `*$`.
  - `(num)` returns length of the `vector` being iterated. Available in `**` and `*$`.
- - `(i)` counts from 0 to `(1- (num))`.
+ - `(cnt [k])` counts from `k`, or `0`.
 
 ### Generic
 
+ - `(@ kv k [default])` get key `k` from `kv`. Equivalent to `gethash`.
  - `(?? fx a ...)` execute `(fx a ...)` only if `a` is not `nil`; otherwise `nil`.
  - `(>< a)` condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
- - `(@ kv k [default])` get key `k` from `kv`. Equivalent to `gethash`.
+ - `(<> a)` ?
 
 ### Strings
 
  - `(mkstr a ...)` stringify and concatenate all arguments.
+ - `(strcat s ...)` concatenate all strings and `vectors`/`lists` of strings.
+ - `(repl s from to)` replace `from` with `to` in `s`.
  - `(sdwn s ...)` `mkstr` and downcase.
  - `(sup s ...)` `mkstr` and upcase.
- - `(strcat s ...)` concatenate all strings and `vectors`/`lists` of strings.
- - `(repl s from to)` replace `from` with `to` in string `s`.
 
 ### Kvs
 
- - `($new (k1 expr1) ...)` new `kv` with these keys and expressions
- - `($stack ...)` add all keys from these `kvs` to a new `kv`. left to right.
+ - `($new (k1 expr1) ...)` new `kv` with these keys and expressions.
+ - `($cat ...)` add all keys from these `kvs` to a new `kv`. left to right.
 
 ### Vectors
 
- - `(*cat a)` concatenate all vectors in vector `a`,
  - `(*ind v i)` get `i` from vector `v`. Equivalent to `aref`.
  - `(*ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
- - `(*new ...)` new `vector` with these elements
+ - `(*cat a ...)` concatenate all `vectors` in these `vectors`. non-vectors are
+   included in their position
+ - `(*new ...)` new `vector` with these elements.
 
 ## Options
 
 Command line options:
-  - `-v` show compiled query
-  - `-m` minify output [indented is default]
-  - `-l` use `ldn` output format [`json` is default]
+  - `-v` show compiled query.
+  - `-m` minify output [indented is default].
+  - `-l` use `ldn` output format [`json` is default].
 
 ## Install
 

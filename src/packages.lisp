@@ -5,8 +5,9 @@
     #:jsnloads #:jsnloadf #:jsnout #:ldnout
     #:proc-qry
     #:qryd #:qryf #:qryl
+    #:cnt #:ctx #:fi #:fn #:num #:par
     #:|| #:?? #:>< #:<> #:@ :@_
-    #:$stack
+    #:$cat #:*cat
     #:$del #:noop
     #:$add+ #:$add? #:$add%
     #:*add+ #:*add? #:*add%

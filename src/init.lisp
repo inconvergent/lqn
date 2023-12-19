@@ -2,10 +2,10 @@
 
 (defvar *qmodes* '(:+@ :?@ :-@ :%@))
 (defvar *fxns* '(
-                 :fn :fi :ctx :num :i :par
+                 :fn :fi :ctx :num :cnt :par
                  :|| :<> :>< :?? :@ :@_
                  :*cat *ind *new
-                 :$new :$stack
+                 :$new :$cat
                  :sup :sdwn :mkstr :repl :strcat
                  ))
 

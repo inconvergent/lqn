@@ -14,7 +14,7 @@
  ;   [symbol]
  ; 
  ; $ADD% names a macro:
- ;   Lambda-list: (DAT LFT K V)
+ ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     do (setf lft v) if v is not nil
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -27,7 +27,7 @@
  ;   [symbol]
  ; 
  ; $ADD+ names a macro:
- ;   Lambda-list: (DAT LFT K V &OPTIONAL DEFAULT)
+ ;   Lambda-list: (LFT K V &OPTIONAL D)
  ;   Documentation:
  ;     do (setf lft (or v default))
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -40,9 +40,24 @@
  ;   [symbol]
  ; 
  ; $ADD? names a macro:
- ;   Lambda-list: (DAT LFT K V)
+ ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     do (setf lft v) if (@_ k) is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:$CAT
+
+```
+ ; JQN:$CAT
+ ;   [symbol]
+ ; 
+ ; $CAT names a compiled function:
+ ;   Lambda-list: (&REST REST &AUX
+ ;                 (RES (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
+ ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
+ ;   Documentation:
+ ;     add all keys from all hash tables in rest. left to right.
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
@@ -53,7 +68,7 @@
  ;   [symbol]
  ; 
  ; $DEL names a macro:
- ;   Lambda-list: (DAT LFT K V)
+ ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     delete key
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -68,21 +83,6 @@
  ;   [symbol]
 ```
 
-#### JQN:$STACK
-
-```
- ; JQN:$STACK
- ;   [symbol]
- ; 
- ; $STACK names a compiled function:
- ;   Lambda-list: (&REST REST &AUX
- ;                 (RES (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
- ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
- ;   Documentation:
- ;     add all keys from all hash tables in rest. left to right.
- ;   Source file: /data/x/jqn/src/jqn.lisp
-```
-
 #### JQN:\*ADD%
 
 ```
@@ -90,7 +90,7 @@
  ;   [symbol]
  ; 
  ; *ADD% names a macro:
- ;   Lambda-list: (DAT LFT K V)
+ ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     do (vextend v lft) if v is not nil or empty
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -103,7 +103,7 @@
  ;   [symbol]
  ; 
  ; *ADD+ names a macro:
- ;   Lambda-list: (DAT LFT K V &OPTIONAL DEFAULT)
+ ;   Lambda-list: (LFT K V &OPTIONAL D)
  ;   Documentation:
  ;     do (vextend (or v default) lft)
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -116,9 +116,24 @@
  ;   [symbol]
  ; 
  ; *ADD? names a macro:
- ;   Lambda-list: (DAT LFT K V)
+ ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     do (vextend v lft) if (gethash k dat) is not nil
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:\*CAT
+
+```
+ ; JQN:*CAT
+ ;   [symbol]
+ ; 
+ ; *CAT names a compiled function:
+ ;   Lambda-list: (&REST REST &AUX (RES (MAKE-ADJUSTABLE-VECTOR)))
+ ;   Derived type: (FUNCTION * (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     concatenate all vectors in these vectors.
+ ;     non-vectors are included in their position
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
@@ -131,7 +146,7 @@
  ; *IND names a macro:
  ;   Lambda-list: (O SEL)
  ;   Documentation:
- ;     get index or range from json array (vector).
+ ;     get index or range from vector.
  ;     if sel is an atom: (aref o ,sel)
  ;     if sel is cons: (subseq o ,@sel)
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -193,7 +208,7 @@
  ;   [symbol]
  ; 
  ; @ names a macro:
- ;   Lambda-list: (O K &OPTIONAL DEFAULT)
+ ;   Lambda-list: (O K &OPTIONAL D)
  ;   Documentation:
  ;     get k from dict o; or default
  ;   Source file: /data/x/jqn/src/jqn.lisp
@@ -205,6 +220,42 @@
 :missing:todo:
 
  ; JQN:@_
+ ;   [symbol]
+```
+
+#### JQN:CNT
+
+```
+:missing:todo:
+
+ ; JQN:CNT
+ ;   [symbol]
+```
+
+#### JQN:CTX
+
+```
+:missing:todo:
+
+ ; JQN:CTX
+ ;   [symbol]
+```
+
+#### JQN:FI
+
+```
+:missing:todo:
+
+ ; JQN:FI
+ ;   [symbol]
+```
+
+#### JQN:FN
+
+```
+:missing:todo:
+
+ ; JQN:FN
  ;   [symbol]
 ```
 
@@ -290,6 +341,24 @@
  ;   Documentation:
  ;     do nothing. return nil
  ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:NUM
+
+```
+:missing:todo:
+
+ ; JQN:NUM
+ ;   [symbol]
+```
+
+#### JQN:PAR
+
+```
+:missing:todo:
+
+ ; JQN:PAR
+ ;   [symbol]
 ```
 
 #### JQN:PROC-QRY

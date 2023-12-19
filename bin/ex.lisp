@@ -9,24 +9,26 @@
 
 (defun main ()
   (print
-    (jqn::jsnout*
-      (jqn:qryd (jqn:jsnloads "{\"a\": {
-                                 \"b\": 3,
-                                 \"c\": {
-                                    \"d\": 89 }}}")
-                :q (*new (@_ :a/c/d) (@_ :a/b)))))
-  ; prints [89 3]
+    ; (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3,
+    ;                                               \"c\": { \"d\": 89 }}}")
+    ;           :q (*new
+    ;                (@_ :a/c/d)
+    ;                (@_ :a/b)
+    ;                )
+    ;           :db t)
+   (jqn:jsnout
+     (jqn:qryf "./sample.json" :db t
+        :q (|| #{_ _id}
+               ; { (a 1) (b 2)}
 
-  (print
-    (jqn::jsnout*
-      (jqn:qryd (jqn:jsnloads "{\"a\": {
-                                 \"b\": 3,
-                                 \"c\": {
-                                    \"d\": 89 }}}")
-                :q {:a/c/d})))
-  ; prints {"d": 89}
-  )
-
+               ; {a b}
+               ; (<> [things])
+               ; [id]
+               )
+        :db t
+        )
+        :indent t)
+   ))
 
 (main)
 
