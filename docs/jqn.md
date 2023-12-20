@@ -143,12 +143,12 @@
  ; JQN:*IND
  ;   [symbol]
  ; 
- ; *IND names a macro:
- ;   Lambda-list: (O SEL)
+ ; *IND names a compiled function:
+ ;   Lambda-list: (V &OPTIONAL (I 0))
+ ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     get index or range from vector.
- ;     if sel is an atom: (aref o ,sel)
- ;     if sel is cons: (subseq o ,@sel)
+ ;     get this index from vector.
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
@@ -159,6 +159,40 @@
 
  ; JQN:*NEW
  ;   [symbol]
+```
+
+#### JQN:\*SEL
+
+```
+ ; JQN:*SEL
+ ;   [symbol]
+ ; 
+ ; *SEL names a compiled function:
+ ;   Lambda-list: (V &REST SEQS)
+ ;   Derived type: (FUNCTION (VECTOR &REST T)
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     new vector with indices or ranges from v.
+ ;     ranges are lists that behave like arguments to *seq
+ ;   Source file: /data/x/jqn/src/jqn.lisp
+```
+
+#### JQN:\*SEQ
+
+```
+ ; JQN:*SEQ
+ ;   [symbol]
+ ; 
+ ; *SEQ names a compiled function:
+ ;   Lambda-list: (V I &OPTIONAL J)
+ ;   Derived type: (FUNCTION (VECTOR FIXNUM &OPTIONAL T)
+ ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
+ ;   Documentation:
+ ;     (subseq v ,@rest)
+ ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:<>
@@ -210,7 +244,7 @@
  ; @ names a macro:
  ;   Lambda-list: (O K &OPTIONAL D)
  ;   Documentation:
- ;     get k from dict o; or default
+ ;     get key k from o
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 

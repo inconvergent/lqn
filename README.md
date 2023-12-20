@@ -41,7 +41,7 @@ which returns:
     "msg": "HELLO, UNDEFINED! YOU HAVE 5 UNREAD MESSAGES." } ]
 ```
 
-JQN queries consist of "Clauses" and "Selectors". As explained in more detail
+JQN queries consist of "Expressions" and "Selectors". As explained in more detail
 below.
 
 ## Object Representation
@@ -53,14 +53,13 @@ to a JSON data structure or an internal lisp structure.
 
 ## Clauses
 
-Currently there are four Clauses, the first three have two notations. The
-first notation is a little more readable and compact.
+Currently there are four special Clauses. You can also write generic CL code,
+including the functions further down.
 
-  - `#{s1 ... sn}` or `(*$ s1 ... sn)` iterate vector of `kvs` and select into
-    a new vector of `kvs`
-  - `[s1 ... sn]` or `(** s1 ... sn)` iterate `vector` and select into new `vector`
-  - `{s1 ... sn}` or `($$ s1 ... sn)` select from `kv` into new `kv`
-  - `(|| c1 c2 ...)` pipe the results from `c1` into `c2` etc. returns
+  - `#{s1 ...}` iterate vector of `kvs` and select into a new vector of `kvs`
+  - ` [s1 ...]` iterate `vector` and select into new `vector`
+  - ` {s1 ...}` select from `kv` into new `kv`
+  - ` (|| ...)` pipe the results from the first clause into the second etc. returns
     the result of the last clause.
 
 ## Selectors
@@ -68,20 +67,20 @@ first notation is a little more readable and compact.
 A Selector is a triple `(mode key expr)`. Where only the key is required. The
 mode is either:
 
-  - `+` always include this selector (evaluate `expr` if defined) [default]
-  - `?` include selector (evaluate `expr` if defined) if key is present
+  - `+` always include this selector (always evaluate `expr` if defined) [default]
+  - `?` include selector (evaluate `expr` if defined) if the key is present
         and not `nil`
-  - `%` include selector if key is present and not `nil`; or: include `expr`
-        if it does not evaluate to `nil`.
-  - `-` drop this key in `*$` and `$$` modes; ignore selector entirely in `**`
-        mode. E.g. `{_ -@key}` to select everything except `key`.
+  - `%` include selector if key is present and not `nil`. (include `expr`
+        if it does not evaluate to `nil`.)
+  - `-` drop this key in `#{}` and `{}` clauses; ignore selector entirely in `[]`
+        E.g. `{_ -@key3}` to select all keys except `key3`. (expr is ignored.)
 
 Selectors can either be written out in full, or they can be be written in short
 form depending on what you want to achieve. Note that the `@` in the following
 examples is used to append a mode to a key without having to wrap the selector
 in `(...)`:
 ```lisp
-_            ; select everything.
+_            ; select everything in current data object
 key          ; select key [+ mode is default]
 +@key        ; same as key
 ?@key        ; optionally select key
@@ -89,19 +88,19 @@ key          ; select key [+ mode is default]
 (?@key expr) ; select expr if key is not nil
 (? key expr) ; same as (?@key expr)
 ```
-An `expr` is any valid CL code (where you can use `_` to refer to the value of
-the selected key). `expr` can also be a new Selector.
+An `expr` is any Caluse or valid CL code. Use `_` to refer to the value of
+the selected key.
 ```lisp
-(name (string-upcase _)) ; convert name to uppercase
-(this (or _ "that"))     ; select (key) this or (string) "that".
-(value (+ _ 33))         ; add 33 to value
+#{(key1 (sup _))       ; convert value of key1 to uppercase
+  (key3 (or _ "that")) ; select the value of key3 or literally "that".
+  (key2 (+ _ 33))}     ; add 33 to value of key2
 ```
 To select everything, but replace some keys with new values or drop keys entirely:
 ```lisp
-#{_                          ; select all keys, then override these:
-  (value (+ _ 22))           ; add 22 to current value
-  (name (string-downcase _)) ; lowercase name
-  -@meta}                    ; drop this key
+#{_               ; select all keys, then override these:
+  (key2 (+ _ 22)) ; add 22 to the value of key2
+  (key3 (sdwn _)) ; lowercase the value of key3
+  -@key3}         ; drop key3
 ```
 If you need case sensitive keys you can use strings instead:
 ```lisp
@@ -127,14 +126,13 @@ But for convenience there are a few special functions defined in `jqn`.
 
 ### Clause Context
 
- - `(@_ k [default])` returns this key from current data object (`_`).
- - `(par)` returns the parent data object. Available in `**` and `*$`.
- - `(num)` returns length of the `vector` being iterated. Available in `**` and `*$`.
- - `(cnt [k])` counts from `k`, or `0`.
+ - `(@_ k [default])` returns this key from current data object (`_`). Only in `{}` and `#{}`.
+ - `(par)` returns the parent data object. Only in `[]` and `#{}`.
+ - `(num)` returns length of the `vector` being iterated. Only in `[]` and `#{}`.
+ - `(cnt [k])` counts from `k`, or `0`. Only in `[]` and `#{}`.
 
 ### Generic
 
- - `(@ kv k [default])` get key `k` from `kv`. Equivalent to `gethash`.
  - `(?? fx a ...)` execute `(fx a ...)` only if `a` is not `nil`; otherwise `nil`.
  - `(>< a)` condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
  - `(<> a)` ?
@@ -150,15 +148,18 @@ But for convenience there are a few special functions defined in `jqn`.
 ### Kvs
 
  - `($new (k1 expr1) ...)` new `kv` with these keys and expressions.
+ - `(@ kv k [default])` get key `k` from `kv`. Equivalent to `gethash`.
+ - `(@_ k ...)` is equivalent to `(@ _ k ...)`.
  - `($cat ...)` add all keys from these `kvs` to a new `kv`. left to right.
 
 ### Vectors
 
- - `(*ind v i)` get `i` from vector `v`. Equivalent to `aref`.
- - `(*ind v i j)` get range `[i j)` from vector `v`. Equivalent to `subseq`.
- - `(*cat a ...)` concatenate all `vectors` in these `vectors`. non-vectors are
-   included in their position
  - `(*new ...)` new `vector` with these elements.
+ - `(*ind v i)` get these index `i` from `v`. Equivalent to `aref`.
+ - `(*seq v i [j])` get range `i ...` or `i ... (1- j)` from `v`. Equivalent to `subseq`.
+ - `(*sel ...)` get new vector with these `*ind`s or `*seq`s
+ - `(*cat a ...)` concatenate all `vectors` in these `vectors`. Non-vectors are
+   included in their position.
 
 ## Options
 
@@ -182,6 +183,4 @@ create an image that has `jqn` preloaded and dump it using
 ## TODO
 
  - add full examples
- - merge dicts
- - merge vector?
- - fix `*new`
+

@@ -1,16 +1,33 @@
 (in-package :jqn)
 
+(defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil" nil)
+(defmacro something? (v &body body) ; ??
+  (declare (symbol v))
+  `(typecase ,v (vector (when (> (length ,v) 0) (progn ,@body)))
+                (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
+                (otherwise (when ,v (progn ,@body)))))
+
 ; QRY RUNTIME
 
 (defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
 (defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
 
-(defun $make (&optional ht &aux (res (make-hash-table :test #'equal)))
-  "new/soft copy ht"
-  (when ht (loop for k being the hash-keys of ht using (hash-value v)
-                 do (setf (gethash k res) (gethash k ht))))
-  res)
+(defun *seq (v i &optional j) (declare (vector v) (fixnum i)) "(subseq v ,@rest)" (subseq v i j))
+(defun *ind (v &optional (i 0)) (declare (vector v) (fixnum i)) "get this index from vector." (aref v i))
 
+(defun *sel (v &rest seqs)
+  (declare (vector v))
+  "new vector with indices or ranges from v.
+ranges are lists that behave like arguments to *seq"
+  (apply #'concatenate 'vector
+    (loop for s in seqs collect (etypecase s (list (apply #'*seq v s))
+                                             (fixnum (list (*ind v s)))))))
+
+(defun $make (&optional kv &aux (res (make-hash-table :test #'equal)))
+  "new/soft copy kv"
+  (when kv (loop for k being the hash-keys of kv using (hash-value v)
+                 do (setf (gethash k res) (gethash k kv))))
+  res)
 (defun $nil (kv)
   "return nil for emtpy hash-tables. otherwise return kv"
   (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
@@ -18,42 +35,12 @@
 
 (defun $cat (&rest rest &aux (res (make-hash-table :test #'equal)))
   "add all keys from all hash tables in rest. left to right."
-  (loop for ht of-type hash-table in rest
-            do (loop for k being the hash-keys of ($make ht)
+  (loop for kv of-type hash-table in rest
+            do (loop for k being the hash-keys of ($make kv)
                      using (hash-value v)
-                     do (setf (gethash k res) (gethash k ht))))
+                     do (setf (gethash k res) (gethash k kv))))
   res)
-
-(defun $rec-get (o pp d)
-  (labels ((rec (o pp)
-             (unless pp (return-from rec (or o d)))
-             (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
-                         (otherwise (return-from rec (or o d))))))
-    (rec o (split-substr pp "/"))))
-(defmacro @ (o k &optional d)
-  "get k from dict o; or default"
-  `($rec-get ,o (ensure-string ,k) ,d))
-
-(defmacro *ind (o sel) ; rename
-  "get index or range from vector.
-if sel is an atom: (aref o ,sel)
-if sel is cons: (subseq o ,@sel)"
-  (typecase sel (cons `(subseq o ,@sel))
-                (atom `(aref ,o ,sel))
-                (otherwise (error "*ind: wanted atom or (atom atom). got: ~a" sel))))
-
-(defmacro something? (v &body body) ; ??
-  (declare (symbol v))
-  `(typecase ,v (vector (when (> (length ,v) 0) (progn ,@body)))
-                (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
-                (otherwise (when ,v (progn ,@body)))))
-(defmacro ?? (fx arg &rest args) ; ?!
-  (declare (symbol fx)) "run (fx arg) only if arg is not nil."
-  (awg (arg*) `(let ((,arg* ,arg))
-                 (if (null ,arg*) nil (,fx ,arg* ,@args)))))
-
-; TODO: handle non vectors
-(defun *cat (&rest rest &aux (res (make-adjustable-vector)))
+(defun *cat (&rest rest &aux (res (make-adjustable-vector))) ; TODO: handle non vectors
   "concatenate all vectors in these vectors.
 non-vectors are included in their position"
   (labels ((do-arg (aa) (loop for a across aa
@@ -61,8 +48,27 @@ non-vectors are included in their position"
     (loop for a in rest do (typecase a (vector (do-arg a))
                                        (otherwise (vextend a res)))))
   res)
+(defun *$cat (&rest rest &aux (res (make-hash-table :test #'equal)))
+  "for all vectors in rest; for all hts in these vectors; copy all keys into new kv. left to right"
+  (loop for v of-type vector in rest
+        do (loop for kv of-type hash-table across v
+                 do (loop for k being the hash-keys of ($make kv)
+                          using (hash-value v)
+                          do (setf (gethash k res) v))))
+  res)
 
-(defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil" nil)
+(defun $rget (o pp d)
+  (labels ((rec (o pp)
+             (unless pp (return-from rec (or o d)))
+             (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
+                         (otherwise (return-from rec (or o d))))))
+    (rec o (split-substr pp "/"))))
+(defmacro @ (o k &optional d) "get key k from o" `($rget ,o (ensure-string ,k) ,d))
+
+(defmacro ?? (fx arg &rest args) ; ?!
+  (declare (symbol fx)) "run (fx arg) only if arg is not nil."
+  (awg (arg*) `(let ((,arg* ,arg)) (when ,arg* (,fx ,arg* ,@args)))))
+
 (defun path-to-key (pp) (first (last (split-substr pp "/"))))
 
 (defmacro $add+ (lft k v &optional d)
@@ -97,9 +103,7 @@ non-vectors are included in their position"
     (sequence (remove-if-not (lambda (o*) (something? o* t)) o))
     (hash-table (loop with keys = (list)
                       for k being the hash-keys of o using (hash-value v)
-                      do (unless (progn
-                                   (print (list k v))
-                                   (something? v t)) (push k keys))
+                      do (unless (something? v t) (push k keys))
                       finally (loop for k in keys do (remhash k o)))
                 o)
     (otherwise (warn ">< works on sequence/vector or hash-table.
@@ -107,17 +111,16 @@ got: ~a" o))))
 
 ; COMPILER
 
-(defun $add (mode) (ecase mode (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
-(defun *add (mode) (ecase mode (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
-
-(defun new-conf (conf kk) `((:dat . (@_ ,kk)) ,@conf))
 (defun strip-all (d) (declare (list d)) (if (car-all? d) (cdr d) d))
+(defun new-conf (conf kk) `((:dat . (@_ ,kk)) ,@conf))
+(defun $add (m) (declare (keyword m)) (ecase m (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
+(defun *add (m) (declare (keyword m)) (ecase m (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
 
 (defun compile/itr/preproc (q)
   (labels
     ((stringify (a)
       (handler-case (ensure-string a)
-                    (error (e) (error "failed to stringify key: ~a.~%err: ~a" a e))))
+        (error (e) (error "failed to stringify key: ~a.~%err: ~a" a e))))
      (stringify-key (v) (dsb (a b c) v `(,a ,(stringify b) ,c)))
      (unpack-cons (k &aux (ck (car k)))
        (declare (list k))

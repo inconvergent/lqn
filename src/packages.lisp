@@ -6,13 +6,12 @@
     #:proc-qry
     #:qryd #:qryf #:qryl
     #:cnt #:ctx #:fi #:fn #:num #:par
-    #:|| #:?? #:>< #:<> #:@ :@_
-    #:$cat #:*cat
-    #:$del #:noop
-    #:$add+ #:$add? #:$add%
-    #:*add+ #:*add? #:*add%
-    #:*ind
+    #:|| #:?? #:>< #:<> #:@ :@_ #:noop
     #:*new #:$new
+    #:$cat #:*cat
+    #:*ind #:*sel #:*seq
+    #:$add+ #:$add? #:$add% #:$del
+    #:*add+ #:*add? #:*add%
     #:sup #:sdwn #:strcat #:repl #:mkstr
     ))
 
