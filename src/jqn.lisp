@@ -63,7 +63,7 @@ non-vectors are included in their position"
              (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
                          (otherwise (return-from rec (or o d))))))
     (rec o (split-substr pp "/"))))
-(defmacro @ (o k &optional d) "get key k from o" `($rget ,o (ensure-string ,k) ,d))
+(defmacro @ (o k &optional d) "get key k from o" `($rget ,o (ensure-key ,k) ,d))
 
 (defmacro ?? (fx arg &rest args) ; ?!
   (declare (symbol fx)) "run (fx arg) only if arg is not nil."
@@ -119,7 +119,7 @@ got: ~a" o))))
 (defun compile/itr/preproc (q)
   (labels
     ((stringify (a)
-      (handler-case (ensure-string a)
+      (handler-case (ensure-key a)
         (error (e) (error "failed to stringify key: ~a.~%err: ~a" a e))))
      (stringify-key (v) (dsb (a b c) v `(,a ,(stringify b) ,c)))
      (unpack-cons (k &aux (ck (car k)))
@@ -152,7 +152,7 @@ got: ~a" k)))))
      (compile/$new (conf d)
        (awg (kv dat) `(let ((,kv ($make)))
                         ,@(loop for (kk expr) in (strip-all d)
-                                collect `($add+ ,kv ,(ensure-string kk)
+                                collect `($add+ ,kv ,(ensure-key kk)
                                            ,(rec conf expr)))
                         ($nil ,kv))))
      (compile/$itr (conf d)

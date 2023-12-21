@@ -98,7 +98,7 @@
 
 (defun ensure-vector (v) (declare (sequence v)) "list to vector; or vector"
   (etypecase v (vector v) (list (coerce v 'vector))))
-(defun ensure-string (s) "symbol to lowercase string; or string"
+(defun ensure-key (s) "symbol to lowercase string; or string"
   (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
 
 (defun $itr? (s)  (and (symbolp s) (eq (kv s) :$$)))
