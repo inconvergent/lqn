@@ -3,7 +3,7 @@
 (defvar *qmodes* '(:+@ :?@ :-@ :%@))
 (defvar *fxns* '(
                  :fn :fi :ctx :num :cnt :par
-                 :|| :<> :>< :?? :@ :@_
+                 :|| :<> :>< :?? :$ :$_
                  :*cat *ind *new
                  :$new :$cat
                  :sup :sdwn :mkstr :repl :strcat

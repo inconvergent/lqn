@@ -63,7 +63,7 @@ non-vectors are included in their position"
              (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
                          (otherwise (return-from rec (or o d))))))
     (rec o (split-substr pp "/"))))
-(defmacro @ (o k &optional d) "get key k from o" `($rget ,o (ensure-key ,k) ,d))
+(defmacro $ (o k &optional d) "get key k from o" `($rget ,o (ensure-key ,k) ,d))
 
 (defmacro ?? (fx arg &rest args) ; ?!
   (declare (symbol fx)) "run (fx arg) only if arg is not nil."
@@ -75,8 +75,8 @@ non-vectors are included in their position"
   (declare (symbol lft)) "do (setf lft (or v default))"
   `(setf (gethash ,(path-to-key k) ,lft) (or ,v ,d)))
 (defmacro $add? (lft k v)
-  (declare (symbol lft)) "do (setf lft v) if (@_ k) is not nil"
-  `(when (@_ ,k) (setf (gethash ,(path-to-key k) ,lft) ,v)))
+  (declare (symbol lft)) "do (setf lft v) if ($_ k) is not nil"
+  `(when ($_ ,k) (setf (gethash ,(path-to-key k) ,lft) ,v)))
 (defmacro $add% (lft k v)
   (declare (symbol lft)) "do (setf lft v) if v is not nil"
   (awg (v*) `(let ((,v* ,v))
@@ -90,7 +90,7 @@ non-vectors are included in their position"
   `(vextend (or ,v ,d) ,lft))
 (defmacro *add? (lft k v)
   (declare (symbol lft)) "do (vextend v lft) if (gethash k dat) is not nil"
-  `(when (@_ ,k) (vextend ,v ,lft)))
+  `(when ($_ ,k) (vextend ,v ,lft)))
 (defmacro *add% (lft k v)
   (declare (ignore k) (symbol lft)) "do (vextend v lft) if v is not nil or empty"
   (awg (v*) `(let ((,v* ,v)) (something? ,v* (vextend ,v* ,lft)))))
@@ -112,7 +112,7 @@ got: ~a" o))))
 ; COMPILER
 
 (defun strip-all (d) (declare (list d)) (if (car-all? d) (cdr d) d))
-(defun new-conf (conf kk) `((:dat . (@_ ,kk)) ,@conf))
+(defun new-conf (conf kk) `((:dat . ($_ ,kk)) ,@conf))
 (defun $add (m) (declare (keyword m)) (ecase m (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
 (defun *add (m) (declare (keyword m)) (ecase m (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
 
@@ -144,10 +144,10 @@ got: ~a" k)))))
 
 (defun proc-qry (conf* q) "compile jqn query"
   (labels
-    ((labels/@_ (dat) `((@_ (k &optional d) (@ ,dat k d))))
+    ((labels/$_ (dat) `(($_ (k &optional d) ($ ,dat k d))))
      (*itr/labels (vv dat i)
        `((cnt (&optional (k 0)) (+ ,i k)) (num () (length ,vv))  (par () ,vv)
-         ,@(labels/@_ dat)))
+         ,@(labels/$_ dat)))
      (compile/*new (conf d) `(vector ,@(loop for o in d collect (rec conf o))))
      (compile/$new (conf d)
        (awg (kv dat) `(let ((,kv ($make)))
@@ -159,7 +159,7 @@ got: ~a" k)))))
        (awg (kv dat)
          `(let* ((,dat ,(gk conf :dat))
                  (,kv ,(if (car-all? d) `($make ,dat) `($make))))
-            (labels ((@_ (k &optional d) (@ ,dat k d)))
+            (labels (($_ (k &optional d) ($ ,dat k d)))
              ,@(loop for (mode kk expr) in (strip-all d)
                      collect `(,($add mode) ,kv ,kk
                                ,(rec (new-conf conf kk) expr))))
@@ -191,7 +191,7 @@ got: ~a" k)))))
        (awg (pipe)
          `(let ((,pipe ,(gk conf :dat)))
            ,@(loop for op in d for i from 0
-                   collect `(labels (,@(labels/@_ pipe))
+                   collect `(labels (,@(labels/$_ pipe))
                              (setf ,pipe ,(rec `((:dat . ,pipe) ,@conf) op))))
            ,pipe)))
      (rec (conf d &aux (dat (gk conf :dat)))
@@ -210,7 +210,7 @@ got: ~a" k)))))
     `(labels ((ctx () ,(gk conf* :ctx t))
               (fn () ,(gk conf* :fn t))
               (fi (&optional (k 0)) (+ k ,(or (gk conf* :fi t) 0)))
-              ,@(labels/@_ (gk conf* :dat)))
+              ,@(labels/$_ (gk conf* :dat)))
        ,(rec conf* q))))
 
 (defmacro qryd (dat &key (q :_) conf db) "run jqn query on dat"

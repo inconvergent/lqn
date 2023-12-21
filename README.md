@@ -126,7 +126,7 @@ But for convenience there are a few special functions defined in `jqn`.
 
 ### Clause Context
 
- - `(@_ k [default])` returns this key from current data object (`_`). Only in `{}` and `#{}`.
+ - `($_ k [default])` returns this key from current data object (`_`). Only in `{}` and `#{}`.
  - `(par)` returns the parent data object. Only in `[]` and `#{}`.
  - `(num)` returns length of the `vector` being iterated. Only in `[]` and `#{}`.
  - `(cnt [k])` counts from `k`, or `0`. Only in `[]` and `#{}`.
@@ -148,8 +148,8 @@ But for convenience there are a few special functions defined in `jqn`.
 ### Kvs
 
  - `($new (k1 expr1) ...)` new `kv` with these keys and expressions.
- - `(@ kv k [default])` get key `k` from `kv`. Equivalent to `gethash`.
- - `(@_ k ...)` is equivalent to `(@ _ k ...)`.
+ - `($ kv k [default])` get key `k` from `kv`. Equivalent to `gethash`.
+ - `($_ k ...)` is equivalent to `($ _ k ...)`.
  - `($cat ...)` add all keys from these `kvs` to a new `kv`. left to right.
 
 ### Vectors
