@@ -42,7 +42,7 @@
  ; $ADD? names a macro:
  ;   Lambda-list: (LFT K V)
  ;   Documentation:
- ;     do (setf lft v) if (@_ k) is not nil
+ ;     do (setf lft v) if ($_ k) is not nil
  ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
@@ -238,14 +238,10 @@
 #### JQN:@
 
 ```
+:missing:todo:
+
  ; JQN:@
  ;   [symbol]
- ; 
- ; @ names a macro:
- ;   Lambda-list: (O K &OPTIONAL D)
- ;   Documentation:
- ;     get key k from o
- ;   Source file: /data/x/jqn/src/jqn.lisp
 ```
 
 #### JQN:@_

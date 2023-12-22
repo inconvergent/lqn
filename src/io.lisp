@@ -2,6 +2,19 @@
 
 (defun read-str (s) (read-from-string s nil nil))
 
+(defun read-stream-lines-as-vector (&optional (s *standard-input*)
+                                    &aux (res (make-adjustable-vector)))
+  (loop for line = (read-line s nil nil)
+        while line do (vextend line res))
+  res)
+
+(defun read-file-as-vector (fn &aux (res (make-adjustable-vector)))
+  (with-open-file (in fn)
+    (loop for line = (read-line in nil nil)
+          while line
+          do (vextend line res)))
+  res)
+
 (defun jsnloads (&optional (s *standard-input*))
   "parse json from stream; or *standard-input*"
   (let ((yason:*parse-json-arrays-as-vectors* t))

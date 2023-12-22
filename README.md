@@ -56,15 +56,16 @@ to a JSON data structure or an internal lisp structure.
 Currently there are four special Clauses. You can also write generic CL code,
 including the functions further down.
 
-  - `#{s1 ...}` iterate vector of `kvs` and select into a new vector of `kvs`
-  - ` [s1 ...]` iterate `vector` and select into new `vector`
-  - ` {s1 ...}` select from `kv` into new `kv`
+  - `#{s1 ...}` iterate vector of `kvs` and select keys a new vector of `kvs` using kv selectors.
+  - ` [s1 ...]` iterate `vector` of `kvs` and select keys into new `vector` using kv selectors.
+  - ` {s1 ...}` select from `kv` into new `kv` using kv selectors.
+  - `#[s1 ...]` iterate `vector` and select into new `vector` using vector selectors/filters
   - ` (|| ...)` pipe the results from the first clause into the second etc. returns
     the result of the last clause.
 
-## Selectors
+## `kv` Selectors
 
-A Selector is a triple `(mode key expr)`. Where only the key is required. The
+A `kv` Selector is a triple `(mode key expr)`. Where only the key is required. The
 mode is either:
 
   - `+` always include this selector (always evaluate `expr` if defined) [default]
@@ -184,4 +185,5 @@ create an image that has `jqn` preloaded and dump it using
 
  - add full examples
  - tqn
+ - prev? suf? sub? filter?
 

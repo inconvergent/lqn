@@ -47,3 +47,12 @@ next symb: ~a" char (peek-char t stream t nil t)))
             while o collect o into objects
             finally (return `(*$ ,@objects))))))
 
+; (make-dispatch-macro-character #\o)
+
+(set-dispatch-macro-character #\# #\[
+  (lambda (stream subchar arg)
+    (declare (ignorable subchar arg))
+    (let ((*readtable* (copy-readtable)))
+      (loop for o = (read-next-object #\Space #\] stream)
+            while o collect o into objects
+            finally (return `(progn ,@objects))))))
