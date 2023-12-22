@@ -11,7 +11,8 @@
                (:file "utils" :depends-on ("reader-macros"))
                (:file "docs" :depends-on ("utils"))
                (:file "io" :depends-on ("docs"))
-               (:file "jqn" :depends-on ("io" "utils" "docs"))))
+               (:file "jqn" :depends-on ("io" "utils" "docs"))
+               (:file "sh" :depends-on ("jqn"))))
 
 (asdf:defsystem #:jqn/tests
   :depends-on (#:jqn #:prove #:uiop #:asdf)

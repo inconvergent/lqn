@@ -218,6 +218,7 @@ got: ~a" k)))))
                 (when db (jqn/show q compiled))
                 `(let ((,dat* ,dat)) ,compiled))))
 
+; TODO: rename to jsn something
 (defmacro qryf (fn &key (q :_) db) "run jqn query on file, fn"
   `(qryd (jsnloadf ,fn) :q ,q :db ,db))
 
