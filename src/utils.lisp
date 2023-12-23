@@ -14,8 +14,7 @@
                  syms)
      ,@body))
 
-(defmacro abbrev (short long)
-  `(defmacro ,short (&rest args) `(,',long ,@args)))
+(defmacro abbrev (short long) `(defmacro ,short (&rest args) `(,',long ,@args)))
 (abbrev awg with-gensyms)
 (abbrev dsb destructuring-bind)
 (abbrev mvb multiple-value-bind)
@@ -61,17 +60,16 @@
         (t (mapcar (lambda (x) (tree-replace-fx x fxmatch fxtransform))
                    tree))))
 
-(defun split-substr (s sub &key prune &aux (lx (length sub)))
-  (declare (optimize speed) (string sub s) (boolean prune))
-  "split string at substring. prune removes empty strings."
-  (labels
-    ((lst (s) (typecase s (list s) (t (list s))))
-     (splt (s &aux (i (match-substr s sub)))
-       (if i (cons (subseq s 0 i) (lst (splt (subseq s (+ lx i))))) s)))
-    (let ((res (lst (splt s))))
-      (if prune (remove-if (lambda (s) (zerop (length s))) res)
-                res))))
-(defun match-substr (s sub)
+
+(defun pref? (s pref &aux (s (mkstr s)))
+  (declare (string s pref)) "t if s starts with pref"
+  (and (<= (length pref) (length s))
+       (string= pref s :end2 (length pref))))
+(defun suf? (s suf)
+  (declare (string s suf)) "declare t if s ends with suf"
+  (pref? (reverse s) (reverse suf)))
+
+(defun sub? (s sub)
   (declare (optimize speed (safety 2)) (string sub s))
   "returns index where substring matches s from left to right. otherwise nil."
   (loop with sub0 of-type character = (char sub 0)
@@ -79,7 +77,17 @@
         for i from 0 repeat (1+ (- (length s) lc))
         if (and (eq sub0 (char s i)) ; this is more efficient
                 (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
-        do (return-from match-substr i)))
+        do (return-from sub? i)))
+
+(defun split-substr (s sub &key prune &aux (lx (length sub)))
+  (declare (optimize speed) (string sub s) (boolean prune))
+  "split string at substring. prune removes empty strings."
+  (labels ((lst (s) (typecase s (list s) (t (list s))))
+           (splt (s &aux (i (sub? s sub)))
+             (if i (cons (subseq s 0 i) (lst (splt (subseq s (+ lx i))))) s)))
+    (let ((res (lst (splt s))))
+      (if prune (remove-if (lambda (s) (zerop (length s))) res)
+                res))))
 (defun repl (s from to)
   (declare (string s to from)) "replace from with to in string s"
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to))
@@ -91,53 +99,8 @@
                                      :element-type type :adjustable t)
            (make-array size :fill-pointer 0 :element-type type :adjustable t)))
 
-(defun startswith? (s pref &aux (s (mkstr s)))
-  (declare (string s pref)) "t if s starts with pref"
-  (and (<= (length pref) (length s))
-       (string= pref s :end2 (length pref))))
-
 (defun ensure-vector (v) (declare (sequence v)) "list to vector; or vector"
   (etypecase v (vector v) (list (coerce v 'vector))))
 (defun ensure-key (s) "symbol to lowercase string; or string"
   (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
-
-(defun $itr? (s)  (and (symbolp s) (eq (kv s) :$$)))
-(defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
-(defun *itr? (s)  (and (symbolp s) (eq (kv s) :**)))
-(defun all? (s)   (and (symbolp s) (eq (kv s) :_)))
-(defun pipe? (s)  (and (symbolp s) (eq (kv s) :||)))
-
-(defun $new? (s) (and (symbolp s) (eq (kv s) :$new)))
-(defun *new? (s) (and (symbolp s) (eq (kv s) :*new)))
-
-(defun car-$itr? (d)  (and (listp d) ($itr? (car d))))
-(defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
-(defun car-*itr? (d)  (and (listp d) (*itr? (car d))))
-(defun car-all? (s)   (and (listp s) (all? (car s))))
-(defun car-pipe? (s)  (and (listp s) (pipe? (car s))))
-
-; convert known jqn functions to a symbol in jqn pkg
-(defun car-jqnfx? (s)
-  (and (listp s) (symbolp (car s)) (member (kv (car s)) *fxns*)))
-
-(defun car-*new? (d) (and (listp d) (*new? (car d))))
-(defun car-$new? (d) (and (listp d) ($new? (car d))))
-
-(defun jqn/show (q compiled)
- (format t "
-██ COMPILED ██████████████████████████
-██ q:   ~s
-██ ---
-   ~s
-██ ██████████████████████████~%" q compiled))
-
-(defun unpack-mode (sym &optional (modes *qmodes*) (default :+))
-  (loop for mode in modes
-        for ind = (match-substr (mkstr sym) (mkstr mode))
-        if (and ind (= ind 0))
-        do (return-from unpack-mode
-              (list (kv (subseq (mkstr mode) 0 1))
-                (typecase sym (string (subseq sym 2))
-                              (symbol (kv (subseq (mkstr sym) 2)))))))
-  (list default sym))
 

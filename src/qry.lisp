@@ -40,7 +40,7 @@ ranges are lists that behave like arguments to *seq"
                      using (hash-value v)
                      do (setf (gethash k res) (gethash k kv))))
   res)
-(defun *cat (&rest rest &aux (res (make-adjustable-vector))) ; TODO: handle non vectors
+(defun *cat (&rest rest &aux (res (make-adjustable-vector)))
   "concatenate all vectors in these vectors.
 non-vectors are included in their position"
   (labels ((do-arg (aa) (loop for a across aa
@@ -110,6 +110,46 @@ non-vectors are included in their position"
 got: ~a" o))))
 
 ; COMPILER
+
+(defun $itr? (s)  (and (symbolp s) (eq (kv s) :$$)))
+(defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
+(defun *itr? (s)  (and (symbolp s) (eq (kv s) :**)))
+(defun all? (s)   (and (symbolp s) (eq (kv s) :_)))
+(defun pipe? (s)  (and (symbolp s) (eq (kv s) :||)))
+
+(defun $new? (s) (and (symbolp s) (eq (kv s) :$new)))
+(defun *new? (s) (and (symbolp s) (eq (kv s) :*new)))
+
+(defun car-$itr? (d)  (and (listp d) ($itr? (car d))))
+(defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
+(defun car-*itr? (d)  (and (listp d) (*itr? (car d))))
+(defun car-all? (s)   (and (listp s) (all? (car s))))
+(defun car-pipe? (s)  (and (listp s) (pipe? (car s))))
+
+; convert known jqn functions to a symbol in jqn pkg
+(defun car-jqnfx? (s)
+  (and (listp s) (symbolp (car s)) (member (kv (car s)) *fxns*)))
+
+(defun car-*new? (d) (and (listp d) (*new? (car d))))
+(defun car-$new? (d) (and (listp d) ($new? (car d))))
+
+(defun qry/show (q compiled)
+ (format t "
+██ COMPILED ██████████████████████████
+██ q:   ~s
+██ ---
+   ~s
+██ ██████████████████████████~%" q compiled))
+
+(defun unpack-mode (sym &optional (modes *qmodes*) (default :+))
+  (loop for mode in modes
+        for ind = (sub? (mkstr sym) (mkstr mode))
+        if (and ind (= ind 0))
+        do (return-from unpack-mode
+              (list (kv (subseq (mkstr mode) 0 1))
+                (typecase sym (string (subseq sym 2))
+                              (symbol (kv (subseq (mkstr sym) 2)))))))
+  (list default sym))
 
 (defun strip-all (d) (declare (list d)) (if (car-all? d) (cdr d) d))
 (defun new-conf (conf kk) `((:dat . ($_ ,kk)) ,@conf))
@@ -215,7 +255,7 @@ got: ~a" k)))))
 
 (defmacro qryd (dat &key (q :_) conf db) "run jqn query on dat"
   (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) ,@conf) q)))
-                (when db (jqn/show q compiled))
+                (when db (qry/show q compiled))
                 `(let ((,dat* ,dat)) ,compiled))))
 
 ; TODO: rename to jsn something

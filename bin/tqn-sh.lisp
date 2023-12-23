@@ -11,9 +11,7 @@ or:
 
 options:
 
-  -m minified json. indented is default. ignored for -l
   -v prints the full compiled qry to stdout before the result
-  -l output to readable lisp data (ldn)
 ")
 
 (defun tqn/execute-query (dat q &key conf db)
@@ -45,7 +43,6 @@ options:
                       :conf `((:mode . :tqn) (:fn . ,f)
                               (:fi . ,i) (:ctx . :file))
                       :db (verbose? opts)))))
-
 
 (defun tqn/run-pipe (opts q)
   (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *ex*))

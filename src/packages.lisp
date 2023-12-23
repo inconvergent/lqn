@@ -13,5 +13,6 @@
     #:$add+ #:$add? #:$add% #:$del
     #:*add+ #:*add? #:*add%
     #:sup #:sdwn #:strcat #:repl #:mkstr
+    #:pref? #:suf? #:sub?
     ))
 

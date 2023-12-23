@@ -17,7 +17,7 @@
                    if (= (length o) 2) nconc `(,(kv o))
                    else nconc (do-explode o))))
    (loop named opts for k in args for i from 0
-        if (startswith? k "-") collect k into opts
+        if (pref? k "-") collect k into opts
         else do (return-from opts
                   (values (explode-opts opts) (subseq args i))))))
 
