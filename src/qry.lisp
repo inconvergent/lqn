@@ -110,28 +110,30 @@ non-vectors are included in their position"
 got: ~a" o))))
 
 ; COMPILER
-
-(defun $itr? (s)  (and (symbolp s) (eq (kv s) :$$)))
-(defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
-(defun *itr? (s)  (and (symbolp s) (eq (kv s) :**)))
-(defun all? (s)   (and (symbolp s) (eq (kv s) :_)))
-(defun pipe? (s)  (and (symbolp s) (eq (kv s) :||)))
-
+j
+(defun all?  (s) (and (symbolp s) (eq (kv s) :_)))
 (defun $new? (s) (and (symbolp s) (eq (kv s) :$new)))
 (defun *new? (s) (and (symbolp s) (eq (kv s) :*new)))
 
-(defun car-$itr? (d)  (and (listp d) ($itr? (car d))))
+(defun $$itr? (s) (and (symbolp s) (eq (kv s) :$$)))
+(defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
+(defun **itr? (s) (and (symbolp s) (eq (kv s) :**)))
+(defun *>itr? (s) (and (symbolp s) (eq (kv s) :*>)))
+(defun pipe?  (s) (and (symbolp s) (eq (kv s) :||)))
+
+(defun car-all?  (s) (and (listp s) (all?  (car s))))
+(defun car-*new? (d) (and (listp d) (*new? (car d))))
+(defun car-$new? (d) (and (listp d) ($new? (car d))))
+
+(defun car-$$itr? (d) (and (listp d) ($$itr? (car d))))
 (defun car-*$itr? (d) (and (listp d) (*$itr? (car d))))
-(defun car-*itr? (d)  (and (listp d) (*itr? (car d))))
-(defun car-all? (s)   (and (listp s) (all? (car s))))
-(defun car-pipe? (s)  (and (listp s) (pipe? (car s))))
+(defun car-**itr? (d) (and (listp d) (**itr? (car d))))
+(defun car-*>itr? (d) (and (listp d) (*>itr? (car d))))
+(defun car-pipe?  (s) (and (listp s) (pipe? (car s))))
 
 ; convert known jqn functions to a symbol in jqn pkg
 (defun car-jqnfx? (s)
   (and (listp s) (symbolp (car s)) (member (kv (car s)) *fxns*)))
-
-(defun car-*new? (d) (and (listp d) (*new? (car d))))
-(defun car-$new? (d) (and (listp d) ($new? (car d))))
 
 (defun qry/show (q compiled)
  (format t "
@@ -227,6 +229,19 @@ got: ~a" k)))))
                              collect `(,($add mode) ,kv ,kk ,comp-expr))
                      (vextend ($nil ,kv) ,ires))
                 finally (return ,ires))))
+
+     (compile/>itr (conf d)
+       (awg (ires dat i vv)
+         `(loop with ,ires of-type vector = (mav)
+                with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
+                for ,dat across ,vv for ,i from 0
+                do (labels (,@(*itr/labels vv dat i))
+                     ,(when (car-all? d) `(*add+ ,ires nil ,dat))
+                     ,@(loop for (mode kk expr) in (strip-all d)
+                             collect `(,(*add mode) ,ires ,kk
+                                       ,(rec (new-conf conf kk) expr))))
+                finally (return ,ires))))
+
      (compile/pipe (conf d)
        (awg (pipe)
          `(let ((,pipe ,(gk conf :dat)))
@@ -237,8 +252,9 @@ got: ~a" k)))))
      (rec (conf d &aux (dat (gk conf :dat)))
        (cond ((all? d) dat) ((atom d) d)
              ((car-*$itr? d) (compile/*$itr conf (compile/itr/preproc (cdr d))))
-             ((car-$itr? d)  (compile/$itr conf (compile/itr/preproc (cdr d))))
-             ((car-*itr? d)  (compile/*itr conf (compile/itr/preproc (cdr d))))
+             ((car-$$itr? d) (compile/$itr conf (compile/itr/preproc (cdr d))))
+             ((car-**itr? d) (compile/*itr conf (compile/itr/preproc (cdr d))))
+             ((car-*>itr? d) (compile/>itr conf (cdr d)))
              ((car-*new? d)  (compile/*new conf (cdr d)))
              ((car-$new? d)  (compile/$new conf (cdr d)))
              ((car-pipe? d)  (compile/pipe conf (cdr d)))

@@ -55,4 +55,4 @@ next symb: ~a" char (peek-char t stream t nil t)))
     (let ((*readtable* (copy-readtable)))
       (loop for o = (read-next-object #\Space #\] stream)
             while o collect o into objects
-            finally (return `(progn ,@objects))))))
+            finally (return `(*> ,@objects))))))

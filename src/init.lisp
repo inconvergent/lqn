@@ -7,6 +7,7 @@
                  :*cat *ind *new
                  :$new :$cat
                  :sup :sdwn :mkstr :repl :strcat
+                 :pref? :suf? :sub?
                  ))
 
 (defun cmd-args ()
