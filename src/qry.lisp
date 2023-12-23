@@ -110,7 +110,7 @@ non-vectors are included in their position"
 got: ~a" o))))
 
 ; COMPILER
-j
+
 (defun all?  (s) (and (symbolp s) (eq (kv s) :_)))
 (defun $new? (s) (and (symbolp s) (eq (kv s) :$new)))
 (defun *new? (s) (and (symbolp s) (eq (kv s) :*new)))
@@ -158,7 +158,7 @@ j
 (defun $add (m) (declare (keyword m)) (ecase m (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
 (defun *add (m) (declare (keyword m)) (ecase m (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
 
-(defun compile/itr/preproc (q)
+(defun compile/kvitr/preproc (q)
   (labels
     ((stringify (a)
       (handler-case (ensure-key a)
@@ -182,6 +182,11 @@ got: ~a" k)))))
       (if (not (= (length q) (length q*)))
           (cons :_ res) res))))
 
+(defun compile/vvitr/preproc (d)
+  d
+  )
+
+
 ; TODO: interpret expr => empty dict/vec as nil and drop in %mode
 
 (defun proc-qry (conf* q) "compile jqn query"
@@ -197,7 +202,7 @@ got: ~a" k)))))
                                 collect `($add+ ,kv ,(ensure-key kk)
                                            ,(rec conf expr)))
                         ($nil ,kv))))
-     (compile/$itr (conf d)
+     (compile/$$itr (conf d)
        (awg (kv dat)
          `(let* ((,dat ,(gk conf :dat))
                  (,kv ,(if (car-all? d) `($make ,dat) `($make))))
@@ -206,7 +211,7 @@ got: ~a" k)))))
                      collect `(,($add mode) ,kv ,kk
                                ,(rec (new-conf conf kk) expr))))
             ($nil ,kv))))
-     (compile/*itr (conf d)
+     (compile/**itr (conf d)
        (awg (ires dat i vv)
          `(loop with ,ires of-type vector = (mav)
                 with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
@@ -230,7 +235,7 @@ got: ~a" k)))))
                      (vextend ($nil ,kv) ,ires))
                 finally (return ,ires))))
 
-     (compile/>itr (conf d)
+     (compile/*>itr (conf d)
        (awg (ires dat i vv)
          `(loop with ,ires of-type vector = (mav)
                 with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
@@ -251,10 +256,10 @@ got: ~a" k)))))
            ,pipe)))
      (rec (conf d &aux (dat (gk conf :dat)))
        (cond ((all? d) dat) ((atom d) d)
-             ((car-*$itr? d) (compile/*$itr conf (compile/itr/preproc (cdr d))))
-             ((car-$$itr? d) (compile/$itr conf (compile/itr/preproc (cdr d))))
-             ((car-**itr? d) (compile/*itr conf (compile/itr/preproc (cdr d))))
-             ((car-*>itr? d) (compile/>itr conf (cdr d)))
+             ((car-*$itr? d) (compile/*$itr conf (compile/kvitr/preproc (cdr d))))
+             ((car-$$itr? d) (compile/$$itr conf (compile/kvitr/preproc (cdr d))))
+             ((car-**itr? d) (compile/**itr conf (compile/kvitr/preproc (cdr d))))
+             ((car-*>itr? d) (compile/*>itr conf (compile/vvitr/preproc (cdr d))))
              ((car-*new? d)  (compile/*new conf (cdr d)))
              ((car-$new? d)  (compile/$new conf (cdr d)))
              ((car-pipe? d)  (compile/pipe conf (cdr d)))
