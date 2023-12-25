@@ -89,10 +89,18 @@
       (if prune (remove-if (lambda (s) (zerop (length s))) res)
                 res))))
 (defun repl (s from to)
-  (declare (string s to from)) "replace from with to in string s"
+  (declare (string s to from)) "replace from with to in s"
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to))
                            (split-substr s from)))))
     (subseq s 0 (1- (length s)))))
+
+; TODO: negative indices, tests
+(defun head (s &optional (n 10))
+  (declare (sequence s) (fixnum n)) "first n elements"
+  (subseq s 0 (min n (length s))))
+(defun tail (s &optional (n 10) &aux (l (length s)))
+  (declare (sequence s) (fixnum n l)) "last n elements"
+  (subseq s (max 0 (- l n)) l))
 
 (defun make-adjustable-vector (&key init (type t) (size 128))
   (if init (make-array (length init) :fill-pointer t :initial-contents init

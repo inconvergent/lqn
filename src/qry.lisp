@@ -158,7 +158,7 @@ got: ~a" o))))
 (defun $add (m) (declare (keyword m)) (ecase m (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
 (defun *add (m) (declare (keyword m)) (ecase m (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
 
-(defun compile/kvitr/preproc (q)
+(defun compile/$$itr/preproc (q)
   (labels
     ((stringify (a)
       (handler-case (ensure-key a)
@@ -182,10 +182,9 @@ got: ~a" k)))))
       (if (not (= (length q) (length q*)))
           (cons :_ res) res))))
 
-(defun compile/vvitr/preproc (d)
+(defun compile/*>itr/preproc (d)
   `((:? (sub? _ ,(ensure-key (car d)))))
   )
-
 
 ; TODO: interpret expr => empty dict/vec as nil and drop in %mode
 
@@ -258,10 +257,10 @@ got: ~a" k)))))
            ,pipe)))
      (rec (conf d &aux (dat (gk conf :dat)))
        (cond ((all? d) dat) ((atom d) d)
-             ((car-*$itr? d) (compile/*$itr conf (compile/kvitr/preproc (cdr d))))
-             ((car-$$itr? d) (compile/$$itr conf (compile/kvitr/preproc (cdr d))))
-             ((car-**itr? d) (compile/**itr conf (compile/kvitr/preproc (cdr d))))
-             ((car-*>itr? d) (compile/*>itr conf (compile/vvitr/preproc (cdr d))))
+             ((car-*$itr? d) (compile/*$itr conf (compile/$$itr/preproc (cdr d))))
+             ((car-$$itr? d) (compile/$$itr conf (compile/$$itr/preproc (cdr d))))
+             ((car-**itr? d) (compile/**itr conf (compile/$$itr/preproc (cdr d))))
+             ((car-*>itr? d) (compile/*>itr conf (compile/*>itr/preproc (cdr d))))
              ((car-*new? d)  (compile/*new conf (cdr d)))
              ((car-$new? d)  (compile/$new conf (cdr d)))
              ((car-pipe? d)  (compile/pipe conf (cdr d)))
