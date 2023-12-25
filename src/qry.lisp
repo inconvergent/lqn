@@ -111,6 +111,9 @@ got: ~a" o))))
 
 ; COMPILER
 
+(defun sym-mode? (k &aux (mode-sym (unpack-mode k *qmodes* nil)) ) 
+   (if mode-sym (values-list (unpack-mode mode-sym k *qmodes* :?))
+                (values nil k)))
 (defun all?  (s) (and (symbolp s) (eq (kv s) :_)))
 (defun $new? (s) (and (symbolp s) (eq (kv s) :$new)))
 (defun *new? (s) (and (symbolp s) (eq (kv s) :*new)))
@@ -121,6 +124,12 @@ got: ~a" o))))
 (defun *>itr? (s) (and (symbolp s) (eq (kv s) :*>)))
 (defun pipe?  (s) (and (symbolp s) (eq (kv s) :||)))
 
+(defun car-sym-mode? (k) 
+  (typecase k (cons (if (or (stringp (car k)) (symbolp (car k))) 
+                        (values-list (sym-mode? (car k)))
+                        (values nil k)))
+              (otherwise (nil k))))
+
 (defun car-all?  (s) (and (listp s) (all?  (car s))))
 (defun car-*new? (d) (and (listp d) (*new? (car d))))
 (defun car-$new? (d) (and (listp d) ($new? (car d))))
@@ -130,6 +139,7 @@ got: ~a" o))))
 (defun car-**itr? (d) (and (listp d) (**itr? (car d))))
 (defun car-*>itr? (d) (and (listp d) (*>itr? (car d))))
 (defun car-pipe?  (s) (and (listp s) (pipe? (car s))))
+
 
 ; convert known jqn functions to a symbol in jqn pkg
 (defun car-jqnfx? (s)
@@ -149,8 +159,9 @@ got: ~a" o))))
         if (and ind (= ind 0))
         do (return-from unpack-mode
               (list (kv (subseq (mkstr mode) 0 1))
-                (typecase sym (string (subseq sym 2))
-                              (symbol (kv (subseq (mkstr sym) 2)))))))
+                    (typecase sym (string (subseq sym 2))
+                                  (symbol (psymb (symbol-package sym)
+                                                 (subseq (mkstr sym) 2)))))))
   (list default sym))
 
 (defun strip-all (d) (declare (list d)) (if (car-all? d) (cdr d) d))
@@ -162,29 +173,62 @@ got: ~a" o))))
   (labels
     ((stringify (a)
       (handler-case (ensure-key a)
-        (error (e) (error "failed to stringify key: ~a.~%err: ~a" a e))))
+        (error (e) (error "$itr bad key: ~a.~%err: ~a" a e))))
      (stringify-key (v) (dsb (a b c) v `(,a ,(stringify b) ,c)))
      (unpack-cons (k &aux (ck (car k)))
-       (declare (list k))
        (case (length k) (0 (warn "empty selector"))
          (1 `(,@(unpack-mode ck *qmodes*) :_))          ; ?/m [m]@key _
          (2 `(,@(unpack-mode ck *qmodes*) ,(second k))) ; ?/m [m]@key expr
          (3 `(,ck ,(stringify (second k)) ,(third k)))  ; m       key expr
          (otherwise (warn "bad # items in selector: ~a" k))))
+     (unpack-s (k) `(,@(unpack-mode k *qmodes*) :_))
      (unpack (k)
-       (typecase k (symbol `(,@(unpack-mode k *qmodes*) :_))
-                   (string `(,@(unpack-mode k *qmodes*) :_))
+       (typecase k (symbol (unpack-s k)) (string (unpack-s k))
                    (cons   (unpack-cons k))
-                   (otherwise (error "selector should be symbol, string, list.
+                   (otherwise (error "selector should be either: symbol, string, cons
 got: ~a" k)))))
     (let* ((q* (remove-if #'all? q))
            (res (mapcar #'stringify-key (mapcar #'unpack q*))))
       (if (not (= (length q) (length q*)))
           (cons :_ res) res))))
 
-(defun compile/*>itr/preproc (d)
-  `((:? (sub? _ ,(ensure-key (car d)))))
-  )
+; #[:eros
+;   :?@eros
+;   "?@eros"
+
+; remember that we can always split first, but length defines
+;   (sub? _ "eros")
+;   (+@ (sub ? _ "eros"))
+;   (+@ "eros")
+
+;   ]
+
+(defun compile/*>itr/preproc (q)
+  (labels
+    ((stringify (a) (handler-case (ensure-key a)
+                     (error (e) (error "*>itr bad key: ~a.~%err: ~a" a e))))
+     (unpack-expr (k &aux (ck (car k)))
+       (dsb (mode sym) (unpack-mode ck)
+         (cond ((and mode (zerop (length (mkstr sym)))) k)
+               (mode `(,mode (,sym ,@(cdr k)))))))
+     (unpack-s (k) (unpack-mode k *qmodes* :?))
+     (unpack (k)
+       (typecase k (symbol (unpack-s k))  ; ?@eros
+                   (string (unpack-s k))  ; "?@eros"
+                   (cons   (unpack-expr k))                ; [ (?@pref) ] -> {? "pref" }
+                   (otherwise (error "selector should be either: symbol, string, cons
+got: ~a" k))))
+     (handle-strs (k)
+       `(,(car k) ,(typecase (second k) (string `(sub? _ ,(second k)))
+                                        (symbol `(sub? _ ,(stringify (second k))))
+                                        (otherwise k)))))
+
+    (let* ((q* (remove-if #'all? q))
+           (res (mapcar #'handle-strs (mapcar #'unpack q*))))
+       
+      res
+      )
+  ))
 
 ; TODO: interpret expr => empty dict/vec as nil and drop in %mode
 
@@ -260,7 +304,7 @@ got: ~a" k)))))
              ((car-*$itr? d) (compile/*$itr conf (compile/$$itr/preproc (cdr d))))
              ((car-$$itr? d) (compile/$$itr conf (compile/$$itr/preproc (cdr d))))
              ((car-**itr? d) (compile/**itr conf (compile/$$itr/preproc (cdr d))))
-             ((car-*>itr? d) (compile/*>itr conf (compile/*>itr/preproc (cdr d))))
+             ((car-*>itr? d) (compile/*>itr conf (print (compile/*>itr/preproc (cdr d)))))
              ((car-*new? d)  (compile/*new conf (cdr d)))
              ((car-$new? d)  (compile/$new conf (cdr d)))
              ((car-pipe? d)  (compile/pipe conf (cdr d)))
