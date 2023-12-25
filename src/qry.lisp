@@ -111,7 +111,7 @@ got: ~a" o))))
 
 ; COMPILER
 
-(defun sym-mode? (k &aux (mode-sym (unpack-mode k *qmodes* nil)) ) 
+(defun sym-mode? (k &aux (mode-sym (unpack-mode k *qmodes* nil)) )
    (if mode-sym (values-list (unpack-mode mode-sym k *qmodes* :?))
                 (values nil k)))
 (defun all?  (s) (and (symbolp s) (eq (kv s) :_)))
@@ -122,10 +122,11 @@ got: ~a" o))))
 (defun *$itr? (s) (and (symbolp s) (eq (kv s) :*$)))
 (defun **itr? (s) (and (symbolp s) (eq (kv s) :**)))
 (defun *>itr? (s) (and (symbolp s) (eq (kv s) :*>)))
+(defun *map? (s) (and (symbolp s)  (eq (kv s) :*map)))
 (defun pipe?  (s) (and (symbolp s) (eq (kv s) :||)))
 
-(defun car-sym-mode? (k) 
-  (typecase k (cons (if (or (stringp (car k)) (symbolp (car k))) 
+(defun car-sym-mode? (k)
+  (typecase k (cons (if (or (stringp (car k)) (symbolp (car k)))
                         (values-list (sym-mode? (car k)))
                         (values nil k)))
               (otherwise (nil k))))
@@ -139,6 +140,7 @@ got: ~a" o))))
 (defun car-**itr? (d) (and (listp d) (**itr? (car d))))
 (defun car-*>itr? (d) (and (listp d) (*>itr? (car d))))
 (defun car-pipe?  (s) (and (listp s) (pipe? (car s))))
+(defun car-*map? (d)  (and (listp d) (*map? (car d))))
 
 
 ; convert known jqn functions to a symbol in jqn pkg
@@ -192,17 +194,6 @@ got: ~a" k)))))
       (if (not (= (length q) (length q*)))
           (cons :_ res) res))))
 
-; #[:eros
-;   :?@eros
-;   "?@eros"
-
-; remember that we can always split first, but length defines
-;   (sub? _ "eros")
-;   (+@ (sub ? _ "eros"))
-;   (+@ "eros")
-
-;   ]
-
 (defun compile/*>itr/preproc (q)
   (labels
     ((stringify (a) (handler-case (ensure-key a)
@@ -215,22 +206,25 @@ got: ~a" k)))))
      (unpack (k)
        (typecase k (symbol (unpack-s k))  ; ?@eros
                    (string (unpack-s k))  ; "?@eros"
-                   (cons   (unpack-expr k))                ; [ (?@pref) ] -> {? "pref" }
-                   (otherwise (error "selector should be either: symbol, string, cons
+                   (cons   (unpack-expr k))
+                   (otherwise (error "*>itr bad selector, expected either symbol, string, cons
 got: ~a" k))))
      (handle-strs (k)
-       `(,(car k) ,(typecase (second k) (string `(sub? _ ,(second k)))
-                                        (symbol `(sub? _ ,(stringify (second k))))
-                                        (otherwise k)))))
-
-    (let* ((q* (remove-if #'all? q))
-           (res (mapcar #'handle-strs (mapcar #'unpack q*))))
-       
-      res
-      )
-  ))
+       `(,(car k) ,(typecase (second k)
+                     (string `(sub? _ ,(second k)))
+                     (symbol `(sub? _ ,(stringify (second k))))
+                     (otherwise k)))))
+    (mapcar #'handle-strs (mapcar #'unpack (remove-if #'all? q)))))
 
 ; TODO: interpret expr => empty dict/vec as nil and drop in %mode
+
+(defun compile/*map (d)
+  (case (length d)
+        (1 `(map 'vector #',(car d) :_))
+        (2 `(map 'vector (lambda (,(car d)) ,(second d)) :_))
+        (3 `(map 'vector (lambda (,(car d)) ,(second d)) ,(third d)))
+        (otherwise (error "*map bad expr: ~a" d))))
+
 
 (defun proc-qry (conf* q) "compile jqn query"
   (labels
@@ -292,6 +286,7 @@ got: ~a" k))))
                        (*add+ ,ires nil ,dat)))
                 finally (return ,ires)))))
 
+
      (compile/pipe (conf d)
        (awg (pipe)
          `(let ((,pipe ,(gk conf :dat)))
@@ -304,7 +299,8 @@ got: ~a" k))))
              ((car-*$itr? d) (compile/*$itr conf (compile/$$itr/preproc (cdr d))))
              ((car-$$itr? d) (compile/$$itr conf (compile/$$itr/preproc (cdr d))))
              ((car-**itr? d) (compile/**itr conf (compile/$$itr/preproc (cdr d))))
-             ((car-*>itr? d) (compile/*>itr conf (print (compile/*>itr/preproc (cdr d)))))
+             ((car-*>itr? d) (compile/*>itr conf (compile/*>itr/preproc (cdr d))))
+             ((car-*map? d)  (rec conf (compile/*map (cdr d))))
              ((car-*new? d)  (compile/*new conf (cdr d)))
              ((car-$new? d)  (compile/$new conf (cdr d)))
              ((car-pipe? d)  (compile/pipe conf (cdr d)))
