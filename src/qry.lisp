@@ -183,7 +183,7 @@ got: ~a" k)))))
           (cons :_ res) res))))
 
 (defun compile/vvitr/preproc (d)
-  d
+  `((:? (sub? _ ,(ensure-key (car d)))))
   )
 
 
@@ -237,15 +237,17 @@ got: ~a" k)))))
 
      (compile/*>itr (conf d)
        (awg (ires dat i vv)
-         `(loop with ,ires of-type vector = (mav)
-                with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
-                for ,dat across ,vv for ,i from 0
-                do (labels (,@(*itr/labels vv dat i))
-                     ,(when (car-all? d) `(*add+ ,ires nil ,dat))
-                     ,@(loop for (mode kk expr) in (strip-all d)
-                             collect `(,(*add mode) ,ires ,kk
-                                       ,(rec (new-conf conf kk) expr))))
-                finally (return ,ires))))
+         (let ((d* (strip-all d)))
+           `(loop with ,ires of-type vector = (mav)
+                  with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
+                  for ,dat across ,vv for ,i from 0
+                  do (labels (,@(*itr/labels vv dat i))
+                       (when (or ,@(loop for (mode expr) in d*
+                                         collect (rec `((:dat . ,dat) ,@conf)
+                                                      expr)
+                               ))
+                       (*add+ ,ires nil ,dat)))
+                finally (return ,ires)))))
 
      (compile/pipe (conf d)
        (awg (pipe)
