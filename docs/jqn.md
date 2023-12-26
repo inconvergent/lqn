@@ -17,7 +17,7 @@
  ;   Lambda-list: (O K &OPTIONAL D)
  ;   Documentation:
  ;     get key k from o
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:$_
@@ -80,7 +80,7 @@
  ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
  ;   Documentation:
  ;     add all keys from all hash tables in rest. left to right.
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:$DEL
@@ -114,7 +114,7 @@
  ; *ADD% names a macro:
  ;   Lambda-list: (LFT K V)
  ;   Documentation:
- ;     do (vextend v lft) if v is not nil or empty
+ ;     do (vex v lft) if v is not nil or empty
  ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
@@ -127,7 +127,7 @@
  ; *ADD+ names a macro:
  ;   Lambda-list: (LFT K V &OPTIONAL D)
  ;   Documentation:
- ;     do (vextend (or v default) lft)
+ ;     do (vex (or v default) lft)
  ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
@@ -140,7 +140,7 @@
  ; *ADD? names a macro:
  ;   Lambda-list: (LFT K V)
  ;   Documentation:
- ;     do (vextend v lft) if (gethash k dat) is not nil
+ ;     do (vex v lft) if (gethash k dat) is not nil
  ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
@@ -152,11 +152,12 @@
  ; 
  ; *CAT names a compiled function:
  ;   Lambda-list: (&REST REST &AUX (RES (MAKE-ADJUSTABLE-VECTOR)))
- ;   Derived type: (FUNCTION * (VALUES T &OPTIONAL))
+ ;   Derived type: (FUNCTION *
+ ;                  (VALUES (AND ARRAY (NOT SIMPLE-ARRAY)) &OPTIONAL))
  ;   Documentation:
  ;     concatenate all vectors in these vectors.
  ;     non-vectors are included in their position
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:\*IND
@@ -171,7 +172,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     get this index from vector.
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:\*NEW
@@ -199,7 +200,7 @@
  ;   Documentation:
  ;     new vector with indices or ranges from v.
  ;     ranges are lists that behave like arguments to *seq
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:\*SEQ
@@ -214,7 +215,7 @@
  ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
  ;   Documentation:
  ;     (subseq v ,@rest)
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:<>
@@ -254,7 +255,7 @@
  ;   Lambda-list: (FX ARG &REST ARGS)
  ;   Documentation:
  ;     run (fx arg) only if arg is not nil.
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:CNT
@@ -275,6 +276,20 @@
  ;   [symbol]
 ```
 
+#### JQN:D?
+
+```
+ ; JQN:D?
+ ;   [symbol]
+ ; 
+ ; D? names a compiled function:
+ ;   Lambda-list: (S)
+ ;   Derived type: (FUNCTION (T) (VALUES &OPTIONAL))
+ ;   Documentation:
+ ;     describe symbol.
+ ;   Source file: /data/x/jqn/src/init.lisp
+```
+
 #### JQN:FI
 
 ```
@@ -282,6 +297,33 @@
 
  ; JQN:FI
  ;   [symbol]
+```
+
+#### JQN:FLT?
+
+```
+ ; JQN:FLT?
+ ;   [symbol]
+ ; 
+ ; FLT? names a compiled function:
+ ;   Lambda-list: (F)
+ ;   Derived type: (FUNCTION (T) (VALUES (OR FLOAT NULL) &OPTIONAL))
+ ;   Documentation:
+ ;     f if float; or nil
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:FMT
+
+```
+ ; JQN:FMT
+ ;   [symbol]
+ ; 
+ ; FMT names a macro:
+ ;   Lambda-list: (S &REST REST)
+ ;   Documentation:
+ ;     format to string.
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:FN
@@ -308,6 +350,20 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     first n elements
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:INT?
+
+```
+ ; JQN:INT?
+ ;   [symbol]
+ ; 
+ ; INT? names a compiled function:
+ ;   Lambda-list: (I)
+ ;   Derived type: (FUNCTION (T) (VALUES (OR NULL INTEGER) &OPTIONAL))
+ ;   Documentation:
+ ;     i if integer; or nil
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -396,6 +452,33 @@
  ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
+#### JQN:JSNQRYF
+
+```
+ ; JQN:JSNQRYF
+ ;   [symbol]
+ ; 
+ ; JSNQRYF names a macro:
+ ;   Lambda-list: (FN Q &KEY DB)
+ ;   Documentation:
+ ;     run jqn query on json file, fn
+ ;   Source file: /data/x/jqn/src/qry.lisp
+```
+
+#### JQN:KV?
+
+```
+ ; JQN:KV?
+ ;   [symbol]
+ ; 
+ ; KV? names a compiled function:
+ ;   Lambda-list: (K)
+ ;   Derived type: (FUNCTION (T) (VALUES (OR HASH-TABLE NULL) &OPTIONAL))
+ ;   Documentation:
+ ;     k if  hash-table; or nil
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:LDNOUT
 
 ```
@@ -403,11 +486,25 @@
  ;   [symbol]
  ; 
  ; LDNOUT names a compiled function:
- ;   Lambda-list: (O &OPTIONAL (KVKEYS T))
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (O)
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     serialize internal json representation to readable lisp data (ldn).
  ;   Source file: /data/x/jqn/src/io.lisp
+```
+
+#### JQN:LST?
+
+```
+ ; JQN:LST?
+ ;   [symbol]
+ ; 
+ ; LST? names a compiled function:
+ ;   Lambda-list: (L)
+ ;   Derived type: (FUNCTION (T) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     l if list; or nil
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:MKSTR
@@ -434,7 +531,7 @@
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
  ;     do nothing. return nil
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:NUM
@@ -444,6 +541,33 @@
 
  ; JQN:NUM
  ;   [symbol]
+```
+
+#### JQN:NUM?
+
+```
+ ; JQN:NUM?
+ ;   [symbol]
+ ; 
+ ; NUM? names a compiled function:
+ ;   Lambda-list: (N)
+ ;   Derived type: (FUNCTION (T) (VALUES (OR NULL NUMBER) &OPTIONAL))
+ ;   Documentation:
+ ;     n if number; or nil
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:OUT
+
+```
+ ; JQN:OUT
+ ;   [symbol]
+ ; 
+ ; OUT names a macro:
+ ;   Lambda-list: (S &REST REST)
+ ;   Documentation:
+ ;     print to standard out
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:PAR
@@ -490,22 +614,9 @@
  ;   [symbol]
  ; 
  ; QRYD names a macro:
- ;   Lambda-list: (DAT &KEY (Q _) CONF DB)
+ ;   Lambda-list: (DAT Q &KEY CONF DB)
  ;   Documentation:
  ;     run jqn query on dat
- ;   Source file: /data/x/jqn/src/qry.lisp
-```
-
-#### JQN:QRYF
-
-```
- ; JQN:QRYF
- ;   [symbol]
- ; 
- ; QRYF names a macro:
- ;   Lambda-list: (FN &KEY (Q _) DB)
- ;   Documentation:
- ;     run jqn query on file, fn
  ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
@@ -516,8 +627,8 @@
  ;   [symbol]
  ; 
  ; QRYL names a compiled function:
- ;   Lambda-list: (DAT &KEY (Q _) CONF DB)
- ;   Derived type: (FUNCTION (T &KEY (:Q T) (:CONF T) (:DB T)) *)
+ ;   Lambda-list: (DAT Q &KEY CONF DB)
+ ;   Derived type: (FUNCTION (T T &KEY (:CONF T) (:DB T)) *)
  ;   Documentation:
  ;     compile jqn query and run on dat
  ;   Source file: /data/x/jqn/src/qry.lisp
@@ -549,7 +660,50 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and downcase
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:SEQ?
+
+```
+ ; JQN:SEQ?
+ ;   [symbol]
+ ; 
+ ; SEQ? names a compiled function:
+ ;   Lambda-list: (S)
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     s if sequence; or nil
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:SPLIT
+
+```
+ ; JQN:SPLIT
+ ;   [symbol]
+ ; 
+ ; SPLIT names a compiled function:
+ ;   Lambda-list: (S X &KEY PRUNE &AUX (LX (LENGTH X)))
+ ;   Derived type: (FUNCTION (STRING STRING &KEY (:PRUNE BOOLEAN))
+ ;                  (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     split string at substring. prune removes empty strings.
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:STR?
+
+```
+ ; JQN:STR?
+ ;   [symbol]
+ ; 
+ ; STR? names a compiled function:
+ ;   Lambda-list: (S)
+ ;   Derived type: (FUNCTION (T) (VALUES (OR STRING NULL) &OPTIONAL))
+ ;   Documentation:
+ ;     s if string; or nil
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:STRCAT
@@ -606,7 +760,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and upcase
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:TAIL
@@ -624,6 +778,37 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     last n elements
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:V?
+
+```
+ ; JQN:V?
+ ;   [symbol]
+ ; 
+ ; V? names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (SILENT T) &AUX
+ ;                 (V
+ ;                  (SLOT-VALUE (FIND-SYSTEM (QUOTE JQN))
+ ;                              (QUOTE VERSION))))
+ ;   Derived type: (FUNCTION (&OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     return/print jqn version.
+ ;   Source file: /data/x/jqn/src/init.lisp
+```
+
+#### JQN:VEC?
+
+```
+ ; JQN:VEC?
+ ;   [symbol]
+ ; 
+ ; VEC? names a compiled function:
+ ;   Lambda-list: (V)
+ ;   Derived type: (FUNCTION (T) (VALUES (OR NULL VECTOR) &OPTIONAL))
+ ;   Documentation:
+ ;     v if vector; or nil
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 

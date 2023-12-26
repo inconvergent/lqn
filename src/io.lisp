@@ -1,26 +1,22 @@
 (in-package #:jqn)
 
-(defun read-str (s) (read-from-string s nil nil))
-
 (defun read-all-str (s &aux (l (length s)))
   (loop with pos = 0
         for (line new-pos) = (multiple-value-list
                                (read-from-string s nil nil :start pos))
         while (and line (<= new-pos l))
-        do (setf pos new-pos)
-        collect line))
+        do (setf pos new-pos) collect line))
 
 (defun read-stream-lines-as-vector (&optional (s *standard-input*)
                                     &aux (res (make-adjustable-vector)))
   (loop for line = (read-line s nil nil)
-        while line do (vextend line res))
+        while line do (vex line res))
   res)
 
 (defun read-file-as-vector (fn &aux (res (make-adjustable-vector)))
   (with-open-file (in fn)
     (loop for line = (read-line in nil nil)
-          while line
-          do (vextend line res)))
+          while line do (vex line res)))
   res)
 
 (defun jsnloads (&optional (s *standard-input*))
@@ -50,15 +46,14 @@
   (jsnout o :s s :indent indent)
   (get-output-stream-string s))
 
-(defun ldnout (o &optional (kvkeys t))
+(defun ldnout (o)
   "serialize internal json representation to readable lisp data (ldn)."
   (etypecase o (string o)
-               (hash-table (loop for k being the hash-keys of o using (hash-value v)
-                                 collect `(,(kv k) . ,(ldnout v kvkeys))))
-               (vector (loop with res = (make-adjustable-vector)
-                             for v across o do (vextend (ldnout v kvkeys) res)
-                             finally (return res)))
-               (cons (loop for (k . v) in o
-                           collect `(,(kv k) . ,(ldnout v kvkeys))))
-               (atom o)))
+     (hash-table (loop for k being the hash-keys of o using (hash-value v)
+                       collect `(,(kv k) . ,(ldnout v))))
+     (vector (loop with res = (make-adjustable-vector)
+                   for v across o do (vex (ldnout v) res)
+                   finally (return res)))
+     (cons (loop for (k . v) in o collect `(,(kv k) . ,(ldnout v))))
+     (atom o)))
 

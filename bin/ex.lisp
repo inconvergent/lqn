@@ -17,7 +17,7 @@
     ;                )
     ;           :db t)
    (jqn:jsnout
-     (jqn:qryf "./sample.json" :db t
+     (jqn:jsnqryf "./sample.json" :db t
         :q (|| #{_ _id}
                ; { (a 1) (b 2)}
 

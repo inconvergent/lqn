@@ -1,30 +1,14 @@
-(in-package #:jqn)
+(in-package :jqn)
 
 ; YASON DOCS https://phmarek.github.io/yason/
 
-(defun d? (s) "describe symbol." (describe s)) (defun i? (s) "inspect s" (inspect s))
-(defun v? (&optional (silent t)
-           &aux (v (slot-value (asdf:find-system 'jqn) 'asdf:version)))
-  "return/print jqn version."
-  (unless silent (format t "~&JQN version: ~a~%." v))
-  v)
+(defun ct/kv/key (s)
+  (typecase s (string s) (symbol (sdwn (mkstr s))) (t `(mkstr ,s))))
 
-(defmacro with-gensyms (syms &body body)
-  `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s))))
-                 syms)
-     ,@body))
-
-(defmacro abbrev (short long) `(defmacro ,short (&rest args) `(,',long ,@args)))
-(abbrev awg with-gensyms)
-(abbrev dsb destructuring-bind)
-(abbrev mvb multiple-value-bind)
-(abbrev mvc multiple-value-call)
-(abbrev mav make-adjustable-vector)
-(abbrev vextend vector-push-extend)
-
-(defun internal-path-string (path &optional (pkg :jqn))
-  (declare (string path))
-  (namestring (asdf:system-relative-pathname pkg path)))
+(defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil" nil)
+(defmacro ?? (fx arg &rest args) ; ?!
+  (declare (symbol fx)) "run (fx arg) only if arg is not nil."
+  (awg (arg*) `(let ((,arg* ,arg)) (when ,arg* (,fx ,arg* ,@args)))))
 
 (defun gk (conf k &optional silent &aux (hit (cdr (assoc k conf))))
   (declare (list conf) (keyword k)) "get k from config"
@@ -32,8 +16,7 @@
 
 (defun mkstr (&rest args) "coerce all arguments to a string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
-(defun strcat (&rest rest)
-  (declare (sequence s)) "concatenate all strings in sequences rest"
+(defun strcat (&rest rest) "concatenate all strings in sequences rest"
   (apply #'mkstr
     (mapcar (lambda (s) (etypecase s (string s)
                           (list (apply #'concatenate 'string s))
@@ -41,24 +24,31 @@
             rest)))
 
 (defun kv (s) "mkstr, upcase, keyword."
-  (intern (string-upcase (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
+  (intern (sup (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
           :keyword))
 (defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
 (defun psymb (&optional (pkg 'jqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 
-(defun tree-replace (tree from to &optional (comparefx #'equal))
-  "compares tree to from (with comparefx); replaces matches with to."
-  (cond ((funcall comparefx tree from) to)
-        ((null tree) nil) ((atom tree) tree)
-        (t (mapcar (lambda (x) (tree-replace x from to)) tree))))
-(defun tree-replace-fx (tree fxmatch fxtransform)
-  "compares elements with (comparefx); repaces matches with (fxmatch hit)."
-  (cond ((funcall fxmatch tree) (funcall fxtransform tree))
-        ((null tree) nil) ((atom tree) tree)
-        (t (mapcar (lambda (x) (tree-replace-fx x fxmatch fxtransform))
-                   tree))))
+; QRY RUNTIME ; TODO: rewrite as maybe macros?
+
+(defun seq? (s) "s if sequence; or nil" (when (or (str? s) (vec? s) (lst? s)) s))
+(defun str? (s) "s if string; or nil" (when (stringp s) s))
+(defun lst? (l) "l if list; or nil" (when (listp l) l))
+(defun kv?  (k) "k if  hash-table; or nil" (when (hash-table-p k) k))
+(defun vec? (v) "v if vector; or nil" (when (vectorp v) v))
+(defun num? (n) "n if number; or nil" (when (numberp n) n))
+(defun int? (i) "i if integer; or nil" (when (integerp i) i))
+(defun flt? (f) "f if float; or nil" (when (floatp f) f))
+
+(defmacro out (s &rest rest) "print to standard out"
+  (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
+                     `(let ((,s* ,s))
+                        (when (and ,s* (or (not (stringp ,s*)) (> (length ,s*) 0)))
+                          (format *standard-output* "~&~a~&" ,s*))))))
+(defmacro fmt (s &rest rest) "format to string."
+  (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
 
 (defun pref? (s pref &aux (s (mkstr s)))
   (declare (string s pref)) "t if s starts with pref"
@@ -85,11 +75,11 @@
 (defun isub? (s sub) "case insensitive check is sub is substring of s."
   (sub? (sup s) (sup sub)))
 
-(defun split-substr (s sub &key prune &aux (lx (length sub)))
-  (declare (optimize speed) (string sub s) (boolean prune))
+(defun split (s x &key prune &aux (lx (length x))) ; todo split to vector
+  (declare (optimize speed) (string x s) (boolean prune))
   "split string at substring. prune removes empty strings."
   (labels ((lst (s) (typecase s (list s) (t (list s))))
-           (splt (s &aux (i (sub? s sub)))
+           (splt (s &aux (i (sub? s x)))
              (if i (cons (subseq s 0 i) (lst (splt (subseq s (+ lx i))))) s)))
     (let ((res (lst (splt s))))
       (if prune (remove-if (lambda (s) (zerop (length s))) res)
@@ -97,16 +87,8 @@
 (defun repl (s from to)
   (declare (string s to from)) "replace from with to in s"
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to))
-                           (split-substr s from)))))
-    (subseq s 0 (1- (length s)))))
-
-; TODO: negative indices, tests
-(defun head (s &optional (n 10))
-  (declare (sequence s) (fixnum n)) "first n elements"
-  (subseq s 0 (min n (length s))))
-(defun tail (s &optional (n 10) &aux (l (length s)))
-  (declare (sequence s) (fixnum n l)) "last n elements"
-  (subseq s (max 0 (- l n)) l))
+                           (split s from)))))
+    (subseq s 0 (- (length s) (length to)))))
 
 (defun make-adjustable-vector (&key init (type t) (size 128))
   (if init (make-array (length init) :fill-pointer t :initial-contents init
@@ -115,6 +97,65 @@
 
 (defun ensure-vector (v) (declare (sequence v)) "list to vector; or vector"
   (etypecase v (vector v) (list (coerce v 'vector))))
-(defun ensure-key (s) "symbol to lowercase string; or string"
-  (etypecase s (symbol (string-downcase (mkstr s))) (string s)))
+
+(defun head (s &optional (n 10)) ; TODO: negative indices, tests
+  (declare (sequence s) (fixnum n)) "first n elements"
+  (subseq s 0 (min n (length s))))
+(defun tail (s &optional (n 10) &aux (l (length s)))
+  (declare (sequence s) (fixnum n l)) "last n elements"
+  (subseq s (max 0 (- l n)) l))
+
+(defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
+(defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
+
+(defun *seq (v i &optional j) (declare (vector v) (fixnum i)) "(subseq v ,@rest)" (subseq v i j))
+(defun *ind (v &optional (i 0)) (declare (vector v) (fixnum i)) "get this index from vector." (aref v i))
+
+(defun *sel (v &rest seqs)
+  (declare (vector v))
+  "new vector with indices or ranges from v.
+ranges are lists that behave like arguments to *seq"
+  (apply #'concatenate 'vector
+    (loop for s in seqs collect (etypecase s (list (apply #'*seq v s))
+                                             (fixnum (list (*ind v s)))))))
+
+(defun $make (&optional kv &aux (res (make-hash-table :test #'equal))) "new/soft copy kv"
+  (when kv (loop for k being the hash-keys of kv using (hash-value v)
+                 do (setf (gethash k res) (gethash k kv))))
+  res)
+(defun $nil (kv) "return nil for emtpy hash-tables. otherwise return kv"
+  (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
+               (otherwise kv)))
+
+(defun $cat (&rest rest &aux (res (make-hash-table :test #'equal)))
+  "add all keys from all hash tables in rest. left to right."
+  (loop for kv of-type hash-table in rest
+            do (loop for k being the hash-keys of ($make kv)
+                     using (hash-value v)
+                     do (setf (gethash k res) (gethash k kv))))
+  res)
+(defun *cat (&rest rest &aux (res (make-adjustable-vector)))
+  "concatenate all vectors in these vectors.
+non-vectors are included in their position"
+  (labels ((do-arg (aa) (loop for a across aa
+                              do (loop for b across a do (vex b res)))))
+    (loop for a in rest do (typecase a (vector (do-arg a))
+                                       (otherwise (vex a res)))))
+  res)
+(defun *$cat (&rest rest &aux (res (make-hash-table :test #'equal)))
+  "for all vectors in rest; for all hts in these vectors; copy all keys into new kv. left to right"
+  (loop for v of-type vector in rest
+        do (loop for kv of-type hash-table across v
+                 do (loop for k being the hash-keys of ($make kv)
+                          using (hash-value v)
+                          do (setf (gethash k res) v))))
+  res)
+
+(defun $rget (o pp d) "recursively get p from some/path/thing."
+  (labels ((rec (o pp)
+             (unless pp (return-from rec (or o d)))
+             (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
+                         (otherwise (return-from rec (or o d))))))
+    (rec o (split pp "/"))))
+(defmacro $ (o k &optional d) "get key k from o" `($rget ,o (ct/kv/key ,k) ,d))
 

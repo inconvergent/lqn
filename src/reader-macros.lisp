@@ -7,7 +7,6 @@
 (set-macro-character #\] '-read-delimiter)
 
 (defun -read-delimiter (stream char)
-  (declare (ignore stream))
   (error "jqn: unexpected delimiter ~s
 next symb: ~a" char (peek-char t stream t nil t)))
 

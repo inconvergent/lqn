@@ -63,7 +63,7 @@ including the functions further down.
   - ` [s1 ...]` iterate `vector` and filter into new `vector` using vector vector filters
   - ` (*map fx)` map `#'fx` across `(dat)`
   - ` (*map . (fx .))` map `(lambda (.) (fx .))` across `(dat)`
-  - ` (*map . (fx .) k)` map `(lambda (.) (fx .))` across `k`
+  - ` (*map k . (fx .))` map `(lambda (.) (fx .))` across `k`
   - ` (*fld fx init)` TODO
   - ` (*fld fx init k)` TODO
     the result of the last clause.
@@ -136,10 +136,10 @@ But for convenience there are a few special functions defined in `jqn`.
 
 ### Clause Context
 
- - `($_ k [default])` returns this key from current data object (`_`). Only in `{}` and `#{}`.
- - `(par)` returns the parent data object. Only in `[]` and `#{}`.
- - `(num)` returns length of the `vector` being iterated. Only in `[]` and `#{}`.
- - `(cnt [k])` counts from `k`, or `0`. Only in `[]` and `#{}`.
+ - `($_ k [default])` returns this key from current data object (`_`). In `*map`, `[]`,  `#[]` and `#{}`.
+ - `(par)` returns the parent data object. In `*map`, `[]`,  `#[]` and `#{}`.
+ - `(num)` returns length of the `vector` being iterated. In `*map`, `[]`, `#[]` and `#{}`.
+ - `(cnt [k])` counts from `k`, or `0`. In `*map`, `[]`, `#[]` and `#{}`.
 
 ### Generic
 
@@ -152,12 +152,20 @@ But for convenience there are a few special functions defined in `jqn`.
  - `(mkstr a ...)` stringify and concatenate all arguments.
  - `(strcat s ...)` concatenate all strings and `vectors`/`lists` of strings.
  - `(repl s from to)` replace `from` with `to` in `s`.
+ - `(split s x)` split `s` at all `x`.
+
  - `(sdwn s ...)` `mkstr` and downcase.
  - `(sup s ...)` `mkstr` and upcase.
+
  - `(sub? s sub)` check if `sub` is a substring of `s`.
  - `(pref? s pref)` check if `pref` is a prefix of `s`.
  - `(suf? s suf)` check if `suf` is a suffix of `s`.
  - `isub?`, `ipref?`, `isuf?` are case insensitive counterparts.
+
+ - `(fmt s)` get printed representation of `s`.
+ - `(fmt f ...)` format f to `string` with these args.
+ - `(out s)` output printed representation of `s` to `standard-out`. return `nil`.
+ - `(out f ...)` format f to `standard-out` with these args.
 
 ### Kvs
 
@@ -176,6 +184,17 @@ But for convenience there are a few special functions defined in `jqn`.
    included in their position.
  - `(head s [n=10])` first n items. Works on `strings` too.
  - `(tail s [n=10])` last n items. Works on `strings` too.
+
+### Types
+
+ - `(float? s)` return `s` if it is a `float`.
+ - `(int? s)` return `s` if it is an `integer`.
+ - `(kv? s)` return `s` if it is a `kv` (`hash-table`).
+ - `(lst? s)` return `s` if it is a `list`.
+ - `(num? s)` return `s` if it is a `number`.
+ - `(seq? s)` return `s` if it is `str`, `vector` or `list`.
+ - `(str? s)` return `s` if it is a `string`.
+ - `(vec? s)` return `s` if it is a `vector`.
 
 ## Options
 
