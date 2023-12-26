@@ -28,7 +28,7 @@ echo '[
     "msg": "Hello, undefined! You have 5 unread messages."
   }
 ]' | jqn '#{_id
-            (things [name ?@extra])
+            (things #[name ?@extra])
             (msg (string-upcase _))}'
 ```
 which returns:
@@ -56,11 +56,14 @@ to a JSON data structure or an internal lisp structure.
 Currently there are four special Clauses. You can also write generic CL code,
 including the functions further down.
 
-  - `#{s1 ...}` iterate vector of `kvs` and select keys a new vector of `kvs` using kv selectors.
-  - ` [s1 ...]` iterate `vector` of `kvs` and select keys into new `vector` using kv selectors.
-  - ` {s1 ...}` select from `kv` into new `kv` using kv selectors.
-  - `#[s1 ...]` iterate `vector` and select into new `vector` using vector selectors/filters
   - ` (|| ...)` pipe the results from the first clause into the second etc. returns
+  - `#{s1 ...}` iterate vector of `kvs` and select keys a new vector of `kvs` using kv selectors.
+  - `#[s1 ...]` iterate `vector` of `kvs` and select keys into new `vector` using kv selectors.
+  - ` {s1 ...}` select from `kv` into new `kv` using kv selectors.
+  - ` [s1 ...]` iterate `vector` and filter into new `vector` using vector selectors/filters
+  - ` (*map fx)` map `#'fx` across `(dat)`
+  - ` (*map v (fx v))` map `(lambda (v) (fx v))` across `(dat)`
+  - ` (*map v (fx v) k)` map `(lambda (v) (fx v))` across `k`
     the result of the last clause.
 
 ## `kv` Selectors

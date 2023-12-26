@@ -17,7 +17,7 @@
  ;   Lambda-list: (O K &OPTIONAL D)
  ;   Documentation:
  ;     get key k from o
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:$_
@@ -39,7 +39,7 @@
  ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     do (setf lft v) if v is not nil
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:$ADD+
@@ -52,7 +52,7 @@
  ;   Lambda-list: (LFT K V &OPTIONAL D)
  ;   Documentation:
  ;     do (setf lft (or v default))
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:$ADD?
@@ -65,7 +65,7 @@
  ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     do (setf lft v) if ($_ k) is not nil
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:$CAT
@@ -80,7 +80,7 @@
  ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
  ;   Documentation:
  ;     add all keys from all hash tables in rest. left to right.
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:$DEL
@@ -93,7 +93,7 @@
  ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     delete key
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:$NEW
@@ -115,7 +115,7 @@
  ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     do (vextend v lft) if v is not nil or empty
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:\*ADD+
@@ -128,7 +128,7 @@
  ;   Lambda-list: (LFT K V &OPTIONAL D)
  ;   Documentation:
  ;     do (vextend (or v default) lft)
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:\*ADD?
@@ -141,7 +141,7 @@
  ;   Lambda-list: (LFT K V)
  ;   Documentation:
  ;     do (vextend v lft) if (gethash k dat) is not nil
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:\*CAT
@@ -156,7 +156,7 @@
  ;   Documentation:
  ;     concatenate all vectors in these vectors.
  ;     non-vectors are included in their position
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:\*IND
@@ -171,7 +171,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     get this index from vector.
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:\*NEW
@@ -199,7 +199,7 @@
  ;   Documentation:
  ;     new vector with indices or ranges from v.
  ;     ranges are lists that behave like arguments to *seq
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:\*SEQ
@@ -214,7 +214,7 @@
  ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
  ;   Documentation:
  ;     (subseq v ,@rest)
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:<>
@@ -241,7 +241,7 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:??
@@ -254,7 +254,7 @@
  ;   Lambda-list: (FX ARG &REST ARGS)
  ;   Documentation:
  ;     run (fx arg) only if arg is not nil.
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:CNT
@@ -308,7 +308,7 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     first n elements
- ;   Source file: /home/anders/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:JSNLOADF
@@ -322,7 +322,7 @@
  ;   Derived type: (FUNCTION (STRING) *)
  ;   Documentation:
  ;     parse json from file, fn
- ;   Source file: /home/anders/x/jqn/src/io.lisp
+ ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
 #### JQN:JSNLOADS
@@ -336,7 +336,7 @@
  ;   Derived type: (FUNCTION (&OPTIONAL T) *)
  ;   Documentation:
  ;     parse json from stream; or *standard-input*
- ;   Source file: /home/anders/x/jqn/src/io.lisp
+ ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
 #### JQN:JSNOUT
@@ -351,7 +351,7 @@
  ;                  (VALUES NULL &OPTIONAL))
  ;   Documentation:
  ;     stream encoded json from o to s; or *standard-output*
- ;   Source file: /home/anders/x/jqn/src/io.lisp
+ ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
 #### JQN:LDNOUT
@@ -365,7 +365,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     serialize internal json representation to readable lisp data (ldn).
- ;   Source file: /home/anders/x/jqn/src/io.lisp
+ ;   Source file: /data/x/jqn/src/io.lisp
 ```
 
 #### JQN:MKSTR
@@ -379,7 +379,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     coerce all arguments to a string.
- ;   Source file: /home/anders/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:NOOP
@@ -392,7 +392,7 @@
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
  ;     do nothing. return nil
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:NUM
@@ -424,7 +424,7 @@
  ;   Derived type: (FUNCTION (STRING STRING) (VALUES BOOLEAN &OPTIONAL))
  ;   Documentation:
  ;     t if s starts with pref
- ;   Source file: /home/anders/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:PROC-QRY
@@ -438,7 +438,7 @@
  ;   Derived type: (FUNCTION (T T) (VALUES CONS &OPTIONAL))
  ;   Documentation:
  ;     compile jqn query
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:QRYD
@@ -451,7 +451,7 @@
  ;   Lambda-list: (DAT &KEY (Q _) CONF DB)
  ;   Documentation:
  ;     run jqn query on dat
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:QRYF
@@ -464,7 +464,7 @@
  ;   Lambda-list: (FN &KEY (Q _) DB)
  ;   Documentation:
  ;     run jqn query on file, fn
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:QRYL
@@ -478,7 +478,7 @@
  ;   Derived type: (FUNCTION (T &KEY (:Q T) (:CONF T) (:DB T)) *)
  ;   Documentation:
  ;     compile jqn query and run on dat
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:REPL
@@ -493,7 +493,7 @@
  ;                  (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     replace from with to in s
- ;   Source file: /home/anders/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:SDWN
@@ -507,7 +507,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and downcase
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:STRCAT
@@ -521,7 +521,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     concatenate all strings in sequences rest
- ;   Source file: /home/anders/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:SUB?
@@ -536,7 +536,7 @@
  ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
  ;   Documentation:
  ;     returns index where substring matches s from left to right. otherwise nil.
- ;   Source file: /home/anders/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:SUF?
@@ -550,7 +550,7 @@
  ;   Derived type: (FUNCTION (STRING STRING) *)
  ;   Documentation:
  ;     declare t if s ends with suf
- ;   Source file: /home/anders/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:SUP
@@ -564,7 +564,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and upcase
- ;   Source file: /home/anders/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:TAIL
@@ -582,6 +582,6 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     last n elements
- ;   Source file: /home/anders/x/jqn/src/utils.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
