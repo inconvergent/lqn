@@ -53,17 +53,19 @@ to a JSON data structure or an internal lisp structure.
 
 ## Clauses
 
-Currently there are four special Clauses. You can also write generic CL code,
+The following clauses have special behaviour. You can also write generic CL code,
 including the functions further down.
 
   - ` (|| ...)` pipe the results from the first clause into the second etc. returns
-  - `#{s1 ...}` iterate vector of `kvs` and select keys a new vector of `kvs` using kv selectors.
-  - `#[s1 ...]` iterate `vector` of `kvs` and select keys into new `vector` using kv selectors.
-  - ` {s1 ...}` select from `kv` into new `kv` using kv selectors.
-  - ` [s1 ...]` iterate `vector` and filter into new `vector` using vector selectors/filters
+  - `#{s1 ...}` iterate vector of `kvs` and select keys a new vector of `kvs` using `kv` selectors.
+  - `#[s1 ...]` iterate `vector` of `kvs` and select keys into new `vector` using `kv` selectors.
+  - ` {s1 ...}` select from `kv` into new `kv` using `kv` selectors.
+  - ` [s1 ...]` iterate `vector` and filter into new `vector` using vector vector filters
   - ` (*map fx)` map `#'fx` across `(dat)`
-  - ` (*map v (fx v))` map `(lambda (v) (fx v))` across `(dat)`
-  - ` (*map v (fx v) k)` map `(lambda (v) (fx v))` across `k`
+  - ` (*map . (fx .))` map `(lambda (.) (fx .))` across `(dat)`
+  - ` (*map . (fx .) k)` map `(lambda (.) (fx .))` across `k`
+  - ` (*fld fx init)` TODO
+  - ` (*fld fx init k)` TODO
     the result of the last clause.
 
 ## `kv` Selectors
@@ -76,7 +78,7 @@ mode is either:
         and not `nil`
   - `%` include selector if key is present and not `nil`. (include `expr`
         if it does not evaluate to `nil`.)
-  - `-` drop this key in `#{}` and `{}` clauses; ignore selector entirely in `[]`
+  - `-` drop this key in `#{}` and `{}` clauses; ignore selector entirely in `#[]`
         E.g. `{_ -@key3}` to select all keys except `key3`. (expr is ignored.)
 
 Selectors can either be written out in full, or they can be be written in short
@@ -114,6 +116,10 @@ If you need case sensitive keys you can use strings instead:
 (+ "Key" expr) ; same as ("?@Key" expr)
 ```
 
+## `vector` Filters
+
+...
+
 ## Query Utility Functions
 
 The internal representation of JSON data as `vectors` and `kvs` in `jqn` means
@@ -148,6 +154,10 @@ But for convenience there are a few special functions defined in `jqn`.
  - `(repl s from to)` replace `from` with `to` in `s`.
  - `(sdwn s ...)` `mkstr` and downcase.
  - `(sup s ...)` `mkstr` and upcase.
+ - `(sub? s sub)` check if `sub` is a substring of `s`.
+ - `(pref? s pref)` check if `pref` is a prefix of `s`.
+ - `(suf? s suf)` check if `suf` is a suffix of `s`.
+ - `isub?`, `ipref?`, `isuf?` are case insensitive counterparts.
 
 ### Kvs
 
@@ -164,6 +174,8 @@ But for convenience there are a few special functions defined in `jqn`.
  - `(*sel ...)` get new vector with these `*ind`s or `*seq`s
  - `(*cat a ...)` concatenate all `vectors` in these `vectors`. Non-vectors are
    included in their position.
+ - `(head s [n=10])` first n items. Works on `strings` too.
+ - `(tail s [n=10])` last n items. Works on `strings` too.
 
 ## Options
 
