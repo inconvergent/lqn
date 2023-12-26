@@ -311,6 +311,48 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
+#### JQN:IPREF?
+
+```
+ ; JQN:IPREF?
+ ;   [symbol]
+ ; 
+ ; IPREF? names a compiled function:
+ ;   Lambda-list: (S SUF)
+ ;   Derived type: (FUNCTION (T T) *)
+ ;   Documentation:
+ ;     case insensitive pref?
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:ISUB?
+
+```
+ ; JQN:ISUB?
+ ;   [symbol]
+ ; 
+ ; ISUB? names a compiled function:
+ ;   Lambda-list: (S SUB)
+ ;   Derived type: (FUNCTION (T T) *)
+ ;   Documentation:
+ ;     case insensitive check is sub is substring of s.
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:ISUF?
+
+```
+ ; JQN:ISUF?
+ ;   [symbol]
+ ; 
+ ; ISUF? names a compiled function:
+ ;   Lambda-list: (S SUF)
+ ;   Derived type: (FUNCTION (T T) *)
+ ;   Documentation:
+ ;     case insensitive suf?
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:JSNLOADF
 
 ```
@@ -549,7 +591,7 @@
  ;   Lambda-list: (S SUF)
  ;   Derived type: (FUNCTION (STRING STRING) *)
  ;   Documentation:
- ;     declare t if s ends with suf
+ ;     t if s ends with suf
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 

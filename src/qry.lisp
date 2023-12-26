@@ -175,19 +175,19 @@ got: ~a" o))))
   (labels
     ((stringify (a)
       (handler-case (ensure-key a)
-        (error (e) (error "$itr bad key: ~a.~%err: ~a" a e))))
+        (error (e) (error "$$itr: bad key: ~a.~%err: ~a" a e))))
      (stringify-key (v) (dsb (a b c) v `(,a ,(stringify b) ,c)))
      (unpack-cons (k &aux (ck (car k)))
-       (case (length k) (0 (warn "empty selector"))
+       (case (length k) (0 (warn "$$itr: empty selector"))
          (1 `(,@(unpack-mode ck *qmodes*) :_))          ; ?/m [m]@key _
          (2 `(,@(unpack-mode ck *qmodes*) ,(second k))) ; ?/m [m]@key expr
          (3 `(,ck ,(stringify (second k)) ,(third k)))  ; m       key expr
-         (otherwise (warn "bad # items in selector: ~a" k))))
+         (otherwise (warn "$$itr: bad # items in selector: ~a" k))))
      (unpack-s (k) `(,@(unpack-mode k *qmodes*) :_))
      (unpack (k)
        (typecase k (symbol (unpack-s k)) (string (unpack-s k))
                    (cons   (unpack-cons k))
-                   (otherwise (error "selector should be either: symbol, string, cons
+                   (otherwise (error "$$itr: selector should be either: symbol, string, cons
 got: ~a" k)))))
     (let* ((q* (remove-if #'all? q))
            (res (mapcar #'stringify-key (mapcar #'unpack q*))))
@@ -197,7 +197,7 @@ got: ~a" k)))))
 (defun compile/**itr/preproc (q)
   (labels
     ((stringify (a) (handler-case (ensure-key a)
-                     (error (e) (error "*>itr bad key: ~a.~%err: ~a" a e))))
+                     (error (e) (error "**itr: bad key: ~a.~%err: ~a" a e))))
      (unpack-expr (k &aux (ck (car k)))
        (dsb (mode sym) (unpack-mode ck)
          (cond ((and mode (zerop (length (mkstr sym)))) k)
@@ -207,13 +207,13 @@ got: ~a" k)))))
        (typecase k (symbol (unpack-s k))  ; ?@eros
                    (string (unpack-s k))  ; "?@eros"
                    (cons   (unpack-expr k))
-                   (otherwise (error "*>itr bad selector, expected either symbol, string, cons
+                   (otherwise (error "**itr: bad selector, expected either symbol, string, cons
 got: ~a" k))))
      (handle-strs (k)
-       `(,(car k) ,(typecase (second k)
-                     (string `(sub? _ ,(second k)))
-                     (symbol `(sub? _ ,(stringify (second k))))
-                     (otherwise k)))))
+       (typecase (second k)
+         (string `(,(car k) (isub? _ ,(second k))))
+         (symbol `(,(car k) (isub? _ ,(stringify (second k)))))
+         (otherwise k))))
     (mapcar #'handle-strs (mapcar #'unpack (remove-if #'all? q)))))
 
 ; TODO: interpret expr => empty dict/vec as nil and drop in %mode
@@ -296,7 +296,7 @@ got: ~a" k))))
        (cond ((all? d) dat) ((atom d) d)
              ((car-*$itr? d) (compile/*$itr conf (compile/$$itr/preproc (cdr d))))
              ((car-$$itr? d) (compile/$$itr conf (compile/$$itr/preproc (cdr d))))
-             ((car-**itr? d) (compile/**itr conf (compile/**itr/preproc (cdr d))))
+             ((car-**itr? d) (compile/**itr conf (print (compile/**itr/preproc (cdr d)))))
              ((car-*>itr? d) (compile/*>itr conf (compile/$$itr/preproc (cdr d))))
              ((car-*map? d)  (rec conf (compile/*map (cdr d))))
              ((car-*new? d)  (compile/*new conf (cdr d)))

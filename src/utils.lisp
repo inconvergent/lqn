@@ -60,14 +60,18 @@
         (t (mapcar (lambda (x) (tree-replace-fx x fxmatch fxtransform))
                    tree))))
 
-
 (defun pref? (s pref &aux (s (mkstr s)))
   (declare (string s pref)) "t if s starts with pref"
   (and (<= (length pref) (length s))
        (string= pref s :end2 (length pref))))
+(defun ipref? (s suf) "case insensitive pref?"
+  (pref? (sup s) (sup suf)))
+
 (defun suf? (s suf)
-  (declare (string s suf)) "declare t if s ends with suf"
+  (declare (string s suf)) "t if s ends with suf"
   (pref? (reverse s) (reverse suf)))
+(defun isuf? (s suf) "case insensitive suf?"
+  (suf? (sup s) (sup suf)))
 
 (defun sub? (s sub)
   (declare (optimize speed (safety 2)) (string sub s))
@@ -78,6 +82,8 @@
         if (and (eq sub0 (char s i)) ; this is more efficient
                 (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
         do (return-from sub? i)))
+(defun isub? (s sub) "case insensitive check is sub is substring of s."
+  (sub? (sup s) (sup sub)))
 
 (defun split-substr (s sub &key prune &aux (lx (length sub)))
   (declare (optimize speed) (string sub s) (boolean prune))
