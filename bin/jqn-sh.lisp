@@ -43,7 +43,8 @@ examples:
     (error (e) (exit-with-msg 2 "jqn: failed to read json file: ~a~%~a" f e))))
 
 (defun jqn/parse-query (args)
-  (handler-case (read-str args)
+  (handler-case (let ((all (read-all-str args)))
+                  (if (= (length all) 1) (car all) `(|| ,@all)))
     (error (e) (exit-with-msg 3 "jqn: failed to parse qry:~%~a" (mkstr e)))))
 
 ; TODO: input file/pipe read ldn

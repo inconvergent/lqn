@@ -23,7 +23,8 @@ options:
     (error (e) (exit-with-msg 2 "tqn: failed to read txt file: ~a~%~a" f e))))
 
 (defun tqn/parse-query (args)
-  (handler-case (read-str args)
+  (handler-case (let ((all (read-all-str args)))
+                  (if (= (length all) 1) (car all) `(|| ,@all)))
     (error (e) (exit-with-msg 3 "tqn: failed to parse qry:~%~a" (mkstr e)))))
 
 (defun tqn/out (res)

@@ -2,6 +2,14 @@
 
 (defun read-str (s) (read-from-string s nil nil))
 
+(defun read-all-str (s &aux (l (length s)))
+  (loop with pos = 0
+        for (line new-pos) = (multiple-value-list
+                               (read-from-string s nil nil :start pos))
+        while (and line (<= new-pos l))
+        do (setf pos new-pos)
+        collect line))
+
 (defun read-stream-lines-as-vector (&optional (s *standard-input*)
                                     &aux (res (make-adjustable-vector)))
   (loop for line = (read-line s nil nil)
