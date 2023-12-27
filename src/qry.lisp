@@ -170,20 +170,24 @@ got: ~a" k))))
         (otherwise (error "*map: bad args: ~a" d))))))
 
 (defun compile/*fld (rec conf d &aux (dat* (gk conf :dat)))
-  (awg (i ires dat)
-    (labels ((do-map (vv curr expr)
-               `(loop with ,ires = (mav)
-                      for ,curr across ,vv for ,i from 0
-                      do (labels (,@(*itr/labels vv curr i))
-                           (*add+ ,ires nil
-                             ,(funcall rec `((:dat . ,curr) ,@conf) expr)))
-                      finally (return ,ires))))
+  (awg (i res dat)
+    (labels ((do-fld (init fx)
+               `(loop with ,res = ,init
+                      for ,dat across ,dat* for ,i from 0
+                      do (setf ,res (,fx ,res ,dat))
+                      finally (return ,res))))
       (case (length d)
-        (1 (typecase (car d) (symbol (do-map dat* dat `(,(car d) ,dat)))
-                             (cons (do-map dat* dat (car d)))))
-        (2 (apply #'do-map dat* d))
-        (3 (apply #'do-map (funcall rec `((:dat . ,dat*) ,@conf) d))) ; TODO: almost redundant
+        (2 (typecase (second d) (symbol (apply #'do-fld d))))
         (otherwise (error "*fld: bad args: ~a" d))))))
+
+; (*fld 0 +)
+; (*fld 0 prev (+ prev _))       <------
+; (*fld 0 prev nxt (+ prev nxt)) <------
+
+; TODO:
+; tqn -v '(print _) nil' tmp.txt
+; tqn -v '(print _) 0' tmp.txt
+; tqn -v 'int?' tmp.txt
 
 (defun new-conf (conf kk) `((:dat . ($_ ,kk)) ,@conf))
 

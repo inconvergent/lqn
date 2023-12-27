@@ -54,8 +54,7 @@ including the functions further down.
   - ` (*map fx)` map `#'fx` current `(dat)`.
   - ` (*map (fx _))` map `(fx _)` across current `(dat)`.
   - ` (*map k (fx ... k))` map `(fx ... k)` across current `(dat)`.
-  - ` (*fld fx init)` TODO
-  - ` (*fld fx init k)` TODO
+  - ` (*fld init fx)` TODO
 
 ## `kv` Selectors
 
