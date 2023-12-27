@@ -111,8 +111,7 @@ To select everything, but replace some keys with new values or drop keys entirel
    `"hello"`) or `"oh"`.
  - `[(+@pref? _ "start") (+@post? _ "end")] select all lines that start with
    `"start"` and end with `"end"`
-
-...
+ - `[(> _ 3)] select all number items larger than `3`.
 
 ## Query Utility Functions
 
