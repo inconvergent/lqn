@@ -9,6 +9,7 @@
     #:|| #:?? #:>< #:<> #:$ :$_ #:noop
     #:*new #:$new #:$cat #:*cat
     #:flt? #:int? #:kv? #:lst? #:num? #:seq? #:str? #:vec?
+    #:int!? #:flt!? #:num!?
     #:*ind #:*sel #:*seq
     #:$add+ #:$add? #:$add% #:$del #:*add+ #:*add? #:*add%
     #:sup #:sdwn #:strcat #:repl #:mkstr #:split

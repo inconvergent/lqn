@@ -299,6 +299,20 @@
  ;   [symbol]
 ```
 
+#### JQN:FLT!?
+
+```
+ ; JQN:FLT!?
+ ;   [symbol]
+ ; 
+ ; FLT!? names a compiled function:
+ ;   Lambda-list: (F &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     f as float if it can be parsed as float; or d
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:FLT?
 
 ```
@@ -306,10 +320,10 @@
  ;   [symbol]
  ; 
  ; FLT? names a compiled function:
- ;   Lambda-list: (F)
- ;   Derived type: (FUNCTION (T) (VALUES (OR FLOAT NULL) &OPTIONAL))
+ ;   Lambda-list: (F &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     f if float; or nil
+ ;     f if float; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -353,6 +367,20 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
+#### JQN:INT!?
+
+```
+ ; JQN:INT!?
+ ;   [symbol]
+ ; 
+ ; INT!? names a compiled function:
+ ;   Lambda-list: (I &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     i as int if it can be parsed as int; or d
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:INT?
 
 ```
@@ -360,10 +388,10 @@
  ;   [symbol]
  ; 
  ; INT? names a compiled function:
- ;   Lambda-list: (I)
- ;   Derived type: (FUNCTION (T) (VALUES (OR NULL INTEGER) &OPTIONAL))
+ ;   Lambda-list: (I &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     i if integer; or nil
+ ;     i if int; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -472,10 +500,10 @@
  ;   [symbol]
  ; 
  ; KV? names a compiled function:
- ;   Lambda-list: (K)
- ;   Derived type: (FUNCTION (T) (VALUES (OR HASH-TABLE NULL) &OPTIONAL))
+ ;   Lambda-list: (K &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     k if  hash-table; or nil
+ ;     k if hash-table; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -500,10 +528,10 @@
  ;   [symbol]
  ; 
  ; LST? names a compiled function:
- ;   Lambda-list: (L)
- ;   Derived type: (FUNCTION (T) (VALUES LIST &OPTIONAL))
+ ;   Lambda-list: (L &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     l if list; or nil
+ ;     l if list; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -543,6 +571,20 @@
  ;   [symbol]
 ```
 
+#### JQN:NUM!?
+
+```
+ ; JQN:NUM!?
+ ;   [symbol]
+ ; 
+ ; NUM!? names a compiled function:
+ ;   Lambda-list: (N &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     n as number if it can be parsed as number; or d
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:NUM?
 
 ```
@@ -550,10 +592,10 @@
  ;   [symbol]
  ; 
  ; NUM? names a compiled function:
- ;   Lambda-list: (N)
- ;   Derived type: (FUNCTION (T) (VALUES (OR NULL NUMBER) &OPTIONAL))
+ ;   Lambda-list: (N &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     n if number; or nil
+ ;     n if number; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -670,10 +712,10 @@
  ;   [symbol]
  ; 
  ; SEQ? names a compiled function:
- ;   Lambda-list: (S)
- ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (S &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     s if sequence; or nil
+ ;     s if sequence; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -699,10 +741,10 @@
  ;   [symbol]
  ; 
  ; STR? names a compiled function:
- ;   Lambda-list: (S)
- ;   Derived type: (FUNCTION (T) (VALUES (OR STRING NULL) &OPTIONAL))
+ ;   Lambda-list: (S &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     s if string; or nil
+ ;     s if string; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -805,10 +847,10 @@
  ;   [symbol]
  ; 
  ; VEC? names a compiled function:
- ;   Lambda-list: (V)
- ;   Derived type: (FUNCTION (T) (VALUES (OR NULL VECTOR) &OPTIONAL))
+ ;   Lambda-list: (V &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     v if vector; or nil
+ ;     v if vector; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 

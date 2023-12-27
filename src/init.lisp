@@ -6,6 +6,7 @@
                  :sup :sdwn :mkstr :repl :strcat
                  :pref? :suf? :sub? :ipref? :isuf? :isub?
                  :flt? :int? :kv? :lst? :num? :seq? :str? :vec?
+                 :int!? :flt!? :num!?
                  :fmt :out))
 
 (defun cmd-args ()

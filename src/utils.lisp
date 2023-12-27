@@ -31,16 +31,21 @@
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 
-; QRY RUNTIME ; TODO: rewrite as maybe macros?
+(defun flt? (f &optional d) "f if float; or d" (if (floatp f) f d))
+(defun int? (i &optional d) "i if int; or d" (if (integerp i) i d))
+(defun kv?  (k &optional d) "k if hash-table; or d" (if (hash-table-p k) d))
+(defun lst? (l &optional d) "l if list; or d" (if (listp l) l d))
+(defun num? (n &optional d) "n if number; or d" (if (numberp n) n d))
+(defun str? (s &optional d) "s if string; or d" (if (stringp s) s d))
+(defun vec? (v &optional d) "v if vector; or d" (if (vectorp v) v d))
+(defun seq? (s &optional d) "s if sequence; or d" (or (lst? s) (str? s) (vec? s) d))
 
-(defun seq? (s) "s if sequence; or nil" (when (or (str? s) (vec? s) (lst? s)) s))
-(defun str? (s) "s if string; or nil" (when (stringp s) s))
-(defun lst? (l) "l if list; or nil" (when (listp l) l))
-(defun kv?  (k) "k if  hash-table; or nil" (when (hash-table-p k) k))
-(defun vec? (v) "v if vector; or nil" (when (vectorp v) v))
-(defun num? (n) "n if number; or nil" (when (numberp n) n))
-(defun int? (i) "i if integer; or nil" (when (integerp i) i))
-(defun flt? (f) "f if float; or nil" (when (floatp f) f))
+(defun int!? (i &optional d) "i as int if it can be parsed as int; or d"
+  (handler-case (or (int? i) (int? (read-from-string i nil nil)) d) (error () d)))
+(defun flt!? (f &optional d) "f as float if it can be parsed as float; or d"
+  (handler-case (or (flt? f) (flt? (read-from-string f nil nil)) d) (error () d)))
+(defun num!? (n &optional d) "n as number if it can be parsed as number; or d"
+  (handler-case (or (num? n) (num? (read-from-string n nil nil)) d) (error () d)))
 
 (defmacro out (s &rest rest) "print to standard out"
   (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
