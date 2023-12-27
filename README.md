@@ -104,13 +104,12 @@ To select everything, but replace some keys with new values or drop keys entirel
 `vector` filters are similar to `kv` Selectors, but they are used with `[...]`
 
  - `[hello]` select all string items that contain `"hello"`.
- - `[hi hello]` select all string items that contain either `"hello"` or
-   `"hi"`.
+ - `[hi hello]` select all string items that contain either `"hello"` or `"hi"`.
  - `[+@hi +@hello]` select all string items that contain `"hi"` and `"hello"`.
- - `[+@hi +@hello oh]` select all string items that contain (`"hi"` and
-   `"hello"`) or `"oh"`.
- - `[(+@pref? _ "start") (+@post? _ "end")] select all lines that start with
-   `"start"` and end with `"end"`
+ - `[+@hi +@hello oh]` select all string items that contain
+    (`"hi"` and `"hello"`) or `"oh"`.
+ - `[(+@pref? _ "start") (+@post? _ "end")]` select all lines that start with
+   `"start"` and end with `"end"`.
  - `[(> _ 3)] select all number items larger than `3`.
 
 ## Query Utility Functions
@@ -127,19 +126,14 @@ But for convenience there are a few special functions defined in `jqn`.
  - `(fi [k])` index of the file that is the source for the current data; or `0`.
 
 ### Clause Context
- - `($_ k [default])` returns this key from current data object (`_`).
-   In `*map`, `[]`, `#[]`, and `#{}`.
- - `(par)` returns the parent data object.
-   In `*map`, `[]`, `#[]`, and `#{}`.
- - `(num)` returns length of the `vector` being iterated.
-   In `*map`, `[]`, `#[]`, and `#{}`.
- - `(cnt [k])` counts from `k`, or `0`.
-   In `*map`, `[]`, `#[]`, and `#{}`.
+ - `($_ k [default])` returns this key from current data object. In `*map`, `[]`, `#[]`, and `#{}`.
+ - `(par)` returns the parent data object. In `*map`, `[]`, `#[]`, and `#{}`.
+ - `(num)` returns length of the `vector` being iterated. In `*map`, `[]`, `#[]`, and `#{}`.
+ - `(cnt [k])` counts from `k`, or `0`. In `*map`, `[]`, `#[]`, and `#{}`.
 
 ### Generic
  - `(?? fx a ...)` execute `(fx a ...)` only if `a` is not `nil`; otherwise `nil`.
  - `(>< a)` condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
- - `(<> a)` ?
 
 ### Strings
  - `(mkstr a ...)` stringify and concatenate all arguments.
@@ -167,21 +161,21 @@ But for convenience there are a few special functions defined in `jqn`.
  - `(*new ...)` new `vector` with these elements.
  - `(*ind v i)` get these index `i` from `v`. Equivalent to `aref`.
  - `(*seq v i [j])` get range `i ...` or `i ... (1- j)` from `v`. Equivalent to `subseq`.
- - `(*sel ...)` get new vector with these `*ind`s or `*seq`s
+ - `(*sel ...)` get new vector with these `*ind`s or `*seq`s.
  - `(*cat a ...)` concatenate all `vectors` in these `vectors`. Non-vectors are
    included in their position.
  - `(head s [n=10])` first n items. Works on `strings` too.
  - `(tail s [n=10])` last n items. Works on `strings` too.
 
 ### Types
- - `(flt? s)` return `s` if it is a `float`.
- - `(int? s)` return `s` if it is an `integer`.
- - `(kv?  s)` return `s` if it is a `kv` (`hash-table`).
- - `(lst? s)` return `s` if it is a `list`.
- - `(num? s)` return `s` if it is a `number`.
+ - `(flt? f)` return `f` if it is a `float`.
+ - `(int? i)` return `i` if it is an `integer`.
+ - `(kv?  k)` return `k` if it is a `kv` (`hash-table`).
+ - `(lst? l)` return `l` if it is a `list`.
+ - `(num? n)` return `n` if it is a `number`.
  - `(seq? s)` return `s` if it is `str`, `vector` or `list`.
  - `(str? s)` return `s` if it is a `string`.
- - `(vec? s)` return `s` if it is a `vector`.
+ - `(vec? v)` return `v` if it is a `vector`.
 
 ## Options
 
