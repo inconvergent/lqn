@@ -28,8 +28,8 @@
             (error (e) (exit-with-msg 5 "LDN: failed to serialize.~%~a" (mkstr e)))))
     (:txt (handler-case
             (labels ((prln (s) (format t "~&~a~%" s)))
-              (etypecase res (vector (loop for s across res do (prln s)))
-                             (list (loop for s in res do (prln s)))
+              (etypecase res (vector (loop for s across res if s do (prln s)))
+                             (list (loop for s in res if s do (prln s)))
                              (hash-table (prln res))
                              (string (prln res)) (number (prln res))))
             (error (e) (exit-with-msg 5 "TXT: failed to serialize.~%~a" (mkstr e)))))))

@@ -154,18 +154,18 @@ got: ~a" k))))
 
 (defun compile/*map (rec conf d &aux (dat* (gk conf :dat)))
   (awg (i ires dat)
-    (labels ((do-map (vv dat expr)
+    (labels ((do-map (vv curr expr)
                `(loop with ,ires = (mav)
-                      for ,dat across ,vv for ,i from 0
-                      do (labels (,@(*itr/labels vv dat i))
+                      for ,curr across ,vv for ,i from 0
+                      do (labels (,@(*itr/labels vv curr i))
                            (*add+ ,ires nil
-                             ,(funcall rec `((:dat . ,dat) ,@conf) expr)))
+                             ,(funcall rec `((:dat . ,curr) ,@conf) expr)))
                       finally (return ,ires))))
       (case (length d)
         (1 (typecase (car d) (symbol (do-map dat* dat `(,(car d) ,dat)))
                              (cons (do-map dat* dat (car d)))))
         (2 (apply #'do-map dat* d))
-        (3 (apply #'do-map d))
+        (3 (apply #'do-map (funcall rec `((:dat . ,dat*) ,@conf) d))) ; TODO: almost redundant
         (otherwise (error "*map: bad args: ~a" d))))))
 
 (defun new-conf (conf kk) `((:dat . ($_ ,kk)) ,@conf))
