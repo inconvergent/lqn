@@ -2,6 +2,7 @@
 (in-package :jqn)
 
 (defvar *ex* "
+QUERY AND TRANSFORM JSON.
 
   jqn [options] <qry> [files ...]
 
@@ -30,6 +31,8 @@ examples:
 
   # query data from pipe:
   echo '{\"_id\": 1}' | jqn '{_id}'")
+
+; TODO: warn if jqn reads only some of a file?
 
 (defun jqn/execute-query (dat q &key conf db)
   (handler-case (qryl dat q :conf conf :db db)

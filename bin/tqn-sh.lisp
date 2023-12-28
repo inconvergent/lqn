@@ -2,6 +2,7 @@
 (in-package :jqn)
 
 (defvar *ex* "
+QUERY AND TRANSFORM TXT.
 
   tqn [options] <qry> [files ...]
 

@@ -45,48 +45,54 @@ internal Lisp data structure.
 The following operators have special behaviour. You can also write generic CL code,
 anywhere you can use an operator. Including the functions further down.
 
-  - ` (|| ...)` pipe the results from the first clause into the second etc.
-    returns the result of the last clause.
-  - `#{s1 ...}` select from vector of `kvs` into new vector of `kvs` using `kv` selectors.
-  - `#[s1 ...]` select from `vector` of `kvs` into new `vector` using `kv` selectors.
-  - ` {s1 ...}` select from `kv` into new `kv` using `kv` selectors.
-  - ` [s1 ...]` select from `vector` into new `vector` using vector `vector` selectors.
-  - ` (*map fx)` map `#'fx` current `(dat)`.
-  - ` (*map (fx _))` map `(fx _)` across current `(dat)`.
-  - ` (*map k (fx ... k))` map `(fx ... k)` across current `(dat)`.
-  - ` (*fld init fx)` fold `fx` with init as the first argument.
-  - ` (*fld init nxt (fx acc ... nxt))` fold `(fx ...)` where the accumulated value is implicit.
-  - ` (*fld init acc nxt (fx ... acc ... nxt))` both the accumulated value and the next is explicit.
+### Pipe Operator
+Pipe is the default operator in all queries.
 
-## `kv` Selectors
+  - ` (|| ..)` pipe the results from the first operator into the second etc.
+    Returns the result of the last operator.
 
-A `kv` Selector is a triple `(mode key expr)`. And are used in `{...}`,
-`#[...]` and `#{...}`.  Only the key is required. If `expr` is not provided the
-`expr` is the value of the `key`:
+### Map/Reduce Operators
+  - `(*map fx)`: map `#'fx` current `(dat)`.
+  - `(*map (fx _))`: map `(fx _)` across current `(dat)`.
+  - `(*map k (fx .. k))`: map `(fx .. k)` across current `(dat)`.
+  - `(*fld init fx)`: fold `(fx acc nxt)` with `init` as the first `acc` value. `acc`, `nxt` is implicit.
+  - `(*fld init nxt (fx acc .. nxt))`: fold `(fx ..)`. `nxt` symbol is explicit
+  - `(*fld init acc nxt (fx .. acc .. nxt))`: `acc`, `nxt` are explicit.
+
+### Selector Operators
+  - `#{s1 ..}`: select from vector of `kvs` into new vector of `kvs` using `kv` selectors.
+  - `#[s1 ..]`: select from `vector` of `kvs` into new `vector` using `kv` selectors.
+  - ` {s1 ..}`: select from `kv` into new `kv` using `kv` selectors.
+  - ` [s1 ..]`: select from `vector` into new `vector` using vector `vector` selectors.
+
+### `kv` Selectors
+A `kv` Selector is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
+`#{}`.  Only the key is required. If `expr` is not provided the `expr` is the
+value of the `key`:
 
 The modes are:
-  - `+` always include this selector (always evaluate `expr` if defined) [default]
-  - `?` include selector (evaluate `expr` if defined) if the key is present and not `nil`
-  - `%` include selector if expr is not `nil`.
-  - `-` drop this key in `#{}` and `{}` clauses; ignore selector entirely in `#[]`
+  - `+`: always include this selector (always evaluate `expr` if defined) [default]
+  - `?`: include selector (evaluate `expr` if defined) if the key is present and not `nil`
+  - `%`: include selector if expr is not `nil`.
+  - `-`: drop this key in `#{}` and `{}` operators; ignore selector entirely in `#[]`
     E.g. `{_ -@key3}` to select all keys except `key3`. (expr is ignored.)
 
 Selectors can either be written out in full, or they can be be written in short
 form depending on what you want to achieve. Note that the `@` in the following
 examples is used to append a mode to a key without having to wrap the selector
-in `(...)`. If you need the litteral key you can use `strings`:
+in parenthesis. If you need the litteral key you can use `strings`:
 ```lisp
-_               ; select everything in current data object
-key             ; select key [+ mode is default]
-+@key           ; same as key
-"+@key"         ; same as key
-?@key           ; select key if the value is not nil.
-(%@key expr)    ; select key if expr is not nil.
-("?@Key" expr)  ; select "Key" if the value is not nil.
-("%@Key" expr)  ; select "Key" if expr is not nil.
-(:+ "Key" expr) ; same as ("+@Key" expr).
+{_}               ; select everything in current data object
+{key1 key2}       ; select key1 and key2 [+ mode is default]
+{+@key}           ; same as key
+{"+@Key"}         ; select "Key"
+{?@key }          ; select key if the value is not nil.
+{(%@key expr)}    ; select key if expr is not nil.
+{("?@Key" expr)}  ; select "Key" if the value is not nil.
+{("%@Key" expr)}  ; select "Key" if expr is not nil.
+{(:+ "Key" expr)} ; same as ("+@Key" expr).
 ```
-An `expr` is any Clause or valid CL code. Use `_` in `expr` to refer to the
+An `expr` is any Operator or valid CL code. Use `_` in `expr` to refer to the
 value of the selected key.
 ```lisp
 #{(key1 (sup _))       ; convert value of key1 to uppercase
@@ -100,19 +106,23 @@ To select everything, but replace some keys with new values or drop keys entirel
   -@key3}         ; drop key3
 ```
 
-## `vector` Selectors
+### `vector` Selectors
+`vector` selectors are similar to `kv` Selectors, but they are used with `[]`.
+`:key` (keyword) are translated to `"key"` and `fx` (symbol) is translated to
+`(fx _)`. That is, symbols are called as functions with current data as the
+only argument.
 
-`vector` selectors are similar to `kv` Selectors, but they are used with `[...]`
-
- - `[hello]` select all string items that contain `"hello"`.
- - `[hi hello]` select all string items that contain either `"hello"` or `"hi"`.
- - `[+@hi +@hello]` select all string items that contain `"hi"` and `"hello"`.
- - `[+@hi +@hello oh]` select all string items that contain
-    (`"hi"` and `"hello"`) or `"oh"`.
- - `[(+@pref? _ "start") (+@post? _ "end")]` select all lines that start with
-   `"start"` and end with `"end"`.
- - `[(> _ 3)] select all number items larger than `3`.
- - `[_ -@hi] select all string items except those that contain `"hi"`.
+```lisp
+[:hello]              ; items that contain `"hello"`.
+[:hi :hello]          ; items that contain either `"hello"` or `"hi"`.
+[:+@hi :+@hello]      ; items that contain `"hi"` and `"hello"`.
+[:+@hi :+@hello "OH"] ; items that contain (`"hi"` and `"hello"`) or `"OH"`.
+[int!?]               ; items that can be parsed as `int`.
+[(> _ 3)]             ; items larger than `3`.
+[_ :-@hi]             ; items except those that contain `"hi"`.
+[(+@pref? _ "start")  ; items that start with `"start"` and end with `"end"`.
+ (+@post? _ "end")]
+```
 
 ## Query Utility Functions
 
@@ -123,61 +133,62 @@ you can use the regular CL utilities such as `gethash`, `aref`, `subseq`,
 But for convenience there are a few special functions defined in `jqn`.
 
 ### Global Context
- - `(ctx)` returns `:pipe` if input is from `stdin`; otherwise `:file`.
- - `(fn)` name of the file that is the source for the current data; or `nil`.
- - `(fi [k])` index of the file that is the source for the current data; or `0`.
+ - `(ctx)`: returns `:pipe` if input is from `stdin`; otherwise `:file`.
+ - `(fi [k])`: index of the file that is the source for the current data; or `0`.
+ - `(fn)`: name of the file that is the source for the current data; or `nil`.
 
-### Clause Context
- - `($_ k [default])` returns this key from current data object. In `*map`, `[]`, `#[]`, and `#{}`.
- - `(par)` returns the parent data object. In `*map`, `[]`, `#[]`, and `#{}`.
- - `(num)` returns length of the `vector` being iterated. In `*map`, `[]`, `#[]`, and `#{}`.
- - `(cnt [k])` counts from `k`, or `0`. In `*map`, `[]`, `#[]`, and `#{}`.
+### Operator Context
+Available in most operators.
+ - `($_ k [default])`: this key from current data object.
+ - `(cnt [k])`: counts from `k`, or `0`.
+ - `(num)`: length of the `vector` being iterated.
+ - `(par)`: the parent data object.
 
 ### Generic
- - `(?? fx a ...)` execute `(fx a ...)` only if `a` is not `nil`; otherwise `nil`.
- - `(>< a)` condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
+ - `(>< a)`: condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
+ - `(?? fx a ..)`: execute `(fx a ..)` only if `a` is not `nil`; otherwise `nil`.
+ - `(fmt f ..)`: format f to `string` with these args.
+ - `(fmt s)`: get printed representation of `s`.
+ - `(out f ..)`: format f to `*standard-out*` with these args.
+ - `(out s)`: output printed representation of `s` to `*standard-out*`. return `nil`.
 
 ### Strings
- - `(mkstr a ...)` stringify and concatenate all arguments.
- - `(strcat s ...)` concatenate all strings and `vectors`/`lists` of strings.
- - `(repl s from to)` replace `from` with `to` in `s`.
- - `(split s x)` split `s` at all `x`.
- - `(sdwn s ...)` `mkstr` and downcase.
- - `(sup s ...)` `mkstr` and upcase.
- - `(sub? s sub)` check if `sub` is a substring of `s`.
- - `(pref? s pref)` check if `pref` is a prefix of `s`.
- - `(suf? s suf)` check if `suf` is a suffix of `s`.
- - `isub?`, `ipref?`, `isuf?` are case insensitive counterparts.
- - `(fmt s)` get printed representation of `s`.
- - `(fmt f ...)` format f to `string` with these args.
- - `(out s)` output printed representation of `s` to `standard-out`. return `nil`.
- - `(out f ...)` format f to `standard-out` with these args.
+ - `(mkstr a ..)`: stringify and concatenate all arguments.
+ - `(pref? s pref [d])`: `s` if `pref` is a prefix of `s`; or `d`.
+ - `(repl s from to)`: replace `from` with `to` in `s`.
+ - `(sdwn s ..)`: `mkstr` and downcase.
+ - `(split s x)`: split `s` at all `x`.
+ - `(strcat s ..)`: concatenate all strings and `vectors`/`lists` of strings.
+ - `(sub? s sub [d])`: `s` if `sub` is a substring of `s`; or `d`.
+ - `(subx? s sub)`: interger where `sub` starts in `s`
+ - `(suf? s suf [d])`: `s` if `suf` is a suffix of `s`; or `d`.
+ - `(sup s ..)`: `mkstr` and upcase.
+ - `isub?` `isubx?`, `ipref?`, `isuf?`: case insensitive counterparts.
 
 ### Kvs
- - `($new (k1 expr1) ...)` new `kv` with these keys and expressions.
- - `($ kv k [default])` get key `k` from `kv`. Equivalent to `gethash`.
- - `($_ k ...)` is equivalent to `($ _ k ...)`.
- - `($cat ...)` add all keys from these `kvs` to a new `kv`. left to right.
+ - `($ kv k [default])`: get key `k` from `kv`. Equivalent to `gethash`.
+ - `($_ k ..)`: is equivalent to `($ _ k ..)`.
+ - `($cat ..)`: add all keys from these `kvs` to a new `kv`. left to right.
+ - `($new (k1 expr1) ..)`: new `kv` with these keys and expressions.
 
 ### Vectors
- - `(*new ...)` new `vector` with these elements.
- - `(*ind v i)` get these index `i` from `v`. Equivalent to `aref`.
- - `(*seq v i [j])` get range `i ...` or `i ... (1- j)` from `v`. Equivalent to `subseq`.
- - `(*sel ...)` get new vector with these `*ind`s or `*seq`s.
- - `(*cat a ...)` concatenate all `vectors` in these `vectors`. Non-vectors are
-   included in their position.
- - `(head s [n=10])` first n items. Works on `strings` too.
- - `(tail s [n=10])` last n items. Works on `strings` too.
+ - `(*cat a ..)`: concatenate all `vectors` in these `vectors`. Non-vectors are included in their position.
+ - `(*ind v i)`: get these index `i` from `v`. Equivalent to `aref`.
+ - `(*new ..)`: new `vector` with these elements.
+ - `(*sel ..)`: get new vector with these `*ind`s or `*seq`s.
+ - `(*seq v i [j])`: get range `i ..` or `i .. (1- j)` from `v`. Equivalent to `subseq`.
+ - `(head s [n=10])`: first n items. Works on `strings` too.
+ - `(tail s [n=10])`: last n items. Works on `strings` too.
 
 ### Types
- - `(flt? f)` return `f` if it is a `float`.
- - `(int? i)` return `i` if it is an `integer`.
- - `(kv?  k)` return `k` if it is a `kv` (`hash-table`).
- - `(lst? l)` return `l` if it is a `list`.
- - `(num? n)` return `n` if it is a `number`.
- - `(seq? s)` return `s` if it is `str`, `vector` or `list`.
- - `(str? s)` return `s` if it is a `string`.
- - `(vec? v)` return `v` if it is a `vector`.
+ - `(flt? f)`: `f` if it is a `float`.
+ - `(int? i)`: `i` if it is an `integer`.
+ - `(kv?  k)`: `k` if it is a `kv` (`hash-table`).
+ - `(lst? l)`: `l` if it is a `list`.
+ - `(num? n)`: `n` if it is a `number`.
+ - `(str? s)`: `s` if it is a `string`.
+ - `(vec? v)`: `v` if it is a `vector`.
+ - `(seq? s)`: `s` if it is `str`, `vector` or `list`.
 
 ## Options
 
@@ -189,14 +200,12 @@ Command line options:
 ## Install
 
 Make sure `jqn` is available in your `quicklisp` `local-projects` folder Then
-create an alias for SBCL to execute `/jqn/bin/jqn-sh.lisp.` e.g.
+create an alias for SBCL to execute shell wrappers e.g:
 ```
 alias jqn="sbcl --script ~/path/to/jqn/bin/jqn-sh.lisp"
+alias tqn="sbcl --script ~/path/to/jqn/bin/tqn-sh.lisp"
 ```
 Unfortunately this will tend to be quite slow. To get around this you can
 create an image that has `jqn` preloaded and dump it using
 `sb-ext:save-lisp-and-die`. Then use your image in the alias instead of SBCL.
-
-
-; TODO: warn if jqn reads only some of a file?
 
