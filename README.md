@@ -40,21 +40,23 @@ respectively is used in the documentation. If the context makes it clear
 whether it is a reference to a JSON data structure or the corresponding
 internal Lisp data structure.
 
-## Clauses
+## Operators
 
-The following clauses have special behaviour. You can also write generic CL code,
-including the functions further down.
+The following operators have special behaviour. You can also write generic CL code,
+anywhere you can use an operator. Including the functions further down.
 
   - ` (|| ...)` pipe the results from the first clause into the second etc.
     returns the result of the last clause.
-  - `#{s1 ...}` iterate vector of `kvs` and select keys a new vector of `kvs` using `kv` selectors.
-  - `#[s1 ...]` iterate `vector` of `kvs` and select keys into new `vector` using `kv` selectors.
+  - `#{s1 ...}` select from vector of `kvs` into new vector of `kvs` using `kv` selectors.
+  - `#[s1 ...]` select from `vector` of `kvs` into new `vector` using `kv` selectors.
   - ` {s1 ...}` select from `kv` into new `kv` using `kv` selectors.
-  - ` [s1 ...]` iterate `vector` and filter into new `vector` using vector vector filters
+  - ` [s1 ...]` select from `vector` into new `vector` using vector `vector` selectors.
   - ` (*map fx)` map `#'fx` current `(dat)`.
   - ` (*map (fx _))` map `(fx _)` across current `(dat)`.
   - ` (*map k (fx ... k))` map `(fx ... k)` across current `(dat)`.
-  - ` (*fld init fx)` TODO
+  - ` (*fld init fx)` fold `fx` with init as the first argument.
+  - ` (*fld init nxt (fx acc ... nxt))` fold `(fx ...)` where the accumulated value is implicit.
+  - ` (*fld init acc nxt (fx ... acc ... nxt))` both the accumulated value and the next is explicit.
 
 ## `kv` Selectors
 
@@ -98,9 +100,9 @@ To select everything, but replace some keys with new values or drop keys entirel
   -@key3}         ; drop key3
 ```
 
-## `vector` Filters
+## `vector` Selectors
 
-`vector` filters are similar to `kv` Selectors, but they are used with `[...]`
+`vector` selectors are similar to `kv` Selectors, but they are used with `[...]`
 
  - `[hello]` select all string items that contain `"hello"`.
  - `[hi hello]` select all string items that contain either `"hello"` or `"hi"`.
@@ -110,6 +112,7 @@ To select everything, but replace some keys with new values or drop keys entirel
  - `[(+@pref? _ "start") (+@post? _ "end")]` select all lines that start with
    `"start"` and end with `"end"`.
  - `[(> _ 3)] select all number items larger than `3`.
+ - `[_ -@hi] select all string items except those that contain `"hi"`.
 
 ## Query Utility Functions
 
@@ -193,4 +196,7 @@ alias jqn="sbcl --script ~/path/to/jqn/bin/jqn-sh.lisp"
 Unfortunately this will tend to be quite slow. To get around this you can
 create an image that has `jqn` preloaded and dump it using
 `sb-ext:save-lisp-and-die`. Then use your image in the alias instead of SBCL.
+
+
+; TODO: warn if jqn reads only some of a file?
 

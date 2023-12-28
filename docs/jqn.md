@@ -235,14 +235,10 @@
  ; 
  ; >< names a compiled function:
  ;   Lambda-list: (O)
- ;   Derived type: (FUNCTION (T)
- ;                  (VALUES
- ;                   (OR LIST HASH-TABLE (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
- ;   Source file: /data/x/jqn/src/qry.lisp
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:??
@@ -402,10 +398,24 @@
  ;   [symbol]
  ; 
  ; IPREF? names a compiled function:
- ;   Lambda-list: (S SUF)
- ;   Derived type: (FUNCTION (T T) *)
+ ;   Lambda-list: (S SUF &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
  ;     case insensitive pref?
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:IS?
+
+```
+ ; JQN:IS?
+ ;   [symbol]
+ ; 
+ ; IS? names a compiled function:
+ ;   Lambda-list: (K &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     k if k is not nil ,not an empty sequence, and not an empty hash-table; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -416,10 +426,24 @@
  ;   [symbol]
  ; 
  ; ISUB? names a compiled function:
+ ;   Lambda-list: (S SUB &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     case insensitive sub?
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:ISUBX?
+
+```
+ ; JQN:ISUBX?
+ ;   [symbol]
+ ; 
+ ; ISUBX? names a compiled function:
  ;   Lambda-list: (S SUB)
  ;   Derived type: (FUNCTION (T T) *)
  ;   Documentation:
- ;     case insensitive check is sub is substring of s.
+ ;     case insensitive subx?
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -430,8 +454,8 @@
  ;   [symbol]
  ; 
  ; ISUF? names a compiled function:
- ;   Lambda-list: (S SUF)
- ;   Derived type: (FUNCTION (T T) *)
+ ;   Lambda-list: (S SUF &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
  ;     case insensitive suf?
  ;   Source file: /data/x/jqn/src/utils.lisp
@@ -628,10 +652,11 @@
  ;   [symbol]
  ; 
  ; PREF? names a compiled function:
- ;   Lambda-list: (S PREF &AUX (S (MKSTR S)))
- ;   Derived type: (FUNCTION (STRING STRING) (VALUES BOOLEAN &OPTIONAL))
+ ;   Lambda-list: (S PREF &OPTIONAL D &AUX (S (MKSTR S)))
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     t if s starts with pref
+ ;     s if s starts with pref; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -719,6 +744,21 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
+#### JQN:SIZE
+
+```
+ ; JQN:SIZE
+ ;   [symbol]
+ ; 
+ ; SIZE names a compiled function:
+ ;   Lambda-list: (L)
+ ;   Derived type: (FUNCTION (T)
+ ;                  (VALUES (MOD 4611686018427387901) &OPTIONAL))
+ ;   Documentation:
+ ;     length of sequence l or number of keys in kv l
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:SPLIT
 
 ```
@@ -769,6 +809,20 @@
  ;   [symbol]
  ; 
  ; SUB? names a compiled function:
+ ;   Lambda-list: (S SUB &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     s if sub is substring of s; ord
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:SUBX?
+
+```
+ ; JQN:SUBX?
+ ;   [symbol]
+ ; 
+ ; SUBX? names a compiled function:
  ;   Lambda-list: (S SUB)
  ;   Derived type: (FUNCTION (STRING STRING)
  ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
@@ -784,10 +838,10 @@
  ;   [symbol]
  ; 
  ; SUF? names a compiled function:
- ;   Lambda-list: (S SUF)
- ;   Derived type: (FUNCTION (STRING STRING) *)
+ ;   Lambda-list: (S SUF &OPTIONAL D)
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T) *)
  ;   Documentation:
- ;     t if s ends with suf
+ ;     s if s ends with suf; or d
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 

@@ -24,21 +24,21 @@ next symb: ~a" char (peek-char t stream t nil t)))
                 )
           o))))
 
-(defun -read-left-curly-brace (stream char) ; {}
+(defun -read-left-curly-brace (stream char) ; {} ; sel
   (declare (ignore char))
   (let ((*readtable* (copy-readtable)))
     (loop for o = (read-next-object #\Space #\} stream)
           while o collect o into objects
           finally (return `($$ ,@objects)))))
 
-(defun -read-left-bracket (stream char) ; []
+(defun -read-left-bracket (stream char) ; [] ; filter
   (declare (ignore char))
   (let ((*readtable* (copy-readtable)))
     (loop for o = (read-next-object #\Space #\] stream)
           while o collect o into objects
           finally (return `(** ,@objects)))))
 
-(set-dispatch-macro-character #\# #\{ ; #{}
+(set-dispatch-macro-character #\# #\{ ; #{} ; sel
   (lambda (stream subchar arg)
     (declare (ignorable subchar arg))
     (let ((*readtable* (copy-readtable)))
@@ -48,10 +48,10 @@ next symb: ~a" char (peek-char t stream t nil t)))
 
 ; (make-dispatch-macro-character #\o)
 
-(set-dispatch-macro-character #\# #\[ ; #[]
+(set-dispatch-macro-character #\# #\[ ; #[] ; sel
   (lambda (stream subchar arg)
     (declare (ignorable subchar arg))
     (let ((*readtable* (copy-readtable)))
       (loop for o = (read-next-object #\Space #\] stream)
             while o collect o into objects
-            finally (return `(*> ,@objects))))))
+            finally (return `($* ,@objects))))))

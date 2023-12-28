@@ -1,11 +1,11 @@
 (in-package :jqn)
 
-(defvar *qmodes* '(:+@ :?@ :-@ :%@))
+(defvar *qmodes* '(:+ :? :- :%))
 (defvar *fxns* '(:fn :fi :ctx :num :cnt :par :$ :$_ :>< :??
-                 :*cat :$cat *ind *sel *seq :head :tail
+                 :*cat :$cat *ind *sel *seq :head :tail :size
                  :sup :sdwn :mkstr :repl :strcat
-                 :pref? :suf? :sub? :ipref? :isuf? :isub?
-                 :flt? :int? :kv? :lst? :num? :seq? :str? :vec?
+                 :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
+                 :flt? :int? :kv? :lst? :num? :seq? :str? :vec? :is?
                  :int!? :flt!? :num!?
                  :fmt :out))
 

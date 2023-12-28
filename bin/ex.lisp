@@ -6,29 +6,29 @@
 (ql:quickload :jqn :silent t)
 ; (in-package :jqn)
 
+   ; (jqn:jsnout (jqn:jsnqryf "./sample.json" :db t (|| #{_ _id}) :db t) :indent t)
 
 (defun main ()
   (print
-    ; (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3,
-    ;                                               \"c\": { \"d\": 89 }}}")
-    ;           :q (*new
-    ;                (@_ :a/c/d)
-    ;                (@_ :a/b)
-    ;                )
-    ;           :db t)
-   (jqn:jsnout
-     (jqn:jsnqryf "./sample.json" :db t
-        :q (|| #{_ _id}
-               ; { (a 1) (b 2)}
+    ; (jqn::preproc/$$itr
+    ;     '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
+    ;       (:% "xBC" (print _)) (:% "ABC" _)))
+    (mapcar #'print
+     (jqn::preproc/**filter
+        '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
+          (% "ABC" (print _)) (:% "ABC" _))))
 
-               ; {a b}
-               ; (<> [things])
-               ; [id]
-               )
-        :db t
-        )
-        :indent t)
-   ))
+   ; (jqn:jsnout (jqn:jsnqryf "./sample.json" (||
+
+   ;                                            #{(:?@_id (print _))}
+   ;                                            ; #{(:? _id (print _))}
+   ;                                            ; #{(?@_id print _)}
+   ;                                            )
+   ;                          :db t
+   ;                          ) :indent t)
+
+   )
+  )
 
 (main)
 

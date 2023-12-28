@@ -40,8 +40,7 @@ examples:
     (error (e) (exit-with-msg 2 "jqn: failed to read json file: ~a~%~a" f e))))
 
 (defun jqn/parse-query (args)
-  (handler-case (let ((all (read-all-str args)))
-                  (if (= (length all) 1) (car all) `(|| ,@all)))
+  (handler-case `(|| ,@(read-all-str args))
     (error (e) (exit-with-msg 3 "jqn: failed to parse qry:~%~a" (mkstr e)))))
 
 (defun jqn/run-files (opts q files)

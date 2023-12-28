@@ -1,6 +1,17 @@
 (in-package #:jqn-tests)
 
-(plan 6)
+(plan 7)
+
+(subtest "utils"
+  (is (jqn::unpack-mode "?@fxfx")    '(:? "fxfx"))
+  (is (jqn::unpack-mode '?@fxfx)     '(:? fxfx))
+  (is (jqn::unpack-mode '(?@fxfx))   '(:? (fxfx)))
+  (is (jqn::unpack-mode '(:? fxfx))  '(:? fxfx))
+  (is (jqn::unpack-mode '(:?@fxfx))  '(:? (:fxfx)))
+  (is (jqn::unpack-mode '(fxfx :ss)) '(:+ (fxfx :ss)))
+  (is (jqn::unpack-mode "fxfx")      '(:+ "fxfx"))
+  (is (jqn::unpack-mode 'fxfx :y)    '(:y fxfx))
+  (is (jqn::unpack-mode 'fxfx :y)    '(:y fxfx)))
 
 (subtest "io"
   (is (jqn:ldnout *test-data-raw*) *test-data-raw* :test #'equalp)
@@ -15,15 +26,29 @@
       (string-downcase (jqn::jsnout* *test-data-2-raw*))))
 
 (subtest "jqn qry identities"
-
   (is (jqn::jsnout* (jqn:jsnqryf *test-data-fn* _))
-      (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (*> _))))
+      (jqn::jsnout* (jqn:jsnqryf *test-data-fn* ($* _))))
   (is (jqn::jsnout* (jqn:jsnqryf *test-data-fn* _))
       (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (*$ _))))
+  (is (jqn::jsnout* (jqn:jsnqryf *test-data-fn* _))
+      (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (** _))))
   (is (jqn::jsnout* (jqn:jsnqryf *test-data-2-fn* _))
       (jqn::jsnout* (jqn:jsnqryf *test-data-2-fn* ($$ _)))))
 
 (subtest "jqn qry 1"
+
+  (is (jqn::preproc/$$
+        '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
+          (% "ABC" (print _)) (:% "ABC" _)))
+      '((:+ "ccc" :_) (:+ "ddd" :_) (:+ "IIUJ" :_) (:% "UU" :_) (:? "aa" :_)
+       (:? "bb" :_) (:+ "cc" (PROGN _)) (:+ "%" "ABC") (:% "ABC" _)))
+  (is (jqn::preproc/**
+        '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
+          (% "ABC" (print _)) (:% "ABC" _)))
+        '((:? (CCC JQN::_)) (:? (JQN:ISUB? JQN::_ "ddd")) (:? (JQN:ISUB? JQN::_ "IIUJ"))
+          (:% (JQN:ISUB? JQN::_ "UU")) (:? (AA JQN::_)) (:? (BB JQN::_))
+          (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _))) (:% (JQN:ISUB? JQN::_ "ABC"))))
+
   (is (jqn:ldnout (jqn:jsnqryf *test-data-fn*
         (*$  _id (+@things (*$ name id))
                  (+@msg (sdwn _)))))
@@ -42,7 +67,7 @@
          :test #'equalp)
 
   (is-str (jqn::jsnout* (jqn:jsnqryf *test-data-fn*
-                          (*>  _id (+@things (*> name id)) (+@msg (sdwn _)))))
+                          ($*  _id (+@things ($* name id)) (+@msg (sdwn _)))))
       "[\"65679d23d38d711eaf999e89\",[\"Chris\",0],\"this is a message\",\"65679d23fe33bc4c240675c0\",[\"Winters\",10,\"Haii\",11,\"Klein\",12],\"hello, undefined! you have 1 unread messages.\",\"65679d235b4143d2932ea17a\",[\"Star\",31,\"Ball\",32],\"hello, undefined! you have 5 unread messages.\"]")
 
   (is (jqn:ldnout (jqn:jsnqryf *test-data-fn* (*$ things)))
@@ -60,7 +85,7 @@
 (subtest "jqn qry 2"
   (is-str (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (*$ _ -@_id -@things)))
 "[{\"index\":0,\"msg\":\"this is a message\",\"fave\":\"strawberry\"},{\"index\":1,\"msg\":\"Hello, undefined! You have 1 unread messages.\",\"fave\":\"strawberry\"},{\"msg\":\"Hello, undefined! You have 5 unread messages.\",\"fave\":\"blueberry\"}]")
-  (is-str (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (*> (things (jqn:*ind (*$ _ -@extra) 0)))))
+  (is-str (jqn::jsnout* (jqn:jsnqryf *test-data-fn* ($* (things (jqn:*ind (*$ _ -@extra) 0)))))
 "[{\"id\":0,\"name\":\"Chris\"},{\"id\":10,\"name\":\"Winters\"},{\"id\":31,\"name\":\"Star\"}]"))
 
 (subtest "jqn qry reader macros"

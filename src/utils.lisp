@@ -3,7 +3,21 @@
 ; YASON DOCS https://phmarek.github.io/yason/
 
 (defun ct/kv/key (s)
-  (typecase s (string s) (symbol (sdwn (mkstr s))) (t `(mkstr ,s))))
+  (typecase s (string s) (symbol (sdwn (mkstr s))) (number (mkstr s)) (cons `(mkstr ,s))))
+
+(defun unpack-mode (o &optional (default :+) merciful)
+  (labels ((valid-mode (m) (member m *qmodes* :test #'eq))
+           (repack- (s s*) (etypecase s (symbol (psymb (symbol-package s) (subseq s* 2)))
+                                        (string (subseq s* 2))))
+           (unpack-cons (cns) (if (valid-mode (car cns)) cns
+                                  (dsb (m s) (unpack- (car cns)) `(,m (,s ,@(cdr cns))))))
+           (unpack- (s &aux (s* (mkstr s)) (splt (subx? s* "@")))
+             (if (and splt (= splt 1)) (let ((m (kv (subseq s* 0 1)))) ; nil -> :nil
+                                         (if (or merciful (valid-mode m)) (list m (repack- s s*))
+                                             (error "jqn: invalid mode in: ~a" s)))
+                                       (list default s))))
+    (typecase o (symbol (unpack- o)) (string (unpack- o)) (cons (unpack-cons o))
+      (otherwise (error "jqn: bad mode thing to have mode: ~a" o)))))
 
 (defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil" nil)
 (defmacro ?? (fx arg &rest args) ; ?!
@@ -33,7 +47,7 @@
 
 (defun flt? (f &optional d) "f if float; or d" (if (floatp f) f d))
 (defun int? (i &optional d) "i if int; or d" (if (integerp i) i d))
-(defun kv?  (k &optional d) "k if hash-table; or d" (if (hash-table-p k) d))
+(defun kv?  (k &optional d) "k if hash-table; or d" (if (hash-table-p k) k d))
 (defun lst? (l &optional d) "l if list; or d" (if (listp l) l d))
 (defun num? (n &optional d) "n if number; or d" (if (numberp n) n d))
 (defun str? (s &optional d) "s if string; or d" (if (stringp s) s d))
@@ -55,20 +69,19 @@
 (defmacro fmt (s &rest rest) "format to string."
   (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
 
-(defun pref? (s pref &aux (s (mkstr s)))
-  (declare (string s pref)) "t if s starts with pref"
-  (and (<= (length pref) (length s))
-       (string= pref s :end2 (length pref))))
-(defun ipref? (s suf) "case insensitive pref?"
-  (pref? (sup s) (sup suf)))
+(defun pref? (s pref &optional d &aux (s (mkstr s)))
+  (declare (string s pref)) "s if s starts with pref; or d"
+  (if (and (<= (length pref) (length s))
+           (string= pref s :end2 (length pref)))
+       s d))
+(defun ipref? (s suf &optional d) "case insensitive pref?" (pref? (sup s) (sup suf) d))
 
-(defun suf? (s suf)
-  (declare (string s suf)) "t if s ends with suf"
-  (pref? (reverse s) (reverse suf)))
-(defun isuf? (s suf) "case insensitive suf?"
-  (suf? (sup s) (sup suf)))
+(defun suf? (s suf &optional d)
+  (declare (string s suf)) "s if s ends with suf; or d"
+  (pref? (reverse s) (reverse suf) d))
+(defun isuf? (s suf &optional d) "case insensitive suf?" (suf? (sup s) (sup suf) d))
 
-(defun sub? (s sub)
+(defun subx? (s sub)
   (declare (optimize speed (safety 2)) (string sub s))
   "returns index where substring matches s from left to right. otherwise nil."
   (loop with sub0 of-type character = (char sub 0)
@@ -76,15 +89,17 @@
         for i from 0 repeat (1+ (- (length s) lc))
         if (and (eq sub0 (char s i)) ; this is more efficient
                 (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
-        do (return-from sub? i)))
-(defun isub? (s sub) "case insensitive check is sub is substring of s."
-  (sub? (sup s) (sup sub)))
+        do (return-from subx? i)))
+(defun isubx? (s sub) "case insensitive subx?"
+  (subx? (sup s) (sup sub)))
+(defun sub? (s sub &optional d) "s if sub is substring of s; ord" (if (subx? s sub) s d))
+(defun isub? (s sub &optional d) "case insensitive sub?" (if (isubx? s sub) s d))
 
 (defun split (s x &key prune &aux (lx (length x))) ; todo split to vector
   (declare (optimize speed) (string x s) (boolean prune))
   "split string at substring. prune removes empty strings."
   (labels ((lst (s) (typecase s (list s) (t (list s))))
-           (splt (s &aux (i (sub? s x)))
+           (splt (s &aux (i (subx? s x)))
              (if i (cons (subseq s 0 i) (lst (splt (subseq s (+ lx i))))) s)))
     (let ((res (lst (splt s))))
       (if prune (remove-if (lambda (s) (zerop (length s))) res)
@@ -109,6 +124,10 @@
 (defun tail (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "last n elements"
   (subseq s (max 0 (- l n)) l))
+(defun size (l) "length of sequence l or number of keys in kv l"
+  (etypecase l (sequence (length l)) (hash-table (hash-table-count l))))
+(defun size? (l &optional d) "length of sequence l or number of keys in kv l"
+  (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise l)))
 
 (defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
 (defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
@@ -148,7 +167,7 @@ non-vectors are included in their position"
                                        (otherwise (vex a res)))))
   res)
 (defun *$cat (&rest rest &aux (res (make-hash-table :test #'equal)))
-  "for all vectors in rest; for all hts in these vectors; copy all keys into new kv. left to right"
+  "for all vectors in rest; for all kvs in these vectors; copy all keys into new kv. left to right"
   (loop for v of-type vector in rest
         do (loop for kv of-type hash-table across v
                  do (loop for k being the hash-keys of ($make kv)
@@ -163,4 +182,26 @@ non-vectors are included in their position"
                          (otherwise (return-from rec (or o d))))))
     (rec o (split pp "/"))))
 (defmacro $ (o k &optional d) "get key k from o" `($rget ,o (ct/kv/key ,k) ,d))
+
+(defmacro something? (v &body body) ; TODO: recursive strip with ext function
+  (declare (symbol v))
+  `(typecase ,v (sequence (when (> (length ,v) 0) (progn ,@body)))
+                (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
+                (otherwise (when ,v (progn ,@body)))))
+(defun is? (k &optional d)
+  "k if k is not nil ,not an empty sequence, and not an empty hash-table; or d"
+  (if (something? k t) k d))
+
+; list/vector: remove if not someting
+; hash-table: remove key if value not something
+(defun >< (o)
+  "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
+  (typecase o
+    (sequence (remove-if-not (lambda (o*) (something? o* t)) o))
+    (hash-table (loop with keys = (list)
+                      for k being the hash-keys of o using (hash-value v)
+                      do (unless (something? v t) (push k keys))
+                      finally (loop for k in keys do (remhash k o)))
+                o)
+    (otherwise o)))
 
