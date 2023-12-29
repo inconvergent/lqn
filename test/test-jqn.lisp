@@ -45,9 +45,12 @@
   (is (jqn::preproc/**
         '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
           (% "ABC" (print _)) (:% "ABC" _)))
-        '((:? (CCC JQN::_)) (:? (JQN:ISUB? JQN::_ "ddd")) (:? (JQN:ISUB? JQN::_ "IIUJ"))
-          (:% (JQN:ISUB? JQN::_ "UU")) (:? (AA JQN::_)) (:? (BB JQN::_))
-          (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _))) (:% (JQN:ISUB? JQN::_ "ABC"))))
+      `((:? (CCC JQN::_)) (:? (JQN:ISUB? JQN::_ "ddd"))
+       (:? (JQN:SUB? JQN::_ "IIUJ")) (:% (JQN:SUB? JQN::_ "UU")) (:? (AA JQN::_))
+       (:? (BB JQN::_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
+       (:% (JQN:SUB? JQN::_ "ABC")))
+
+      )
 
   (is (jqn:ldnout (jqn:jsnqryf *test-data-fn*
         (*$  _id (+@things (*$ name id))

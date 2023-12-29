@@ -1,7 +1,8 @@
 (in-package :jqn)
 
 (defun verbose? (opts) (not (null (member :-v opts :test #'equal))))
-(defun indent? (opts) (null (member :-m opts :test #'equal)))
+(defun help? (opts)    (member :-h opts :test #'equal))
+(defun indent? (opts)  (null (member :-m opts :test #'equal)))
 (defun format? (opts &optional (d :json))
   (cond ((member :-l opts :test #'eq) :ldn)
         ((member :-t opts :test #'eq) :txt)
@@ -9,16 +10,17 @@
         (t d)))
 
 (defmacro exit-with-msg (i &rest rest) (declare (fixnum i))
-  `(progn (format *error-output* ,@rest) (terminate ,i t)))
+  (if (< i 1) `(progn (format *standard-output* ,@rest) (terminate ,i t))
+              `(progn (format *error-output* ,@rest) (terminate ,i t))))
 
 (defun split-opts-args (args)
-  (labels ((do-explode (o) (loop for s across (subseq o 1) collect (kv (mkstr "-" s))))
-           (explode-opts (opts) (loop for o in opts
-                                      if (= (length o) 2) nconc `(,(kv o))
-                                      else nconc (do-explode o))))
+  (labels ((expl- (o) (loop for s across (subseq o 1) collect (kv (mkstr "-" s))))
+           (explode- (opts) (loop for o in opts if (= (length o) 2) nconc `(,(kv o))
+                                                else nconc (expl- o))))
    (loop named opts for k in args for i from 0
-        if (pref? k "-") collect k into opts
-        else do (return-from opts (values (explode-opts opts) (subseq args i))))))
+         if (pref? k "-") collect k into opts
+         else do (return-from opts (values (explode- opts) (subseq args i)))
+         finally (return-from opts (values (explode- opts) nil)))))
 
 (defun sh/out (d opts res)
   (ecase (format? opts d)

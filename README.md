@@ -46,10 +46,15 @@ The following operators have special behaviour. You can also write generic CL co
 anywhere you can use an operator. Including the functions further down.
 
 ### Pipe Operator
-Pipe is the default operator in all queries.
-
+Pipe is the operator that surrounds all queries by default.
   - ` (|| ..)` pipe the results from the first operator into the second etc.
     Returns the result of the last operator.
+
+For convenience pipe has the following default translations:
+  - `fx` (`symbol`): to `(*map (fx _))`; map `fx` across all items.
+  - `:word` (`keyword`): to `[(isub? _ "word")]` to filter by `"word"`.
+  - `"Word"` (`string`): to `[(sub? _ "Word")]` to filter all items by this string with case.
+  - `(expr)`: to itself.
 
 ### Map/Reduce Operators
   - `(*map fx)`: map `#'fx` current `(dat)`.
@@ -67,8 +72,8 @@ Pipe is the default operator in all queries.
 
 ### `kv` Selectors
 A `kv` Selector is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
-`#{}`.  Only the key is required. If `expr` is not provided the `expr` is the
-value of the `key`:
+`#{}`.  Only the key is required. If `expr` is not provided the `expr` is `_`,
+that is: the value of the `key`.
 
 The modes are:
   - `+`: always include this selector (always evaluate `expr` if defined) [default]
@@ -139,6 +144,7 @@ But for convenience there are a few special functions defined in `jqn`.
 
 ### Operator Context
 Available in most operators.
+ - `_` or `(dat)`: the current data object.
  - `($_ k [default])`: this key from current data object.
  - `(cnt [k])`: counts from `k`, or `0`.
  - `(num)`: length of the `vector` being iterated.
@@ -151,6 +157,7 @@ Available in most operators.
  - `(fmt s)`: get printed representation of `s`.
  - `(out f ..)`: format f to `*standard-out*` with these args.
  - `(out s)`: output printed representation of `s` to `*standard-out*`. return `nil`.
+ - `(size? o [d])`: length of `vector` or number of keys in `kv`; or `d`.
 
 ### Strings
  - `(mkstr a ..)`: stringify and concatenate all arguments.
@@ -169,7 +176,7 @@ Available in most operators.
  - `($ kv k [default])`: get key `k` from `kv`. Equivalent to `gethash`.
  - `($_ k ..)`: is equivalent to `($ _ k ..)`.
  - `($cat ..)`: add all keys from these `kvs` to a new `kv`. left to right.
- - `($new (k1 expr1) ..)`: new `kv` with these keys and expressions.
+ - `($new :k1 expr1 ..)`: new `kv` with these keys and values.
 
 ### Vectors
  - `(*cat a ..)`: concatenate all `vectors` in these `vectors`. Non-vectors are included in their position.
@@ -189,6 +196,7 @@ Available in most operators.
  - `(str? s)`: `s` if it is a `string`.
  - `(vec? v)`: `v` if it is a `vector`.
  - `(seq? s)`: `s` if it is `str`, `vector` or `list`.
+ - `(str! s)`: `s` coerce `s` to string.
 
 ## Options
 

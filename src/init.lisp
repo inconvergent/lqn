@@ -7,6 +7,7 @@
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :flt? :int? :kv? :lst? :num? :seq? :str? :vec? :is?
                  :int!? :flt!? :num!?
+                 :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9
                  :fmt :out))
 
 (defun cmd-args ()

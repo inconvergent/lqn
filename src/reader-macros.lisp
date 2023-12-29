@@ -19,9 +19,7 @@ next symb: ~a" char (peek-char t stream t nil t)))
               (nxt (peek-)))
           (cond ((char= nxt sep) (discard-))
                 ((and del (char= nxt del)) nil)
-                (t nxt)
-                ; (t (error "Unexpected next char: ~S" nxt)) ; why was this here?
-                )
+                (t nxt)) ; (t (error "Unexpected next char: ~S" nxt)) ; why was this here?
           o))))
 
 (defun -read-left-curly-brace (stream char) ; {} ; sel
@@ -45,8 +43,6 @@ next symb: ~a" char (peek-char t stream t nil t)))
       (loop for o = (read-next-object #\Space #\} stream)
             while o collect o into objects
             finally (return `(*$ ,@objects))))))
-
-; (make-dispatch-macro-character #\o)
 
 (set-dispatch-macro-character #\# #\[ ; #[] ; sel
   (lambda (stream subchar arg)

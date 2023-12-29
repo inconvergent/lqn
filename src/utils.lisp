@@ -28,6 +28,15 @@
   (declare (list conf) (keyword k)) "get k from config"
   (if (or silent hit) hit (warn "JQN: missing conf key: ~a~%conf: ~s" k conf)))
 
+(defun group (n l) (declare (list l) (fixnum n)) "group l into lists of n elements."
+  (if (< n 1) (error "group error: group size is smaller than 1"))
+  (labels ((rec (l acc)
+             (let ((rest (nthcdr n l)))
+               (if (consp rest)
+                   (rec rest (cons (subseq l 0 n) acc))
+                   (nreverse (cons l acc))))))
+    (if l (rec l nil) nil)))
+
 (defun mkstr (&rest args) "coerce all arguments to a string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
 (defun strcat (&rest rest) "concatenate all strings in sequences rest"
@@ -54,6 +63,10 @@
 (defun vec? (v &optional d) "v if vector; or d" (if (vectorp v) v d))
 (defun seq? (s &optional d) "s if sequence; or d" (or (lst? s) (str? s) (vec? s) d))
 
+(defun str! (s)
+  "coerce to string."
+  (typecase s (string s) (symbol (sdwn s)) (otherwise (mkstr s))))
+
 (defun int!? (i &optional d) "i as int if it can be parsed as int; or d"
   (handler-case (or (int? i) (int? (read-from-string i nil nil)) d) (error () d)))
 (defun flt!? (f &optional d) "f as float if it can be parsed as float; or d"
@@ -69,20 +82,19 @@
 (defmacro fmt (s &rest rest) "format to string."
   (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
 
-(defun pref? (s pref &optional d &aux (s (mkstr s)))
+(defun pref? (s pref &optional d &aux (s (str! s)) (pref (str! pref)))
   (declare (string s pref)) "s if s starts with pref; or d"
   (if (and (<= (length pref) (length s))
            (string= pref s :end2 (length pref)))
        s d))
 (defun ipref? (s suf &optional d) "case insensitive pref?" (pref? (sup s) (sup suf) d))
 
-(defun suf? (s suf &optional d)
-  (declare (string s suf)) "s if s ends with suf; or d"
-  (pref? (reverse s) (reverse suf) d))
+(defun suf? (s suf &optional d &aux (s (str! s)) (suf (str! suf)))
+  "s if s ends with suf; or d" (pref? (reverse s) (reverse suf) d))
 (defun isuf? (s suf &optional d) "case insensitive suf?" (suf? (sup s) (sup suf) d))
 
-(defun subx? (s sub)
-  (declare (optimize speed (safety 2)) (string sub s))
+(defun subx? (s sub &aux (s (str! s)) (sub (str! sub)))
+  (declare (optimize speed (safety 2)))
   "returns index where substring matches s from left to right. otherwise nil."
   (loop with sub0 of-type character = (char sub 0)
         with lc = (length sub)
@@ -95,8 +107,9 @@
 (defun sub? (s sub &optional d) "s if sub is substring of s; ord" (if (subx? s sub) s d))
 (defun isub? (s sub &optional d) "case insensitive sub?" (if (isubx? s sub) s d))
 
-(defun split (s x &key prune &aux (lx (length x))) ; todo split to vector
-  (declare (optimize speed) (string x s) (boolean prune))
+
+(defun split (s x &key prune &aux (s (str! s)) (x (str! x)) (lx (length x)))
+  (declare (optimize speed) (boolean prune))
   "split string at substring. prune removes empty strings."
   (labels ((lst (s) (typecase s (list s) (t (list s))))
            (splt (s &aux (i (subx? s x)))
@@ -104,8 +117,8 @@
     (let ((res (lst (splt s))))
       (if prune (remove-if (lambda (s) (zerop (length s))) res)
                 res))))
-(defun repl (s from to)
-  (declare (string s to from)) "replace from with to in s"
+(defun repl (s from to &aux (s (str! s)) (from (str! from)) (to (str! to)))
+  "replace from with to in s"
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to))
                            (split s from)))))
     (subseq s 0 (- (length s) (length to)))))
@@ -116,7 +129,7 @@
            (make-array size :fill-pointer 0 :element-type type :adjustable t)))
 
 (defun ensure-vector (v) (declare (sequence v)) "list to vector; or vector"
-  (etypecase v (vector v) (list (coerce v 'vector))))
+  (etypecase v (vector v) (list (coerce v 'vector)) (atom `#(,v))))
 
 (defun head (s &optional (n 10)) ; TODO: negative indices, tests
   (declare (sequence s) (fixnum n)) "first n elements"
@@ -127,7 +140,7 @@
 (defun size (l) "length of sequence l or number of keys in kv l"
   (etypecase l (sequence (length l)) (hash-table (hash-table-count l))))
 (defun size? (l &optional d) "length of sequence l or number of keys in kv l"
-  (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise l)))
+  (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
 
 (defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
 (defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))

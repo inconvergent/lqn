@@ -1,12 +1,3 @@
-#### JQN:
-
-```
-:missing:todo:
-
- ; JQN:||
- ;   [symbol]
-```
-
 #### JQN:$
 
 ```
@@ -18,54 +9,6 @@
  ;   Documentation:
  ;     get key k from o
  ;   Source file: /data/x/jqn/src/utils.lisp
-```
-
-#### JQN:$_
-
-```
-:missing:todo:
-
- ; JQN:$_
- ;   [symbol]
-```
-
-#### JQN:$ADD%
-
-```
- ; JQN:$ADD%
- ;   [symbol]
- ; 
- ; $ADD% names a macro:
- ;   Lambda-list: (LFT K V)
- ;   Documentation:
- ;     do (setf lft v) if v is not nil
- ;   Source file: /data/x/jqn/src/qry.lisp
-```
-
-#### JQN:$ADD+
-
-```
- ; JQN:$ADD+
- ;   [symbol]
- ; 
- ; $ADD+ names a macro:
- ;   Lambda-list: (LFT K V &OPTIONAL D)
- ;   Documentation:
- ;     do (setf lft (or v default))
- ;   Source file: /data/x/jqn/src/qry.lisp
-```
-
-#### JQN:$ADD?
-
-```
- ; JQN:$ADD?
- ;   [symbol]
- ; 
- ; $ADD? names a macro:
- ;   Lambda-list: (LFT K V)
- ;   Documentation:
- ;     do (setf lft v) if ($_ k) is not nil
- ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:$CAT
@@ -81,67 +24,6 @@
  ;   Documentation:
  ;     add all keys from all hash tables in rest. left to right.
  ;   Source file: /data/x/jqn/src/utils.lisp
-```
-
-#### JQN:$DEL
-
-```
- ; JQN:$DEL
- ;   [symbol]
- ; 
- ; $DEL names a macro:
- ;   Lambda-list: (LFT K V)
- ;   Documentation:
- ;     delete key
- ;   Source file: /data/x/jqn/src/qry.lisp
-```
-
-#### JQN:$NEW
-
-```
-:missing:todo:
-
- ; JQN:$NEW
- ;   [symbol]
-```
-
-#### JQN:\*ADD%
-
-```
- ; JQN:*ADD%
- ;   [symbol]
- ; 
- ; *ADD% names a macro:
- ;   Lambda-list: (LFT K V)
- ;   Documentation:
- ;     do (vex v lft) if v is not nil or empty
- ;   Source file: /data/x/jqn/src/qry.lisp
-```
-
-#### JQN:\*ADD+
-
-```
- ; JQN:*ADD+
- ;   [symbol]
- ; 
- ; *ADD+ names a macro:
- ;   Lambda-list: (LFT K V &OPTIONAL D)
- ;   Documentation:
- ;     do (vex (or v default) lft)
- ;   Source file: /data/x/jqn/src/qry.lisp
-```
-
-#### JQN:\*ADD?
-
-```
- ; JQN:*ADD?
- ;   [symbol]
- ; 
- ; *ADD? names a macro:
- ;   Lambda-list: (LFT K V)
- ;   Documentation:
- ;     do (vex v lft) if (gethash k dat) is not nil
- ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
 #### JQN:\*CAT
@@ -173,15 +55,6 @@
  ;   Documentation:
  ;     get this index from vector.
  ;   Source file: /data/x/jqn/src/utils.lisp
-```
-
-#### JQN:\*NEW
-
-```
-:missing:todo:
-
- ; JQN:*NEW
- ;   [symbol]
 ```
 
 #### JQN:\*SEL
@@ -218,15 +91,6 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:<>
-
-```
-:missing:todo:
-
- ; JQN:<>
- ;   [symbol]
-```
-
 #### JQN:><
 
 ```
@@ -254,24 +118,6 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:CNT
-
-```
-:missing:todo:
-
- ; JQN:CNT
- ;   [symbol]
-```
-
-#### JQN:CTX
-
-```
-:missing:todo:
-
- ; JQN:CTX
- ;   [symbol]
-```
-
 #### JQN:D?
 
 ```
@@ -284,15 +130,6 @@
  ;   Documentation:
  ;     describe symbol.
  ;   Source file: /data/x/jqn/src/init.lisp
-```
-
-#### JQN:FI
-
-```
-:missing:todo:
-
- ; JQN:FI
- ;   [symbol]
 ```
 
 #### JQN:FLT!?
@@ -334,15 +171,6 @@
  ;   Documentation:
  ;     format to string.
  ;   Source file: /data/x/jqn/src/utils.lisp
-```
-
-#### JQN:FN
-
-```
-:missing:todo:
-
- ; JQN:FN
- ;   [symbol]
 ```
 
 #### JQN:HEAD
@@ -586,15 +414,6 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:NUM
-
-```
-:missing:todo:
-
- ; JQN:NUM
- ;   [symbol]
-```
-
 #### JQN:NUM!?
 
 ```
@@ -636,15 +455,6 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:PAR
-
-```
-:missing:todo:
-
- ; JQN:PAR
- ;   [symbol]
-```
-
 #### JQN:PREF?
 
 ```
@@ -652,7 +462,7 @@
  ;   [symbol]
  ; 
  ; PREF? names a compiled function:
- ;   Lambda-list: (S PREF &OPTIONAL D &AUX (S (MKSTR S)))
+ ;   Lambda-list: (S PREF &OPTIONAL D &AUX (S (STR! S)) (PREF (STR! PREF)))
  ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
@@ -708,9 +518,9 @@
  ;   [symbol]
  ; 
  ; REPL names a compiled function:
- ;   Lambda-list: (S FROM TO)
- ;   Derived type: (FUNCTION (STRING STRING STRING)
- ;                  (VALUES SIMPLE-STRING &OPTIONAL))
+ ;   Lambda-list: (S FROM TO &AUX (S (STR! S)) (FROM (STR! FROM))
+ ;                 (TO (STR! TO)))
+ ;   Derived type: (FUNCTION (T T T) (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     replace from with to in s
  ;   Source file: /data/x/jqn/src/utils.lisp
@@ -759,6 +569,20 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
+#### JQN:SIZE?
+
+```
+ ; JQN:SIZE?
+ ;   [symbol]
+ ; 
+ ; SIZE? names a compiled function:
+ ;   Lambda-list: (L &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     length of sequence l or number of keys in kv l
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:SPLIT
 
 ```
@@ -766,11 +590,26 @@
  ;   [symbol]
  ; 
  ; SPLIT names a compiled function:
- ;   Lambda-list: (S X &KEY PRUNE &AUX (LX (LENGTH X)))
- ;   Derived type: (FUNCTION (STRING STRING &KEY (:PRUNE BOOLEAN))
+ ;   Lambda-list: (S X &KEY PRUNE &AUX (S (STR! S)) (X (STR! X))
+ ;                 (LX (LENGTH X)))
+ ;   Derived type: (FUNCTION (T T &KEY (:PRUNE BOOLEAN))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     split string at substring. prune removes empty strings.
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
+#### JQN:STR!
+
+```
+ ; JQN:STR!
+ ;   [symbol]
+ ; 
+ ; STR! names a compiled function:
+ ;   Lambda-list: (S)
+ ;   Derived type: (FUNCTION (T) *)
+ ;   Documentation:
+ ;     coerce to string.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -823,8 +662,8 @@
  ;   [symbol]
  ; 
  ; SUBX? names a compiled function:
- ;   Lambda-list: (S SUB)
- ;   Derived type: (FUNCTION (STRING STRING)
+ ;   Lambda-list: (S SUB &AUX (S (STR! S)) (SUB (STR! SUB)))
+ ;   Derived type: (FUNCTION (T T)
  ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
  ;   Documentation:
  ;     returns index where substring matches s from left to right. otherwise nil.
@@ -838,8 +677,8 @@
  ;   [symbol]
  ; 
  ; SUF? names a compiled function:
- ;   Lambda-list: (S SUF &OPTIONAL D)
- ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T) *)
+ ;   Lambda-list: (S SUF &OPTIONAL D &AUX (S (STR! S)) (SUF (STR! SUF)))
+ ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
  ;     s if s ends with suf; or d
  ;   Source file: /data/x/jqn/src/utils.lisp

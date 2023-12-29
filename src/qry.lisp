@@ -1,6 +1,11 @@
 (in-package :jqn)
 
-; jsn -t use tqn output
+(defmacro ind-getters ()
+  `(progn ,@(loop for i from 0 to 9 collect
+              `(defun ,(symb :* i) (v &optional (k 0))
+                 (declare (sequence v) (fixnum k))
+                 (*ind v (+ k ,i))))))
+(ind-getters)
 
 (defun path-to-key (pp) (first (last (split pp "/"))))
 (defmacro $add+ (lft k v &optional d)
@@ -65,7 +70,9 @@
 (defun preproc/pipe (qq)
   (loop for q in qq collect
     (if (all? q) (kv q)
-      (typecase q (keyword `(** ,(ct/kv/key q))) (string `(** ,q)) (number `(** ,(ct/kv/key q)))
+      (typecase q (keyword `(** ,q))
+                  (string `(** ,q))
+                  (number `(** ,(ct/kv/key q)))
                   (symbol `(*map ,q)) (cons q)
                   (otherwise (error "||jqn: invalid clause: ~a" q))))))
 
@@ -85,8 +92,10 @@
   (labels
     ((unpack- (o &aux (k (unpack-mode o m)) (ck (car k)) (sk (second k)))
        (etypecase (second k) (keyword `(,ck (isub? _ ,(ct/kv/key sk))))
-                             (string `(,ck (isub? _ ,sk)))
-                             (cons `(,ck ,@(cdr k))) (symbol `(,ck (,sk _))))))
+                             (string `(,ck (sub? _ ,sk)))
+                             (number `(,ck (sub? _ ,(ct/kv/key sk))))
+                             (symbol `(,ck (,sk _)))
+                             (cons `(,ck ,@(cdr k))))))
     (let* ((q* (remove-if #'all? q)) (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 
@@ -94,7 +103,7 @@
 (defun compile/*new (d) `(vector ,@(loop for expr in d collect expr)))
 (defun compile/$new (d)
   (awg (kv) `(let ((,kv ($make)))
-               ,@(loop for (kk expr) in (strip-all d)
+               ,@(loop for (kk expr) in (group 2 d)
                        collect `(setf (gethash ,(ct/kv/key kk) ,kv) ,expr))
                ($nil ,kv))))
 
@@ -110,7 +119,7 @@
   (awg (i ires dat)
     (labels ((do-map (vv curr expr)
                `(loop with ,ires = (mav)
-                      for ,curr across ,vv for ,i from 0
+                      for ,curr across (ensure-vector ,vv) for ,i from 0
                       do (labels (,@(*sel/labels vv curr i))
                            (*add+ ,ires nil
                              ,(funcall rec `((:dat . ,curr) ,@conf) expr)))
@@ -129,7 +138,7 @@
                        (error "*fld: unexpected lhs/rhs: ~a/~a" l r))
                (unless (consp expr) (error "*fld: unexpected expr: ~a" expr))
                `(loop with ,l = ,init
-                      for ,r across ,dat* for ,i from 0
+                      for ,r across (ensure-vector ,dat*) for ,i from 0
                       do (labels (,@(*sel/labels dat* r i))
                            (setf ,l ,(funcall rec `((:dat . ,r) ,@conf) expr)))
                       finally (return ,l))))
@@ -155,7 +164,7 @@
   (awg (i ires dat vv)
     `(loop with ,ires of-type vector = (mav)
            with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
-           for ,dat across ,vv for ,i from 0
+           for ,dat across (ensure-vector ,vv) for ,i from 0
            do (labels (,@(*sel/labels vv dat i))
                 ,(when (car- all? d) `(*add+ ,ires nil ,dat))
                 ,@(loop for (m kk expr) in (strip-all d)
@@ -167,7 +176,7 @@
   (awg (i ires kv dat vv)
     `(loop with ,ires of-type vector = (mav)
            with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
-           for ,i from 0 for ,dat of-type hash-table across ,vv
+           for ,i from 0 for ,dat of-type hash-table across (ensure-vector ,vv)
            for ,kv of-type hash-table = ,(if (car- all? d) `($make ,dat) `($make))
            do (labels (,@(*sel/labels vv dat i))
                 ,@(loop for (m kk expr) in (strip-all d)
@@ -185,7 +194,7 @@
                  (if res res '(nil)))))
       `(loop with ,ires of-type vector = (mav)
              with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
-             for ,dat across ,vv for ,i from 0
+             for ,dat across (ensure-vector ,vv) for ,i from 0
              do (labels (,@(*sel/labels vv dat i))
                   (when (and (or ,(car- all? d) ,@(get-modes :? :%)
                                  (and ,@(get-modes :+)))
