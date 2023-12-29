@@ -1,11 +1,11 @@
 (in-package :jqn)
 
-(defmacro ind-getters ()
-  `(progn ,@(loop for i from 0 to 9 collect
+(defmacro make-ind-getters (n)
+  `(progn ,@(loop for i from 0 to n collect
               `(defun ,(symb :* i) (v &optional (k 0))
                  (declare (sequence v) (fixnum k))
                  (*ind v (+ k ,i))))))
-(ind-getters)
+(make-ind-getters 9)
 
 (defun path-to-key (pp) (first (last (split pp "/"))))
 (defmacro $add+ (lft k v &optional d)
@@ -108,12 +108,13 @@
                ($nil ,kv))))
 
 (defun labels/$_ (dat) `(($_ (k &optional d) ($ ,dat k d))))
-(defun *sel/labels (par dat i)
-  `((par () ,par) (cnt (&optional (k 0)) (+ ,i k))
-    (num (&optional (d 0)) (typecase ,par (sequence (length ,par))
-                                          (hash-table (hash-table-count ,par))
-                                          (otherwise d)))
-     ,@(labels/$_ dat)))
+(defmacro op/labels ((par dat i) &body body)
+  `(labels ((par () ,par) (cnt (&optional (k 0)) (+ ,i k))
+            (num (&optional (d 0)) (typecase ,par (sequence (length ,par))
+                                                  (hash-table (hash-table-count ,par))
+                                                  (otherwise d)))
+            ,@(labels/$_ dat))
+     ,@body))
 
 (defun compile/*map (rec conf d &aux (dat* (gk conf :dat)))
   (awg (i ires dat)
@@ -121,7 +122,7 @@
     (labels ((do-map (vv curr expr)
                `(loop with ,ires = (mav)
                       for ,curr across (ensure-vector ,vv) for ,i from 0
-                      do (labels (,@(*sel/labels vv curr i))
+                      do (op/labels (,vv ,curr ,i)
                            (vex ,(funcall rec `((:dat . ,curr) ,@conf) expr) ,ires))
                       finally (return ,ires))))
       (case (length d)
@@ -139,7 +140,7 @@
                (unless (consp expr) (error "*fld: unexpected expr: ~a" expr))
                `(loop with ,l = ,init
                       for ,r across (ensure-vector ,dat*) for ,i from 0
-                      do (labels (,@(*sel/labels dat* r i))
+                      do (op/labels  (,dat* ,r ,i)
                            (setf ,l ,(funcall rec `((:dat . ,r) ,@conf) expr)))
                       finally (return ,l))))
       (case (length d)
@@ -165,7 +166,7 @@
     `(loop with ,ires of-type vector = (mav)
            with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
            for ,dat across (ensure-vector ,vv) for ,i from 0
-           do (labels (,@(*sel/labels vv dat i))
+           do (op/labels (,vv ,dat ,i)
                 ,(when (car- all? d) `(*add+ ,ires nil ,dat))
                 ,@(loop for (m kk expr) in (strip-all d)
                         collect `(,(*add m) ,ires ,kk
@@ -178,7 +179,7 @@
            with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
            for ,i from 0 for ,dat of-type hash-table across (ensure-vector ,vv)
            for ,kv of-type hash-table = ,(if (car- all? d) `($make ,dat) `($make))
-           do (labels (,@(*sel/labels vv dat i))
+           do (op/labels (,vv ,dat ,i)
                 ,@(loop for (m kk expr) in (strip-all d)
                         for comp-expr = (funcall rec (new-conf conf kk) expr)
                         collect `(,($add m) ,kv ,kk ,comp-expr))
@@ -195,7 +196,7 @@
       `(loop with ,ires of-type vector = (mav)
              with ,vv of-type vector = (ensure-vector ,(gk conf :dat))
              for ,dat across (ensure-vector ,vv) for ,i from 0
-             do (labels (,@(*sel/labels vv dat i))
+             do (op/labels (,vv ,dat ,i)
                   (when (and (or ,(car- all? d) ,@(get-modes :? :%)
                                  (and ,@(get-modes :+)))
                              (not (or ,@(get-modes :-))))
@@ -206,10 +207,15 @@
   (awg (pipe)
     `(let ((,pipe ,(gk conf :dat)))
       ,@(loop for op in d for i from 0
-              collect `(labels (,@(*sel/labels pipe pipe 0))
+              collect `(op/labels (,pipe ,pipe 0)
                          (setf ,pipe ,(funcall rec `((:dat . ,pipe) ,@conf) op))))
       ,pipe)))
 
+(defmacro qry/labels (conf &body body)
+  `(labels ((ctx () ,(gk conf :ctx t)) (fn () ,(gk conf :fn t))
+            (fi (&optional (k 0)) (+ k ,(or (gk conf :fi t) 0)))
+            ,@(labels/$_ (gk conf :dat)))
+     ,@body))
 (defun proc-qry (conf* q) "compile jqn query"
   (labels
     ((rec (conf d &aux (dat (gk conf :dat)))
@@ -226,13 +232,7 @@
              ((car- jqnfx? d) `(,(psymb 'jqn (car d)) ,@(rec conf (cdr d))))
              ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
              (t (error "jqn compile error for: ~a" d)))))
-    `(labels ((ctx () ,(gk conf* :ctx t))
-              (fn () ,(gk conf* :fn t))
-              (fi (&optional (k 0)) (+ k ,(or (gk conf* :fi t) 0)))
-              ,@(labels/$_ (gk conf* :dat)))
-       ,(rec conf* q))))
-
-; WRAPPERS ------------
+    `(qry/labels ,conf* ,(rec conf* q))))
 
 (defmacro qryd (dat q &key conf db) "run jqn query on dat"
   (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) ,@conf) q)))

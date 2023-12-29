@@ -1,16 +1,13 @@
 # JQN - JSON Query Notation
 
 JQN is a terminal utility (and Common Lisp library) to query and transform
-JSON.
+JSON. It consists of two terminal commands `jqn` and `tqn`.
 
-## Example
+## JQN Example (JSON)
 
 Use in terminal like this:
 ```bash
 jqn [options] <qry> [files ...]
-```
-or:
-```bash
 echo '{\"_id\": 1}' | jqn [options] <qry>
 ```
 Here is a full example:
@@ -28,8 +25,27 @@ echo '[
 ```
 which returns (something like):
 ```json
-[ { "_id": "65679", "msg": "HAI!", "things": [ "Win", "ex1", "Hai", "ex2", "Kle" ] },
-  { "_id": "CAABB", "msg": "NIH!", "things": [ "Sta", "Bal" ] } ]
+[ { "_id": "65679", "msg": "HAI!",
+    "things": [ "Win", "ex1", "Hai", "ex2", "Kle" ] },
+  { "_id": "CAABB", "msg": "NIH!",
+    "things": [ "Sta", "Bal" ] } ]
+```
+
+## TQN Example (TXT)
+
+`tqn` is a mode for reading lines of text into a `vector` (JSON array). `tqn`
+has slightly different default behaviour to `jqn`. Notably that it ignores
+`nil` in the output. `tqn` defaults to printing the vector as rows, but `-j`
+will output to JSON instead. `-t` does the oposite for `jqn`.
+
+```bash
+# split string and sum as integers:
+echo '1 x 1 x 7 x 100' | \
+  tqn '(split (*0 _) :x) int!? (*fld 0 +)'
+
+# split string and make a new JSON structure:
+echo '1 x 1 x 7 x 100' | \
+   tqn -j '(split (*0 _) :x) int!? (*map ($new :v _))'
 ```
 
 ## Object Representation
@@ -57,18 +73,18 @@ For convenience pipe has the following default translations:
   - `(expr)`: to itself.
 
 ### Map/Reduce Operators
-  - `(*map fx)`: map `#'fx` current `(dat)`.
-  - `(*map (fx _))`: map `(fx _)` across current `(dat)`.
-  - `(*map k (fx .. k))`: map `(fx .. k)` across current `(dat)`.
+  - `(*map fx)`: map `fx` across all items.
+  - `(*map (fx _ ..))`: map `(fx _ ..)` across all items.
+  - `(*map k (fx .. k))`: map `(fx .. k)` across all items. where `k` is current item.
   - `(*fld init fx)`: fold `(fx acc nxt)` with `init` as the first `acc` value. `acc`, `nxt` is implicit.
   - `(*fld init nxt (fx acc .. nxt))`: fold `(fx ..)`. `nxt` symbol is explicit
   - `(*fld init acc nxt (fx .. acc .. nxt))`: `acc`, `nxt` are explicit.
 
 ### Selector Operators
-  - `#{s1 ..}`: select from vector of `kvs` into new vector of `kvs` using `kv` selectors.
-  - `#[s1 ..]`: select from `vector` of `kvs` into new `vector` using `kv` selectors.
-  - ` {s1 ..}`: select from `kv` into new `kv` using `kv` selectors.
-  - ` [s1 ..]`: select from `vector` into new `vector` using vector `vector` selectors.
+  - `#{s1 ..}` or `(*$ ..)`: select from vector of `kvs` into new vector of `kvs` using `kv` selectors.
+  - `#[s1 ..]` or `($* ..)`: select from `vector` of `kvs` into new `vector` using `kv` selectors.
+  - ` {s1 ..}` or `($$ ..)`: select from `kv` into new `kv` using `kv` selectors.
+  - ` [s1 ..]` or `(** ..)`: select from `vector` into new `vector` using vector `vector` selectors.
 
 ### `kv` Selectors
 A `kv` Selector is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
