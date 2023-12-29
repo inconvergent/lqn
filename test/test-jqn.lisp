@@ -32,6 +32,8 @@
       (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (*$ _))))
   (is (jqn::jsnout* (jqn:jsnqryf *test-data-fn* _))
       (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (** _))))
+  (is (jqn::jsnout* (jqn:jsnqryf *test-data-fn* _))
+      (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (*map _))))
   (is (jqn::jsnout* (jqn:jsnqryf *test-data-2-fn* _))
       (jqn::jsnout* (jqn:jsnqryf *test-data-2-fn* ($$ _)))))
 
@@ -48,9 +50,7 @@
       `((:? (CCC JQN::_)) (:? (JQN:ISUB? JQN::_ "ddd"))
        (:? (JQN:SUB? JQN::_ "IIUJ")) (:% (JQN:SUB? JQN::_ "UU")) (:? (AA JQN::_))
        (:? (BB JQN::_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
-       (:% (JQN:SUB? JQN::_ "ABC")))
-
-      )
+       (:% (JQN:SUB? JQN::_ "ABC"))))
 
   (is (jqn:ldnout (jqn:jsnqryf *test-data-fn*
         (*$  _id (+@things (*$ name id))

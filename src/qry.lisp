@@ -117,12 +117,12 @@
 
 (defun compile/*map (rec conf d &aux (dat* (gk conf :dat)))
   (awg (i ires dat)
+    (when (car- all? d) (return-from compile/*map dat*))
     (labels ((do-map (vv curr expr)
                `(loop with ,ires = (mav)
                       for ,curr across (ensure-vector ,vv) for ,i from 0
                       do (labels (,@(*sel/labels vv curr i))
-                           (*add+ ,ires nil
-                             ,(funcall rec `((:dat . ,curr) ,@conf) expr)))
+                           (vex ,(funcall rec `((:dat . ,curr) ,@conf) expr) ,ires))
                       finally (return ,ires))))
       (case (length d)
         (1 (typecase (car d) (symbol (do-map dat* dat `(,(car d) ,dat)))
