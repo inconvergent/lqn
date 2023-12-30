@@ -26,6 +26,19 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:$NEW
+
+```
+ ; LQN:$NEW
+ ;   [symbol]
+ ; 
+ ; $NEW names a macro:
+ ;   Lambda-list: (&REST D)
+ ;   Documentation:
+ ;     new kv/hash-table from these (k v) pairs
+ ;   Source file: /data/x/lqn/src/qry.lisp
+```
+
 #### LQN:\*CAT
 
 ```
@@ -55,6 +68,19 @@
  ;   Documentation:
  ;     get this index from vector.
  ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:\*NEW
+
+```
+ ; LQN:*NEW
+ ;   [symbol]
+ ; 
+ ; *NEW names a macro:
+ ;   Lambda-list: (&REST D)
+ ;   Documentation:
+ ;     new vector with these elements
+ ;   Source file: /data/x/lqn/src/qry.lisp
 ```
 
 #### LQN:\*SEL
@@ -370,7 +396,7 @@
  ;   Lambda-list: (K &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     k if hash-table; or d
+ ;     k if kv; or d
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -413,7 +439,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     coerce all arguments to a string.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
 #### LQN:NOOP
@@ -509,12 +535,11 @@
  ;   Lambda-list: (DAT &REST REST)
  ;   Documentation:
  ;     query data.
- ;     ex: (lqn:qry "1 x 1 x 7 x 100 $
- ;                   3 x 8 x 30"
- ;                 (splt _ :$)
- ;                 (*map k (splt k :x) int!? ; for each row, split and parse as int
- ;                         ($new :num (num)  ; new nested dict for each row
- ;                               :items (*map ($new :v _ :i (cnt))))))
+ ;     ex: (lqn:qry "1 x 1 x 7 x 100 $ 3 x 8 x 30"
+ ;           (splt _ :$)
+ ;           (*map k (splt k :x) int!? ; for each row, split and parse as int
+ ;                   ($new :num (num)  ; new nested dict for each row
+ ;                         :items (*map ($new :v _ :i (cnt))))))
  ;   Source file: /data/x/lqn/src/qry.lisp
 ```
 
@@ -554,7 +579,11 @@
  ; REPL names a compiled function:
  ;   Lambda-list: (S FROM TO &AUX (S (STR! S)) (FROM (STR! FROM))
  ;                 (TO (STR! TO)))
- ;   Derived type: (FUNCTION (T T T) (VALUES SIMPLE-STRING &OPTIONAL))
+ ;   Derived type: (FUNCTION (T T T)
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
  ;   Documentation:
  ;     replace from with to in s
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -667,7 +696,7 @@
  ; 
  ; STRCAT names a compiled function:
  ;   Lambda-list: (&REST REST)
- ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
+ ;   Derived type: FUNCTION
  ;   Documentation:
  ;     concatenate all strings in sequences rest
  ;   Source file: /data/x/lqn/src/utils.lisp

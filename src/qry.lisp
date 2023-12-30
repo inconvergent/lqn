@@ -7,6 +7,14 @@
                  (*n v (+ k ,i))))))
 (make-ind-getters 9)
 
+; TODO: interpret expr => empty dict/vec as nil and drop in %mode
+(defmacro *new (&rest d) "new vector with these elements" `(vector ,@d))
+(defmacro $new (&rest d) "new kv/hash-table from these (k v) pairs"
+  (awg (kv) `(let ((,kv ($make)))
+               ,@(loop for (kk expr) in (group 2 d)
+                       collect `(setf (gethash ,(ct/kv/key kk) ,kv) ,expr))
+               ,kv)))
+
 (defun path-to-key (pp) (first (last (split pp "/"))))
 (defmacro $add+ (lft k v &optional d)
   (declare (symbol lft)) "do (setf lft (or v default))"
@@ -35,6 +43,8 @@
 (defun strip-all (d) (declare (list d)) (if (car- all? d) (cdr d) d))
 (defun $add (m) (declare (keyword m)) (ecase m (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
 (defun *add (m) (declare (keyword m)) (ecase m (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
+(defun dat/key (conf kk) `((:dat . ($_ ,kk)) ,@conf))
+(defun dat/new (conf dat) `((:dat . ,dat) ,@conf))
 
 (defun preproc/pipe (qq)
   (loop for q in qq collect
@@ -66,25 +76,13 @@
     (let* ((q* (remove-if #'all? q)) (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 
-; TODO: interpret expr => empty dict/vec as nil and drop in %mode
-(defun compile/*new (d) `(vector ,@(loop for expr in d collect expr)))
-(defun compile/$new (d)
-  (awg (kv) `(let ((,kv ($make)))
-               ,@(loop for (kk expr) in (group 2 d)
-                       collect `(setf (gethash ,(ct/kv/key kk) ,kv) ,expr))
-               ($nil ,kv))))
-
 (defun labels/$_ (dat) `(($_ (k &optional d) ($ ,dat k d))))
-(defmacro op/fxs ((par dat i) &body body)
+(defmacro op/fxs ((par &optional (dat par) (i 0)) &body body)
+  (declare (symbol par dat))
   `(labels ((par () ,par) (cnt (&optional (k 0)) (+ ,i k))
-            (num (&optional (d 0)) (typecase ,par (sequence (length ,par))
-                                                  (hash-table (hash-table-count ,par))
-                                                  (otherwise d)))
+            (num (&optional (d 0)) (size? ,par d))
             ,@(labels/$_ dat))
      ,@body))
-
-(defun dat/key (conf kk) `((:dat . ($_ ,kk)) ,@conf))
-(defun dat/new (conf dat) `((:dat . ,dat) ,@conf))
 
 (defun compile/*map (rec conf d &aux (dat* (gk conf :dat)))
   (awg (i ires dat)
@@ -115,21 +113,21 @@
                            (setf ,acc ,(funcall rec (dat/new conf r) expr)))
                       finally (return ,acc))))
       (case (length d)
-        ((0 1) (error "*fld: missing args."))
+        (0 (error "*fld: missing args."))
         (2 (etypecase (second d)
-            (symbol (do-fld (car d) res dat `(,(second d) ,res ,dat)))
-            (cons (do-fld (car d) res dat `(,(first (second d)) ,res ,@(cdr (second d)))))))
+             (symbol (do-fld (car d) res dat `(,(second d) ,res ,dat)))
+             (cons (do-fld (car d) res dat `(,(first (second d)) ,res ,@(cdr (second d)))))))
         (3 (let ((d3 (third d))) (do-fld (car d) (second d) dat d3)))
         (otherwise (error "*fld: bad args: ~a" d))))))
 
 (defun compile/$$ (rec conf d) ; {...} ; sel
-  (awg (kv dat)
+  (awg (kres dat)
     `(let* ((,dat ,(gk conf :dat))
-            (,kv ,(if (car- all? d) `($make ,dat) `($make))))
-       (labels (($_ (k &optional d) ($ ,dat k d)))
-        ,@(loop for (m kk expr) in (strip-all d) collect
-            `(,($add m) ,kv ,kk ,(funcall rec (dat/key conf kk) expr))))
-       ($nil ,kv))))
+            (,kres ,(if (car- all? d) `($make ,dat) `($make))))
+       (op/fxs (,dat)
+         ,@(loop for (m kk expr) in (strip-all d) collect
+             `(,($add m) ,kres ,kk ,(funcall rec (dat/key conf kk) expr))))
+       ($nil ,kres))))
 
 (defun compile/$* (rec conf d) ; #[...] ; sel
   (awg (i ires dat vv)
@@ -172,16 +170,15 @@
                         (vex ,ires ,dat)))
              finally (return ,ires)))))
 
-(defun compile/pipe (rec conf d) ; (|| ...)
-  (awg (pipe)
+(defun compile/pipe (rec conf d &aux (dat* (gk conf :dat))) ; (|| ...)
+  (awg (pipe-)
     (if (< (length d) 2)
-        `(op/fxs (,(gk conf :dat) ,(gk conf :dat) 0)
-           ,(funcall rec conf (car d)))
-        `(let ((,pipe ,(gk conf :dat)))
+        `(op/fxs (,dat*) ,(funcall rec conf (car d)))
+        `(let ((,pipe- ,dat*))
            ,@(loop for op in d for i from 0 collect
-               `(op/fxs (,pipe ,pipe ,i)
-                  (setf ,pipe ,(funcall rec (dat/new conf pipe) op))))
-           ,pipe))))
+               `(op/fxs (,pipe- ,pipe- ,i)
+                  (setf ,pipe- ,(funcall rec (dat/new conf pipe-) op))))
+           ,pipe-))))
 
 (defmacro qry/fxs (conf &body body)
   `(labels ((ctx () ,(gk conf :ctx t)) (fn () ,(gk conf :fn t))
@@ -200,11 +197,9 @@
              ((car- $*sel? d) (compile/$*   #'rec conf (preproc/$$ (cdr d))))
              ((car- *map?  d) (compile/*map #'rec conf (cdr d)))
              ((car- *fld?  d) (compile/*fld #'rec conf (cdr d)))
-             ((car- *new?  d) (rec conf (compile/*new (cdr d))))
-             ((car- $new?  d) (rec conf (compile/$new (cdr d))))
              ((car- lqnfx? d) `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
              ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
-             (t (error "lqn compile error for: ~a" d)))))
+             (t (error "lqn compile error in: ~a" d)))))
     `(qry/fxs ,conf* ,(rec conf* q))))
 
 (defun qry/show (q compiled)
@@ -212,7 +207,7 @@
 ██ COMPILED ██████████████████████████
 ██ q:   ~s
 ██ ---
-   ~s
+   ~a
 ██ ██████████████████████████~%" q compiled))
 
 (defmacro qryd (dat q &key conf db) "run lqn query on dat"

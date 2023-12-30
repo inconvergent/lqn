@@ -1,20 +1,16 @@
 (in-package :lqn)
 
-; YASON DOCS https://phmarek.github.io/yason/
-
-; TYPES --------
-
 (defun ct/kv/key (s)
   (typecase s (string s) (symbol (sdwn (mkstr s)))
               (number (mkstr s)) (cons `(mkstr ,s))))
 
-(defun flt? (f &optional d) "f if float; or d" (if (floatp f) f d))
-(defun int? (i &optional d) "i if int; or d" (if (integerp i) i d))
-(defun kv?  (k &optional d) "k if hash-table; or d" (if (hash-table-p k) k d))
-(defun lst? (l &optional d) "l if list; or d" (if (listp l) l d))
-(defun num? (n &optional d) "n if number; or d" (if (numberp n) n d))
-(defun str? (s &optional d) "s if string; or d" (if (stringp s) s d))
-(defun vec? (v &optional d) "v if vector; or d" (if (vectorp v) v d))
+(defun flt? (f &optional d) "f if float; or d"    (if (floatp f) f d))
+(defun int? (i &optional d) "i if int; or d"      (if (integerp i) i d))
+(defun kv?  (k &optional d) "k if kv; or d"       (if (hash-table-p k) k d))
+(defun lst? (l &optional d) "l if list; or d"     (if (listp l) l d))
+(defun num? (n &optional d) "n if number; or d"   (if (numberp n) n d))
+(defun str? (s &optional d) "s if string; or d"   (if (stringp s) s d))
+(defun vec? (v &optional d) "v if vector; or d"   (if (vectorp v) v d))
 (defun seq? (s &optional d) "s if sequence; or d" (or (lst? s) (str? s) (vec? s) d))
 
 (defun str! (s) "coerce to string"
@@ -30,16 +26,6 @@ vector with v as the only element"
 (defun num!? (n &optional d) "n as number if it can be parsed as number; or d"
   (handler-case (or (num? n) (num? (read-from-string n nil nil)) d) (error () d)))
 
-(defun mkstr (&rest args) "coerce all arguments to a string."
-  (with-output-to-string (s) (dolist (a args) (princ a s))))
-(defun kv (s) "mkstr, upcase, keyword."
-  (intern (sup (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
-          :keyword))
-(defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
-(defun psymb (&optional (pkg 'lqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
-  "mkstr, make symbol in pkg."
-  (values (intern (apply #'mkstr args) pkg)))
-
 (defmacro something? (v &body body) ; TODO: recursive strip with ext function
   (declare (symbol v))
   `(typecase ,v (sequence (when (> (length ,v) 0) (progn ,@body)))
@@ -48,8 +34,6 @@ vector with v as the only element"
 (defun is? (k &optional d)
   "k if k is not nil ,not an empty sequence, and not an empty hash-table; or d"
   (if (something? k t) k d))
-
-; --------
 
 (defun unpack-mode (o &optional (default :+) merciful)
   (labels ((valid-mode (m) (member m *qmodes* :test #'eq))
@@ -65,7 +49,6 @@ vector with v as the only element"
     (typecase o (symbol (unpack- o)) (string (unpack- o)) (cons (unpack-cons o))
       (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
-(defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil." nil)
 (defmacro ?? (fx arg &rest args) ; ?!
   (declare (symbol fx)) "run (fx arg) only if arg is not nil."
   (awg (arg*) `(let ((,arg* ,arg)) (when ,arg* (,fx ,arg* ,@args)))))
@@ -187,8 +170,7 @@ ranges are lists that behave like arguments to *seq."
                      do (setf (gethash k res) (gethash k kv))))
   res)
 (defun *cat (&rest rest &aux (res (make-adjustable-vector)))
-  "concatenate all vectors in these vectors.
-non-vectors are included in their position."
+  "concatenate all vectors in these vectors."
   (labels ((do-arg (aa) (loop for a across aa
                               do (loop for b across a do (vex res b)))))
     (loop for a in rest do (typecase a (vector (do-arg a))
@@ -212,7 +194,6 @@ copy all keys into new kv. left to right."
     (rec o (split pp "/"))))
 (defmacro $ (o k &optional d) "get key k from o" `($rget ,o (ct/kv/key ,k) ,d))
 
-; list/vector: remove if not someting ; hash-table: remove key if value not something
 (defun >< (o) ; TODO: recursive?
   "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
   (typecase o (sequence (remove-if-not (lambda (o*) (something? o* t)) o))

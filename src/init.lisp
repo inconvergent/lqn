@@ -4,10 +4,9 @@
 (defvar *fxns* '(:fmt :out :jsnstr
                  :fn :fi :ctx :num :cnt :par :$ :$_ :>< :??
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq
-                 :*cat :$cat :head :tail :size
+                 :*new :$new :*cat :$cat :head :tail :size
                  :sup :sdwn :mkstr :repl :strcat :splt
-                 :tfnd?
-                 :is? :kv?
+                 :tfnd?  :is? :kv?
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :num!? :num? :flt!? :flt? :int!? :int?
                  :lst? :seq? :str! :str? :vec! :vec?))
@@ -23,6 +22,7 @@
   #+abcl (ext:quit:status status) #+allegro (excl:exit status :quiet t)
   #+gcl (common-lisp-user::bye status) #+ecl (ext:quit status))
 
+(defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil." nil)
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s)))) syms) ,@body))
 
@@ -43,27 +43,28 @@
   (unless silent (format t "~&LQN version: ~a~%." v))
   v)
 
-(defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
+(defun mkstr (&rest args) "coerce all arguments to a string."
+  (with-output-to-string (s) (dolist (a args) (princ a s))))
+(defun kv (s) "mkstr, upcase, keyword."
+  (intern (sup (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
+          :keyword))
+(defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
+(defun psymb (&optional (pkg 'lqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
+  "mkstr, make symbol in pkg."
+  (values (intern (apply #'mkstr args) pkg)))
 
+(defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
 (defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
   (if mode-sym (values-list (unpack-mode mode-sym d :?))
                (values nil d)))
+(defun symbol-not-kv (d) (and (symbolp d) (not (keywordp d))))
 (defun all?   (d) (and (symbolp d) (eq (kv d) :_)))
-(defun $new?  (d) (and (symbolp d) (eq (kv d) :$new)))
-(defun *new?  (d) (and (symbolp d) (eq (kv d) :*new)))
-(defun $$sel? (d) (and (symbolp d) (eq (kv d) :$$)))
-(defun *$sel? (d) (and (symbolp d) (eq (kv d) :*$)))
-(defun **sel? (d) (and (symbolp d) (eq (kv d) :**)))
-(defun $*sel? (d) (and (symbolp d) (eq (kv d) :$*)))
-(defun *map?  (d) (and (symbolp d) (eq (kv d) :*map)))
-(defun *fld?  (d) (and (symbolp d) (eq (kv d) :*fld)))
-(defun pipe?  (d) (and (symbolp d) (eq (kv d) :||)))
-(defun lqnfx? (d) (and (symbolp d) ; only symbols, not kv
-                       (not (keywordp d))
-                       (member (kv d) *fxns* :test #'eq)))
+(defun $$sel? (d) (and (symbol-not-kv d) (eq (kv d) :$$)))
+(defun *$sel? (d) (and (symbol-not-kv d) (eq (kv d) :*$)))
+(defun **sel? (d) (and (symbol-not-kv d) (eq (kv d) :**)))
+(defun $*sel? (d) (and (symbol-not-kv d) (eq (kv d) :$*)))
+(defun *map?  (d) (and (symbol-not-kv d) (eq (kv d) :*map)))
+(defun *fld?  (d) (and (symbol-not-kv d) (eq (kv d) :*fld)))
+(defun pipe?  (d) (and (symbol-not-kv d) (eq (kv d) :||)))
+(defun lqnfx? (d) (and (symbol-not-kv d) (member (kv d) *fxns* :test #'eq)))
 
-(defun car-sym-mode? (d)
-  (typecase d (cons (if (or (str? (car d)) (symbolp (car d)))
-                        (values-list (sym-mode? (car d)))
-                        (values nil d)))
-              (otherwise (values nil d))))

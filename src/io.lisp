@@ -1,4 +1,5 @@
 (in-package #:lqn)
+; YASON DOCS https://phmarek.github.io/yason/
 
 (defun read-all-str (s &aux (n (length s)) (pos 0))
   (loop for (l new-pos) = (mvl (read-from-string s nil nil :start pos))
