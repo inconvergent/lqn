@@ -41,11 +41,11 @@ will output to JSON instead. `-t` does the oposite for `jqn`.
 ```bash
 # split string and sum as integers:
 echo '1 x 1 x 7 x 100' | \
-  tqn '(splt (*0 _) :x) int!? (*fld 0 +)'
+  tqn '(splt _ :x) int!? (*fld 0 +)'
 
 # split string and make a new JSON structure:
 echo '1 x 1 x 7 x 100' | \
-   tqn -j '(splt (*0 _) :x) int!? (*map ($new :v _))'
+   tqn -j '(splt _ :x) int!? (*map ($new :v _))'
 ```
 
 ## Object Representation

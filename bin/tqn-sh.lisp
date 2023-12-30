@@ -22,11 +22,11 @@ Examples:
 
   # split string and sum as integers:
   echo '1 x 1 x 7 x 100' | \
-    tqn '(split (*0 _) :x) int!? (*fld 0 +)'
+    tqn '(split _ :x) int!? (*fld 0 +)'
 
   # split string and make a new JSON structure:
   echo '1 x 1 x 7 x 100' | \
-     tqn -j '(split (*0 _) :x) int!? (*map ($new :v _))'
+     tqn -j '(split _ :x) int!? (*map ($new :v _))'
 ")
 
 (defun tqn/execute-query (opts dat q &key conf db)
@@ -55,10 +55,11 @@ Examples:
 (defun tqn/run-pipe (opts q)
   (when (help? opts) (exit-with-msg 0 *tqnex*))
   (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *tqnex*))
-  (sh/out :txt opts
-    (tqn/execute-query opts (read-stream-lines-as-vector) (tqn/parse-query q)
+  (labels ((one-line (v) (if (> (length v) 1) v (aref v 0))))
+   (sh/out :txt opts
+    (tqn/execute-query opts (one-line (read-stream-lines-as-vector)) (tqn/parse-query q)
       :conf `((:mode . :tqn) (:ctx . :pipe))
-      :db (verbose? opts))))
+      :db (verbose? opts)))))
 
 (defun tqn/run-from-shell (args)
   (multiple-value-bind (opts args) (split-opts-args args)
