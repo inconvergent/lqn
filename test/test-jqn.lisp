@@ -1,6 +1,6 @@
 (in-package #:jqn-tests)
 
-(plan 7)
+(plan 8)
 
 (subtest "utils"
   (is (jqn::unpack-mode "?@fxfx")    '(:? "fxfx"))
@@ -88,7 +88,7 @@
 (subtest "jqn qry 2"
   (is-str (jqn::jsnout* (jqn:jsnqryf *test-data-fn* (*$ _ -@_id -@things)))
 "[{\"index\":0,\"msg\":\"this is a message\",\"fave\":\"strawberry\"},{\"index\":1,\"msg\":\"Hello, undefined! You have 1 unread messages.\",\"fave\":\"strawberry\"},{\"msg\":\"Hello, undefined! You have 5 unread messages.\",\"fave\":\"blueberry\"}]")
-  (is-str (jqn::jsnout* (jqn:jsnqryf *test-data-fn* ($* (things (jqn:*ind (*$ _ -@extra) 0)))))
+  (is-str (jqn::jsnout* (jqn:jsnqryf *test-data-fn* ($* (things (*n (*$ _ -@extra) 0)))))
 "[{\"id\":0,\"name\":\"Chris\"},{\"id\":10,\"name\":\"Winters\"},{\"id\":31,\"name\":\"Star\"}]"))
 
 (subtest "jqn qry reader macros"
@@ -125,6 +125,19 @@
   (is-str (jqn::jsnout* (jqn:qryd (jqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
                                   ($_ :a/b)))
           "3"))
+
+(subtest "jqn qry 3"
+  (is (jqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 +)) 109)
+  (is (jqn:ldnout
+        (jqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*map ($new :v _ :n (cnt)))))
+      #(((:V . 1) (:N . 0)) ((:V . 1) (:N . 1))
+        ((:V . 7) (:N . 2)) ((:V . 100) (:N . 3)))
+      :test #'equalp)
+  (is (jqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 (+ _))) 109)
+  (is (jqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 1000 +)) 1109)
+  (is (jqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- acc _))) -109)
+  (is (jqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 3 acc (- _ acc))) 96)
+  )
 
 (unless (finalize) (error "error in jqn"))
 

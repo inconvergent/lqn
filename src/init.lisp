@@ -2,12 +2,18 @@
 
 (defvar *qmodes* '(:+ :? :- :%))
 (defvar *fxns* '(:fn :fi :ctx :num :cnt :par :$ :$_ :>< :??
-                 :*cat :$cat *ind *sel *seq :head :tail :size
+                 :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq
+                 :*cat :$cat :head :tail :size
                  :sup :sdwn :mkstr :repl :strcat
+                 :splt
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
-                 :flt? :int? :kv? :lst? :num? :seq? :str? :vec? :is?
-                 :int!? :flt!? :num!?
-                 :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9
+                 :is? :kv?
+                 :num!? :num?
+                 :flt!? :flt?
+                 :int!? :int?
+                 :lst? :seq?
+                 :str! :str?
+                 :vec! :vec?
                  :fmt :out))
 
 (defun cmd-args ()
@@ -30,7 +36,8 @@
 (abbrev mvb multiple-value-bind)
 (abbrev mvc multiple-value-call)
 (abbrev mav make-adjustable-vector)
-(abbrev vex vector-push-extend)
+(abbrev vpe vector-push-extend)
+(defmacro vex (v o) `(vpe ,o ,v))
 
 (defun internal-path-string (path &optional (pkg :jqn))
   (declare (string path))
@@ -42,3 +49,28 @@
   "return/print jqn version."
   (unless silent (format t "~&JQN version: ~a~%." v))
   v)
+
+(defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
+
+(defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
+  (if mode-sym (values-list (unpack-mode mode-sym d :?))
+               (values nil d)))
+(defun all?   (d) (and (symbolp d) (eq (kv d) :_)))
+(defun $new?  (d) (and (symbolp d) (eq (kv d) :$new)))
+(defun *new?  (d) (and (symbolp d) (eq (kv d) :*new)))
+(defun $$sel? (d) (and (symbolp d) (eq (kv d) :$$)))
+(defun *$sel? (d) (and (symbolp d) (eq (kv d) :*$)))
+(defun **sel? (d) (and (symbolp d) (eq (kv d) :**)))
+(defun $*sel? (d) (and (symbolp d) (eq (kv d) :$*)))
+(defun *map?  (d) (and (symbolp d) (eq (kv d) :*map)))
+(defun *fld?  (d) (and (symbolp d) (eq (kv d) :*fld)))
+(defun pipe?  (d) (and (symbolp d) (eq (kv d) :||)))
+(defun jqnfx? (d) (and (symbolp d) ; only symbols, not kv
+                       (not (keywordp d))
+                       (member (kv d) *fxns* :test #'eq)))
+
+(defun car-sym-mode? (d)
+  (typecase d (cons (if (or (str? (car d)) (symbolp (car d)))
+                        (values-list (sym-mode? (car d)))
+                        (values nil d)))
+              (otherwise (values nil d))))

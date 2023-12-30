@@ -1,22 +1,22 @@
 (in-package #:jqn)
 
-(defun read-all-str (s &aux (l (length s)))
+(defun read-all-str (s &aux (n (length s)))
   (loop with pos = 0
-        for (line new-pos) = (multiple-value-list
+        for (l new-pos) = (multiple-value-list
                                (read-from-string s nil nil :start pos))
-        while (and line (<= new-pos l))
-        do (setf pos new-pos) collect line))
+        while (and l (<= new-pos n))
+        do (setf pos new-pos) collect l))
 
 (defun read-stream-lines-as-vector (&optional (s *standard-input*)
                                     &aux (res (make-adjustable-vector)))
-  (loop for line = (read-line s nil nil)
-        while line do (vex line res))
+  (loop for l = (read-line s nil nil)
+        while l do (vex res l))
   res)
 
 (defun read-file-as-vector (fn &aux (res (make-adjustable-vector)))
   (with-open-file (in fn)
-    (loop for line = (read-line in nil nil)
-          while line do (vex line res)))
+    (loop for l = (read-line in nil nil)
+          while l do (vex res l)))
   res)
 
 (defun jsnloads (&optional (s *standard-input*))
@@ -52,7 +52,7 @@
      (hash-table (loop for k being the hash-keys of o using (hash-value v)
                        collect `(,(kv k) . ,(ldnout v))))
      (vector (loop with res = (make-adjustable-vector)
-                   for v across o do (vex (ldnout v) res)
+                   for v across o do (vex res (ldnout v))
                    finally (return res)))
      (cons (loop for (k . v) in o collect `(,(kv k) . ,(ldnout v))))
      (atom o)))

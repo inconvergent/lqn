@@ -38,17 +38,17 @@
  ;                  (VALUES (AND ARRAY (NOT SIMPLE-ARRAY)) &OPTIONAL))
  ;   Documentation:
  ;     concatenate all vectors in these vectors.
- ;     non-vectors are included in their position
+ ;     non-vectors are included in their position.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:\*IND
+#### JQN:\*N
 
 ```
- ; JQN:*IND
+ ; JQN:*N
  ;   [symbol]
  ; 
- ; *IND names a compiled function:
+ ; *N names a compiled function:
  ;   Lambda-list: (V &OPTIONAL (I 0))
  ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM)
  ;                  (VALUES T &OPTIONAL))
@@ -72,7 +72,7 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     new vector with indices or ranges from v.
- ;     ranges are lists that behave like arguments to *seq
+ ;     ranges are lists that behave like arguments to *seq.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -187,7 +187,7 @@
  ;                       SB-KERNEL:EXTENDED-SEQUENCE)
  ;                   &OPTIONAL))
  ;   Documentation:
- ;     first n elements
+ ;     first n elements.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -229,7 +229,7 @@
  ;   Lambda-list: (S SUF &OPTIONAL D)
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
- ;     case insensitive pref?
+ ;     ignore case pref?
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -257,7 +257,7 @@
  ;   Lambda-list: (S SUB &OPTIONAL D)
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     case insensitive sub?
+ ;     ignore case sub?
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -271,7 +271,7 @@
  ;   Lambda-list: (S SUB)
  ;   Derived type: (FUNCTION (T T) *)
  ;   Documentation:
- ;     case insensitive subx?
+ ;     ignore case subx?
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -285,7 +285,7 @@
  ;   Lambda-list: (S SUF &OPTIONAL D)
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
- ;     case insensitive suf?
+ ;     ignore case suf?
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -410,7 +410,7 @@
  ; NOOP names a macro:
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
- ;     do nothing. return nil
+ ;     do nothing. return nil.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -481,6 +481,25 @@
  ;   Derived type: (FUNCTION (T T) (VALUES CONS &OPTIONAL))
  ;   Documentation:
  ;     compile jqn query
+ ;   Source file: /data/x/jqn/src/qry.lisp
+```
+
+#### JQN:QRY
+
+```
+ ; JQN:QRY
+ ;   [symbol]
+ ; 
+ ; QRY names a macro:
+ ;   Lambda-list: (DAT &REST REST)
+ ;   Documentation:
+ ;     query data.
+ ;     ex: (jqn:qry "1 x 1 x 7 x 100 $
+ ;                   3 x 8 x 30"
+ ;                 (splt _ :$)
+ ;                 (*map k (splt k :x) int!? ; for each row, split and parse as int
+ ;                         ($new :num (num)  ; new nested dict for each row
+ ;                               :items (*map ($new :v _ :i (cnt))))))
  ;   Source file: /data/x/jqn/src/qry.lisp
 ```
 
@@ -565,7 +584,7 @@
  ;   Derived type: (FUNCTION (T)
  ;                  (VALUES (MOD 4611686018427387901) &OPTIONAL))
  ;   Documentation:
- ;     length of sequence l or number of keys in kv l
+ ;     length of sequence l or number of keys in kv l.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -579,23 +598,21 @@
  ;   Lambda-list: (L &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     length of sequence l or number of keys in kv l
+ ;     length of sequence l or number of keys in kv l.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
-#### JQN:SPLIT
+#### JQN:SPLT
 
 ```
- ; JQN:SPLIT
+ ; JQN:SPLT
  ;   [symbol]
  ; 
- ; SPLIT names a compiled function:
- ;   Lambda-list: (S X &KEY PRUNE &AUX (S (STR! S)) (X (STR! X))
- ;                 (LX (LENGTH X)))
- ;   Derived type: (FUNCTION (T T &KEY (:PRUNE BOOLEAN))
- ;                  (VALUES LIST &OPTIONAL))
+ ; SPLT names a compiled function:
+ ;   Lambda-list: (S X &OPTIONAL PRUNE &AUX (S (STR! S)) (X (STR! X)))
+ ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
- ;     split string at substring. prune removes empty strings.
+ ;     split s at substring x. returns vector.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -609,7 +626,7 @@
  ;   Lambda-list: (S)
  ;   Derived type: (FUNCTION (T) *)
  ;   Documentation:
- ;     coerce to string.
+ ;     coerce to string
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -666,7 +683,7 @@
  ;   Derived type: (FUNCTION (T T)
  ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
  ;   Documentation:
- ;     returns index where substring matches s from left to right. otherwise nil.
+ ;     returns index where substring matches s from left to right. otherwise nil
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -712,7 +729,7 @@
  ;                       SB-KERNEL:EXTENDED-SEQUENCE)
  ;                   &OPTIONAL))
  ;   Documentation:
- ;     last n elements
+ ;     last n elements.
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
@@ -731,6 +748,21 @@
  ;   Documentation:
  ;     return/print jqn version.
  ;   Source file: /data/x/jqn/src/init.lisp
+```
+
+#### JQN:VEC!
+
+```
+ ; JQN:VEC!
+ ;   [symbol]
+ ; 
+ ; VEC! names a compiled function:
+ ;   Lambda-list: (V)
+ ;   Derived type: (FUNCTION (T) (VALUES VECTOR &OPTIONAL))
+ ;   Documentation:
+ ;     coerce v to vector. if v is not a vector, list, string it will return a
+ ;     vector with v as the only element
+ ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
 #### JQN:VEC?

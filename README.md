@@ -41,11 +41,11 @@ will output to JSON instead. `-t` does the oposite for `jqn`.
 ```bash
 # split string and sum as integers:
 echo '1 x 1 x 7 x 100' | \
-  tqn '(split (*0 _) :x) int!? (*fld 0 +)'
+  tqn '(splt (*0 _) :x) int!? (*fld 0 +)'
 
 # split string and make a new JSON structure:
 echo '1 x 1 x 7 x 100' | \
-   tqn -j '(split (*0 _) :x) int!? (*map ($new :v _))'
+   tqn -j '(splt (*0 _) :x) int!? (*map ($new :v _))'
 ```
 
 ## Object Representation
@@ -67,24 +67,30 @@ Pipe is the operator that surrounds all queries by default.
     Returns the result of the last operator.
 
 For convenience pipe has the following default translations:
-  - `fx` (`symbol`): to `(*map (fx _))`; map `fx` across all items.
-  - `:word` (`keyword`): to `[(isub? _ "word")]` to filter by `"word"`.
-  - `"Word"` (`string`): to `[(sub? _ "Word")]` to filter all items by this string with case.
+  - `fx`: to `(*map (fx _))`; map `fx` across all items.
+  - `:word`: to `[(isub? _ "word")]` to filter by `"word"`.
+  - `"Word"`: to `[(sub? _ "Word")]` to filter all items by this string with case.
   - `(expr)`: to itself.
 
 ### Map/Reduce Operators
-  - `(*map fx)`: map `fx` across all items.
-  - `(*map (fx _ ..))`: map `(fx _ ..)` across all items.
-  - `(*map k (fx .. k))`: map `(fx .. k)` across all items. where `k` is current item.
-  - `(*fld init fx)`: fold `(fx acc nxt)` with `init` as the first `acc` value. `acc`, `nxt` is implicit.
-  - `(*fld init nxt (fx acc .. nxt))`: fold `(fx ..)`. `nxt` symbol is explicit
-  - `(*fld init acc nxt (fx .. acc .. nxt))`: `acc`, `nxt` are explicit.
+  - `(*map fx)`: map `(fx _)` across all items.
+  - `(*map (fx .. _ ..) ..)`: map `(fx .. _ ..)` across all items.
+  - `(*fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value. acc is inserted as the
+     first argument to `fx`
+  - `(*fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. the accumulator is
+    inserted as the first argument to `fx`.
+  - `(*fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. use this if you need to name
+    the accumulator explicity.
 
 ### Selector Operators
-  - `#{s1 ..}` or `(*$ ..)`: select from vector of `kvs` into new vector of `kvs` using `kv` selectors.
-  - `#[s1 ..]` or `($* ..)`: select from `vector` of `kvs` into new `vector` using `kv` selectors.
-  - ` {s1 ..}` or `($$ ..)`: select from `kv` into new `kv` using `kv` selectors.
-  - ` [s1 ..]` or `(** ..)`: select from `vector` into new `vector` using vector `vector` selectors.
+  - `#{s1 ..}` or `(*$ ..)`: select from vector of `kvs` into new vector of
+    `kvs` using `kv` selectors.
+  - `#[s1 ..]` or `($* ..)`: select from `vector` of `kvs` into new `vector`
+    using `kv` selectors.
+  - ` {s1 ..}` or `($$ ..)`: select from `kv` into new `kv` using `kv`
+    selectors.
+  - ` [s1 ..]` or `(** ..)`: select from `vector` into new `vector` using
+    vector `vector` selectors.
 
 ### `kv` Selectors
 A `kv` Selector is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
@@ -120,7 +126,8 @@ value of the selected key.
   (key3 (or _ "that")) ; select the value of key3 or literally "that".
   (key2 (+ 33 _))}     ; add 33 to value of key2
 ```
-To select everything, but replace some keys with new values or drop keys entirely:
+To select everything, but replace some keys with new values or drop keys
+entirely:
 ```lisp
 #{_               ; select all keys, then override these:
   (key2 (sdwn _)) ; lowercase the value of key2
@@ -195,11 +202,13 @@ Available in most operators.
  - `($new :k1 expr1 ..)`: new `kv` with these keys and values.
 
 ### Vectors
- - `(*cat a ..)`: concatenate all `vectors` in these `vectors`. Non-vectors are included in their position.
- - `(*ind v i)`: get these index `i` from `v`. Equivalent to `aref`.
+ - `(*cat a ..)`: concatenate all `vectors` in these `vectors`. Non-vectors are
+   included in their position.
+ - `(*n v i)`: get these index `i` from `v`. Equivalent to `aref`.
  - `(*new ..)`: new `vector` with these elements.
- - `(*sel ..)`: get new vector with these `*ind`s or `*seq`s.
- - `(*seq v i [j])`: get range `i ..` or `i .. (1- j)` from `v`. Equivalent to `subseq`.
+ - `(*sel ..)`: get new vector with these `*n`s or `*seq`s.
+ - `(*seq v i [j])`: get range `i ..` or `i .. (1- j)` from `v`. Equivalent to
+   `subseq`.
  - `(head s [n=10])`: first n items. Works on `strings` too.
  - `(tail s [n=10])`: last n items. Works on `strings` too.
 
