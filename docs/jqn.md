@@ -733,6 +733,19 @@
  ;   Source file: /data/x/jqn/src/utils.lisp
 ```
 
+#### JQN:TFND?
+
+```
+:missing:todo:
+
+ ; JQN:TFND?
+ ;   [symbol]
+ ; 
+ ; TFND? names a macro:
+ ;   Lambda-list: (ROOT &REST Q)
+ ;   Source file: /data/x/jqn/src/utils.lisp
+```
+
 #### JQN:V?
 
 ```

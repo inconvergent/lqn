@@ -223,3 +223,31 @@ copy all keys into new kv. left to right."
                           o)
               (otherwise o)))
 
+; (defun tree-replace-fx (tree fxcomp fxtx)
+;   "compares elements with (comparefx); repaces matches with (fxtx hit)."
+;   (cond ((funcall fxcomp tree)
+;            (tree-replace-fx (funcall fxtx tree) fxcomp fxtx))
+;         ((null tree) nil)
+;         ((atom tree) tree)
+;         (t (mapcar (lambda (x) (tree-replace-fx x fxcomp fxtx))
+;                    tree))))
+
+(defun tree-find-all (root fx &optional (res (list)))
+  (declare (optimize speed) (function fx) (list res))
+  "find all instances where fx is t in root."
+  (cond ((funcall fx root) (return-from tree-find-all (cons root res)))
+        ((atom root) nil)
+        (t (let ((l (tree-find-all (car root) fx res))
+                 (r (tree-find-all (cdr root) fx res)))
+             (when l (setf res `(,@l ,@res)))
+             (when r (setf res `(,@r ,@res))))
+           res)))
+(defmacro tfnd? (root &rest q)
+  (case (length q)
+    (1 `(tree-find-all ,root
+          (lambda (f) ,(typecase (car q)
+                         (symbol `(equal f ',(car q)))
+                         (string `(and (stringp ,(car q)) (isub? f ,(car q))))))))
+    (2 `(tree-find-all ,root (lambda (,(the symbol (car q))) ,(the cons (second q)))))
+    (otherwise (error "tfnd: incorrect args: ~a" q))))
+

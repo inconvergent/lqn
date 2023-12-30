@@ -6,14 +6,10 @@
     #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
     #:?? #:>< #:$ #:noop
     #:$cat #:*cat #:size #:size?
+    #:tfnd?
     #:is? #:kv?
-    #:num!? #:num?
-    #:flt!? #:flt?
-    #:int!? #:int?
-    #:lst? #:seq?
-    #:str! #:str?
-    #:vec! #:vec?
-    #:*n #:*sel #:*seq
+    #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
+    #:lst? #:seq? #:str! #:str? #:vec! #:vec? #:*n #:*sel #:*seq
     #:sup #:sdwn #:strcat #:repl #:mkstr #:splt
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
     #:head #:tail #:fmt #:out))

@@ -39,8 +39,8 @@
 (defun preproc/pipe (qq)
   (loop for q in qq collect
     (if (all? q) (kv q)
-      (typecase q (cons q) (symbol `(*map ,q))
-                  (keyword `(** ,q)) (string `(** ,q)) (number `(** ,(ct/kv/key q)))
+      (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
+                  (string `(** ,q)) (number `(** ,(ct/kv/key q)))
                   (otherwise (error "||jqn: invalid clause: ~a" q))))))
 
 (defun preproc/$$ (q &optional (m :+))

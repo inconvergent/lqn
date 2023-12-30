@@ -4,16 +4,12 @@
 (defvar *fxns* '(:fn :fi :ctx :num :cnt :par :$ :$_ :>< :??
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq
                  :*cat :$cat :head :tail :size
-                 :sup :sdwn :mkstr :repl :strcat
-                 :splt
-                 :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
+                 :sup :sdwn :mkstr :repl :strcat :splt
+                 :tfnd?
                  :is? :kv?
-                 :num!? :num?
-                 :flt!? :flt?
-                 :int!? :int?
-                 :lst? :seq?
-                 :str! :str?
-                 :vec! :vec?
+                 :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
+                 :num!? :num?  :flt!? :flt?  :int!? :int?
+                 :lst? :seq?  :str! :str?  :vec! :vec?
                  :fmt :out))
 
 (defun cmd-args ()
@@ -31,13 +27,10 @@
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s)))) syms) ,@body))
 
 (defmacro abbrev (short long) `(defmacro ,short (&rest args) `(,',long ,@args)))
-(abbrev awg with-gensyms)
-(abbrev dsb destructuring-bind)
-(abbrev mvb multiple-value-bind)
-(abbrev mvc multiple-value-call)
-(abbrev mav make-adjustable-vector)
-(abbrev vpe vector-push-extend)
-(defmacro vex (v o) `(vpe ,o ,v))
+(abbrev awg with-gensyms) (abbrev mav make-adjustable-vector)
+(abbrev dsb destructuring-bind) (abbrev mvb multiple-value-bind)
+(abbrev mvc multiple-value-call) (abbrev mvl multiple-value-list)
+(abbrev vpe vector-push-extend) (defmacro vex (v o) `(vpe ,o ,v))
 
 (defun internal-path-string (path &optional (pkg :jqn))
   (declare (string path))
