@@ -1,4 +1,4 @@
-(in-package :jqn)
+(in-package :lqn)
 
 ; YASON DOCS https://phmarek.github.io/yason/
 
@@ -36,7 +36,7 @@ vector with v as the only element"
   (intern (sup (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
           :keyword))
 (defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
-(defun psymb (&optional (pkg 'jqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
+(defun psymb (&optional (pkg 'lqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 
@@ -60,10 +60,10 @@ vector with v as the only element"
            (unpack- (s &aux (s* (mkstr s)) (splt (subx? s* "@")))
              (if (and splt (= splt 1)) (let ((m (kv (subseq s* 0 1)))) ; nil -> :nil
                                          (if (or merciful (valid-mode m)) (list m (repack- s s*))
-                                             (error "jqn: invalid mode in: ~a" s)))
+                                             (error "lqn: invalid mode in: ~a" s)))
                                        (list default s))))
     (typecase o (symbol (unpack- o)) (string (unpack- o)) (cons (unpack-cons o))
-      (otherwise (error "jqn: bad mode thing to have mode: ~a" o)))))
+      (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
 (defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil." nil)
 (defmacro ?? (fx arg &rest args) ; ?!
@@ -72,7 +72,7 @@ vector with v as the only element"
 
 (defun gk (conf k &optional silent &aux (hit (cdr (assoc k conf))))
   (declare (list conf) (keyword k)) "get k from config"
-  (if (or silent hit) hit (warn "JQN: missing conf key: ~a~%conf: ~s" k conf)))
+  (if (or silent hit) hit (warn "LQN: missing conf key: ~a~%conf: ~s" k conf)))
 
 (defun group (n l) (declare (list l) (fixnum n)) "group l into lists of n elements."
   (if (< n 1) (error "group error: group size is smaller than 1"))

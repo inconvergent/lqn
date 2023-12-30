@@ -1,4 +1,4 @@
-(in-package :jqn)
+(in-package :lqn)
 
 (defmacro make-ind-getters (n)
   `(progn ,@(loop for i from 0 to n collect
@@ -41,7 +41,7 @@
     (if (all? q) (kv q)
       (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
                   (string `(** ,q)) (number `(** ,(ct/kv/key q)))
-                  (otherwise (error "||jqn: invalid clause: ~a" q))))))
+                  (otherwise (error "||lqn: invalid clause: ~a" q))))))
 
 (defun preproc/$$ (q &optional (m :+))
   (labels
@@ -189,7 +189,7 @@
             ,@(labels/$_ (gk conf :dat)))
      ,@body))
 
-(defun proc-qry (conf* q) "compile jqn query"
+(defun proc-qry (conf* q) "compile lqn query"
   (labels
     ((rec (conf d &aux (dat (gk conf :dat)))
        (cond ((all? d) dat) ((atom d) d)
@@ -202,9 +202,9 @@
              ((car- *fld?  d) (compile/*fld #'rec conf (cdr d)))
              ((car- *new?  d) (rec conf (compile/*new (cdr d))))
              ((car- $new?  d) (rec conf (compile/$new (cdr d))))
-             ((car- jqnfx? d) `(,(psymb 'jqn (car d)) ,@(rec conf (cdr d))))
+             ((car- lqnfx? d) `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
              ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
-             (t (error "jqn compile error for: ~a" d)))))
+             (t (error "lqn compile error for: ~a" d)))))
     `(qry/fxs ,conf* ,(rec conf* q))))
 
 (defun qry/show (q compiled)
@@ -215,23 +215,22 @@
    ~s
 ██ ██████████████████████████~%" q compiled))
 
-(defmacro qryd (dat q &key conf db) "run jqn query on dat"
+(defmacro qryd (dat q &key conf db) "run lqn query on dat"
   (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) ,@conf) q)))
                 (when db (qry/show q compiled))
                 `(let ((,dat* ,dat)) ,compiled))))
 (defmacro qry (dat &rest rest)
   "query data.
-ex: (jqn:qry \"1 x 1 x 7 x 100 $
-              3 x 8 x 30\"
-            (splt _ :$)
-            (*map k (splt k :x) int!? ; for each row, split and parse as int
-                    ($new :num (num)  ; new nested dict for each row
-                          :items (*map ($new :v _ :i (cnt))))))"
+ex: (lqn:qry \"1 x 1 x 7 x 100 $ 3 x 8 x 30\"
+      (splt _ :$)
+      (*map k (splt k :x) int!? ; for each row, split and parse as int
+              ($new :num (num)  ; new nested dict for each row
+                    :items (*map ($new :v _ :i (cnt))))))"
   `(qryd ,dat (|| ,@rest)))
 
-(defun qryl (dat q &key conf db) "compile jqn query and run on dat"
+(defun qryl (dat q &key conf db) "compile lqn query and run on dat"
   (eval `(qryd ,dat ,q :db ,db :conf ,conf)))
 
-(defmacro jsnqryf (fn q &key db) "run jqn query on json file, fn"
+(defmacro jsnqryf (fn q &key db) "run lqn query on json file, fn"
   `(qryd (jsnloadf ,fn) ,q :db ,db))
 

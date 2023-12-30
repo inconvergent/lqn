@@ -1,8 +1,8 @@
-(asdf:defsystem #:jqn
-  :description "JSON query language"
+(asdf:defsystem #:lqn
+  :description "Lisp Query Notation"
   :version "1.0.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
-  :in-order-to ((asdf:test-op (asdf:test-op #:jqn/tests)))
+  :in-order-to ((asdf:test-op (asdf:test-op #:lqn/tests)))
   :licence "MIT" :pathname "src/" :serial nil
   :depends-on (#:yason)
   :components ((:file "packages")
@@ -14,9 +14,9 @@
                (:file "qry" :depends-on ("io" "utils" "docs"))
                (:file "sh" :depends-on ("qry"))))
 
-(asdf:defsystem #:jqn/tests
-  :depends-on (#:jqn #:prove #:uiop #:asdf)
+(asdf:defsystem #:lqn/tests
+  :depends-on (#:lqn #:prove #:uiop #:asdf)
   :version "1.0.0"
-  :perform (asdf:test-op (o s) (uiop:symbol-call ':jqn-tests '#:run-tests))
+  :perform (asdf:test-op (o s) (uiop:symbol-call ':lqn-tests '#:run-tests))
   :pathname "test/" :serial t
   :components ((:file "run")))

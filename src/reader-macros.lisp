@@ -1,4 +1,4 @@
-(in-package :jqn)
+(in-package :lqn)
 
 (set-macro-character #\{ '-read-left-curly-brace)
 (set-macro-character #\[ '-read-left-bracket)
@@ -7,7 +7,7 @@
 (set-macro-character #\] '-read-delimiter)
 
 (defun -read-delimiter (stream char)
-  (error "jqn: unexpected delimiter ~s
+  (error "lqn: unexpected delimiter ~s
 next symb: ~a" char (peek-char t stream t nil t)))
 
 (defun read-next-object (sep del &optional (stream *standard-input*))

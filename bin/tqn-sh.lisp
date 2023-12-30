@@ -1,7 +1,7 @@
-(ql:quickload :jqn :silent t)
-(in-package :jqn)
+(ql:quickload :lqn :silent t)
+(in-package :lqn)
 
-(defvar *tqnex* "
+(defvar *ex* "
 QUERY AND TRANSFORM TXT
 
 Usage:
@@ -42,9 +42,9 @@ Examples:
     (error (e) (exit-with-msg 3 "tqn: failed to parse qry:~%~a" (mkstr e)))))
 
 (defun tqn/run-files (opts q files)
-  (when (help? opts) (exit-with-msg 0 *tqnex*))
-  (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *tqnex*))
-  (unless (< 0 (length files)) (exit-with-msg 2 "tqn: missing files.~%~a~&" *tqnex*))
+  (when (help? opts) (exit-with-msg 0 *ex*))
+  (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *ex*))
+  (unless (< 0 (length files)) (exit-with-msg 2 "tqn: missing files.~%~a~&" *ex*))
   (loop for f in files for i from 0
         do (sh/out :txt opts
              (tqn/execute-query opts (tqn/load-with-err f) (tqn/parse-query q)
@@ -53,8 +53,8 @@ Examples:
                :db (verbose? opts)))))
 
 (defun tqn/run-pipe (opts q)
-  (when (help? opts) (exit-with-msg 0 *tqnex*))
-  (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *tqnex*))
+  (when (help? opts) (exit-with-msg 0 *ex*))
+  (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *ex*))
   (labels ((one-line (v) (if (> (length v) 1) v (aref v 0))))
    (sh/out :txt opts
     (tqn/execute-query opts (one-line (read-stream-lines-as-vector)) (tqn/parse-query q)

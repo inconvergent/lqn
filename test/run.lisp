@@ -1,29 +1,29 @@
 
 (setf prove:*enable-colors* nil)
-(defpackage #:jqn-tests (:use #:cl #:prove) (:export #:run-tests))
-(in-package #:jqn-tests)
+(defpackage #:lqn-tests (:use #:cl #:prove) (:export #:run-tests))
+(in-package #:lqn-tests)
 
 (defun -run-tests (files)
   (labels ((rel (f) (mapcar (lambda (p) (asdf:system-relative-pathname
-                                          "jqn/tests" p))
+                                          "lqn/tests" p))
                             f)))
     (loop with fails = 0
           for f in (rel files)
-          do (format t "~&~%starting tests in: ~a~%" (jqn:mkstr f))
+          do (format t "~&~%starting tests in: ~a~%" (lqn:mkstr f))
              (unless (prove:run f :reporter :fiveam)
                      (incf fails))
-             (format t "~&done: ~a~%" (jqn:mkstr f))
+             (format t "~&done: ~a~%" (lqn:mkstr f))
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
-  (-run-tests '(#P"test/test-jqn.lisp")))
+  (-run-tests '(#P"test/test-lqn.lisp")))
 
 (defun strip (s)
-  (jqn::repl s (jqn:mkstr #\Newline) ""))
+  (lqn::repl s (lqn:mkstr #\Newline) ""))
 (defmacro is-str (a b) `(is (strip ,a) (strip ,b)))
 
-(defvar *test-data-fn* (jqn::internal-path-string "test/sample.json"))
-(defvar *test-data-2-fn* (jqn::internal-path-string "test/sample2.json"))
+(defvar *test-data-fn* (lqn::internal-path-string "test/sample.json"))
+(defvar *test-data-2-fn* (lqn::internal-path-string "test/sample2.json"))
 (defvar *test-data-raw*
         #(((:_ID . "65679d23d38d711eaf999e89") (:INDEX . 0)
            (:THINGS . #(((:ID . 0) (:NAME . "Chris") (:EXTRA . "extra99"))))

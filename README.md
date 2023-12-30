@@ -1,7 +1,8 @@
-# JQN - JSON Query Notation
+# LQN - Lisp Query Notation
 
-JQN is a terminal utility (and Common Lisp library) to query and transform
-JSON. It consists of two terminal commands `jqn` and `tqn`.
+LQN is a terminal utility (and Common Lisp library) to query and transform
+Lisp data, JSON and TXT files. It consists of three terminal commands `lqn`,
+`jqn` and `tqn`.
 
 ## JQN Example (JSON)
 
@@ -34,7 +35,7 @@ which returns (something like):
 ## TQN Example (TXT)
 
 `tqn` is a mode for reading lines of text into a `vector` (JSON array). `tqn`
-has slightly different default behaviour to `jqn`. Notably that it ignores
+has slightly different default behaviour to `jqn`. Notably, it ignores
 `nil` in the output. `tqn` defaults to printing the vector as rows, but `-j`
 will output to JSON instead. `-t` does the oposite for `jqn`.
 
@@ -154,11 +155,11 @@ only argument.
 
 ## Query Utility Functions
 
-The internal representation of JSON data as `vectors` and `kvs` in `jqn` means
+The internal representation of JSON data as `vectors` and `kvs` in `lqn` means
 you can use the regular CL utilities such as `gethash`, `aref`, `subseq`,
 `length` etc.
 
-But for convenience there are a few special functions defined in `jqn`.
+But for convenience there are a few special functions defined in `lqn`.
 
 ### Global Context
  - `(ctx)`: returns `:pipe` if input is from `stdin`; otherwise `:file`.
@@ -232,13 +233,13 @@ Command line options:
 
 ## Install
 
-Make sure `jqn` is available in your `quicklisp` `local-projects` folder Then
+Make sure `lqn` is available in your `quicklisp` `local-projects` folder Then
 create an alias for SBCL to execute shell wrappers e.g:
 ```
-alias jqn="sbcl --script ~/path/to/jqn/bin/jqn-sh.lisp"
-alias tqn="sbcl --script ~/path/to/jqn/bin/tqn-sh.lisp"
+alias jqn="sbcl --script ~/path/to/lqn/bin/jqn-sh.lisp"
+alias tqn="sbcl --script ~/path/to/lqn/bin/tqn-sh.lisp"
+alias lqn="sbcl --script ~/path/to/lqn/bin/lqn-sh.lisp"
 ```
 Unfortunately this will tend to be quite slow. To get around this you can
-create an image that has `jqn` preloaded and dump it using
+create an image that has `lqn` preloaded and dump it using
 `sb-ext:save-lisp-and-die`. Then use your image in the alias instead of SBCL.
-

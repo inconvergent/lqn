@@ -1,4 +1,4 @@
-(in-package :jqn)
+(in-package :lqn)
 
 (defvar *docstring-map* nil)
 

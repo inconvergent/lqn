@@ -1,16 +1,16 @@
-(in-package :jqn)
+(in-package :lqn)
 
 (defvar *qmodes* '(:+ :? :- :%))
-(defvar *fxns* '(:fn :fi :ctx :num :cnt :par :$ :$_ :>< :??
+(defvar *fxns* '(:fmt :out :jsnstr
+                 :fn :fi :ctx :num :cnt :par :$ :$_ :>< :??
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq
                  :*cat :$cat :head :tail :size
                  :sup :sdwn :mkstr :repl :strcat :splt
                  :tfnd?
                  :is? :kv?
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
-                 :num!? :num?  :flt!? :flt?  :int!? :int?
-                 :lst? :seq?  :str! :str?  :vec! :vec?
-                 :fmt :out))
+                 :num!? :num? :flt!? :flt? :int!? :int?
+                 :lst? :seq? :str! :str? :vec! :vec?))
 
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*
@@ -32,15 +32,15 @@
 (abbrev mvc multiple-value-call) (abbrev mvl multiple-value-list)
 (abbrev vpe vector-push-extend) (defmacro vex (v o) `(vpe ,o ,v))
 
-(defun internal-path-string (path &optional (pkg :jqn))
+(defun internal-path-string (path &optional (pkg :lqn))
   (declare (string path))
   (namestring (asdf:system-relative-pathname pkg path)))
 
 (defun d? (s) "describe symbol." (describe s)) (defun i? (s) "inspect s" (inspect s))
 (defun v? (&optional (silent t)
-           &aux (v (slot-value (asdf:find-system 'jqn) 'asdf:version)))
-  "return/print jqn version."
-  (unless silent (format t "~&JQN version: ~a~%." v))
+           &aux (v (slot-value (asdf:find-system 'lqn) 'asdf:version)))
+  "return/print lqn version."
+  (unless silent (format t "~&LQN version: ~a~%." v))
   v)
 
 (defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
@@ -58,7 +58,7 @@
 (defun *map?  (d) (and (symbolp d) (eq (kv d) :*map)))
 (defun *fld?  (d) (and (symbolp d) (eq (kv d) :*fld)))
 (defun pipe?  (d) (and (symbolp d) (eq (kv d) :||)))
-(defun jqnfx? (d) (and (symbolp d) ; only symbols, not kv
+(defun lqnfx? (d) (and (symbolp d) ; only symbols, not kv
                        (not (keywordp d))
                        (member (kv d) *fxns* :test #'eq)))
 

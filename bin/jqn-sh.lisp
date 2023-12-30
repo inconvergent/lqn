@@ -1,7 +1,7 @@
-(ql:quickload :jqn :silent t)
-(in-package :jqn)
+(ql:quickload :lqn :silent t)
+(in-package :lqn)
 
-(defvar *jqnex* "
+(defvar *ex* "
 QUERY AND TRANSFORM JSON
 
 Usage:
@@ -25,7 +25,6 @@ Examples:
   echo '{\"_id\": 1}' | jqn '{_id}'  # query data from pipe
 ")
 
-; TODO: warn if jqn reads only some of a file?
 (defun jqn/execute-query (opts dat q &key conf db)
   (handler-case (qryl dat q :conf conf :db db)
     (error (e) (exit-with-msg 4 "jqn: failed to execute qry:~%~a" e))))
@@ -39,8 +38,8 @@ Examples:
     (error (e) (exit-with-msg 3 "jqn: failed to parse qry:~%~a" (mkstr e)))))
 
 (defun jqn/run-files (opts q files)
-  (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *jqnex*))
-  (unless (< 0 (length files)) (exit-with-msg 2 "jqn: missing files.~%~a~&" *jqnex*))
+  (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
+  (unless (< 0 (length files)) (exit-with-msg 2 "jqn: missing files.~%~a~&" *ex*))
   (loop for f in files for i from 0
         do (sh/out :json opts
              (jqn/execute-query opts (jqn/loadf-with-err f) (jqn/parse-query q)
@@ -49,7 +48,7 @@ Examples:
                :db (verbose? opts)))))
 
 (defun jqn/run-pipe (opts q)
-  (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *jqnex*))
+  (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
   (sh/out :json opts
     (jqn/execute-query opts (jsnloads *standard-input*) (jqn/parse-query q)
       :conf `((:mode . :jqn) (:ctx . :pipe))
@@ -57,7 +56,7 @@ Examples:
 
 (defun jqn/run-from-shell (args)
   (multiple-value-bind (opts args) (split-opts-args args)
-    (when (help? opts) (exit-with-msg 0 *jqnex*))
+    (when (help? opts) (exit-with-msg 0 *ex*))
     (cond ((interactive-stream-p *standard-input*)
            (jqn/run-files opts (car args) (cdr args)))
           (t (jqn/run-pipe opts (car args))))))

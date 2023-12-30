@@ -21,12 +21,12 @@ RUN apt-get -qq remove curl -y &&\
 from base AS build
 
 WORKDIR /opt
-ADD src quicklisp/local-projects/jqn/src
-ADD test quicklisp/local-projects/jqn/test
-ADD jqn.asd quicklisp/local-projects/jqn
-ADD run-tests.sh quicklisp/local-projects/jqn/run-tests.sh
+ADD src quicklisp/local-projects/lqn/src
+ADD test quicklisp/local-projects/lqn/test
+ADD lqn.asd quicklisp/local-projects/lqn
+ADD run-tests.sh quicklisp/local-projects/lqn/run-tests.sh
 RUN mkdir -p ~/quicklisp/ && ln -s  /opt/quicklisp/setup.lisp ~/quicklisp/setup.lisp
 
-WORKDIR /opt/quicklisp/local-projects/jqn/
+WORKDIR /opt/quicklisp/local-projects/lqn/
 
 CMD ["bash", "./run-tests.sh"]

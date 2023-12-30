@@ -1,8 +1,8 @@
-(defpackage #:jqn
+(defpackage #:lqn
   (:use #:common-lisp)
-  (:nicknames #:cl-jqn)
+  (:nicknames #:cl-lqn)
   (:export #:d? #:v?
-    #:jsnloads #:jsnloadf #:jsnout #:ldnout
+    #:jsnloads #:jsnloadf #:jsnout #:lqnout #:fmt #:out #:jsnstr
     #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
     #:?? #:>< #:$ #:noop
     #:$cat #:*cat #:size #:size?
@@ -12,5 +12,5 @@
     #:lst? #:seq? #:str! #:str? #:vec! #:vec? #:*n #:*sel #:*seq
     #:sup #:sdwn #:strcat #:repl #:mkstr #:splt
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
-    #:head #:tail #:fmt #:out))
+    #:head #:tail))
 
