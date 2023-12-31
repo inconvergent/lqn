@@ -46,7 +46,7 @@ echo '1 x 1 x 7 x 100' | \
 
 # split string and make a new JSON structure:
 echo '1 x 1 x 7 x 100' | \
-   tqn -j '(splt _ :x) int!? (*map ($new :v _))'
+  tqn -j '(splt _ :x) int!? (*map ($new :v _))'
 ```
 
 ## Object Representation
@@ -59,28 +59,31 @@ internal Lisp data structure.
 
 ## Operators
 
-The following operators have special behaviour. You can also write generic CL code,
-anywhere you can use an operator. Including the functions further down.
+The following operators have special behaviour. You can also write generic CL
+code, anywhere you can use an operator. Including the functions further down.
 
 ### Pipe Operator
-Pipe is the operator that surrounds all queries by default.
-  - ` (|| ..)` pipe the results from the first operator into the second etc.
-    Returns the result of the last operator.
+` (|| ..)` pipes the results from the first operator into the second etc.
+Returns the result of the last operator. Pipe is the operator that surrounds
+all terminal queries by default.
 
 For convenience pipe has the following default translations:
-  - `fx`: to `(*map (fx _))`; map `fx` across all items.
+  - `fx`: to `(*map (fx _))`: map `fx` across all items.
   - `:word`: to `[(isub? _ "word")]` to filter by `"word"`.
   - `"Word"`: to `[(sub? _ "Word")]` to filter all items by this string with case.
   - `(expr)`: to itself.
 
 ### Map/Reduce Operators
+  - `(*? test [expr=test])` new vector with `(expr _)` for all items where
+    `(test _)` is not `nil`.
   - `(*map fx)`: map `(fx _)` across all items.
   - `(*map (fx .. _ ..) ..)`: map `(fx .. _ ..)` across all items.
-  - `(*fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value. acc is inserted as the
-     first argument to `fx`
+  - `(*fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
+    acc is inserted as the first argument to `fx`
   - `(*fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. the accumulator is
     inserted as the first argument to `fx`.
-  - `(*fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. use this if you need to name
+  - `(*fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. use this
+    if you need to name
     the accumulator explicity.
 
 ### Selector Operators
@@ -124,7 +127,7 @@ An `expr` is any Operator or valid CL code. Use `_` in `expr` to refer to the
 value of the selected key.
 ```lisp
 #{(key1 (sup _))       ; convert value of key1 to uppercase
-  (key3 (or _ "that")) ; select the value of key3 or literally "that".
+  (key3 (or _ "That")) ; select the value of key3 or literally "That".
   (key2 (+ 33 _))}     ; add 33 to value of key2
 ```
 To select everything, but replace some keys with new values or drop keys
@@ -137,9 +140,8 @@ entirely:
 
 ### `vector` Selectors
 `vector` selectors are similar to `kv` Selectors, but they are used with `[]`.
-`:key` (keyword) are translated to `"key"` and `fx` (symbol) is translated to
-`(fx _)`. That is, symbols are called as functions with current data as the
-only argument.
+`:key` is translated to `"key"` and `fx` is translated to `(fx _)`. That is,
+`symbols` are called as functions with current data as the only argument.
 
 ```lisp
 [:hello]              ; items that contain `"hello"`.
@@ -163,32 +165,35 @@ But for convenience there are a few special functions defined in `lqn`.
 
 ### Global Context
  - `(ctx)`: returns `:pipe` if input is from `stdin`; otherwise `:file`.
- - `(fi [k])`: index of the file that is the source for the current data; or `0`.
+ - `(fi [k=0])`: index of the file that is the source for the current data;
+   starts at `k`.
  - `(fn)`: name of the file that is the source for the current data; or `nil`.
 
 ### Operator Context
-Available in most operators.
+Available in all operators:
  - `_` or `(dat)`: the current data object.
- - `($_ k [default])`: this key from current data object.
- - `(cnt [k])`: counts from `k`, or `0`.
- - `(num)`: length of the `vector` being iterated.
+ - `($_ k [d])`: this key from current data (`kv`) object; or `d`.
  - `(par)`: the parent data object.
+ - `(num)`: length of the `vector` being iterated.
+ - `(cnt [k=0])`: counts from `k` over the vector being iterated.
 
 ### Generic
- - `(>< a)`: condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
+ - `(>< a)`: condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys
+   with empty `kvs`.
  - `(?? fx a ..)`: execute `(fx a ..)` only if `a` is not `nil`; otherwise `nil`.
- - `(fmt f ..)`: format f to `string` with these args.
+ - `(fmt f ..)`: format `f` to `string` with these args.
  - `(fmt s)`: get printed representation of `s`.
- - `(out f ..)`: format f to `*standard-out*` with these args.
+ - `(out f ..)`: format `f` to `*standard-out*` with these args.
  - `(out s)`: output printed representation of `s` to `*standard-out*`. return `nil`.
  - `(size? o [d])`: length of `vector` or number of keys in `kv`; or `d`.
 
 ### Strings
  - `(mkstr a ..)`: stringify and concatenate all arguments.
+ - `(trim s)`: trim leading and trailing whitespace.
  - `(pref? s pref [d])`: `s` if `pref` is a prefix of `s`; or `d`.
  - `(repl s from to)`: replace `from` with `to` in `s`.
  - `(sdwn s ..)`: `mkstr` and downcase.
- - `(split s x)`: split `s` at all `x`.
+ - `(splt s x)`: split `s` at all `x`.
  - `(strcat s ..)`: concatenate all strings and `vectors`/`lists` of strings.
  - `(sub? s sub [d])`: `s` if `sub` is a substring of `s`; or `d`.
  - `(subx? s sub)`: interger where `sub` starts in `s`
@@ -200,36 +205,40 @@ Available in most operators.
  - `($ kv k [default])`: get key `k` from `kv`. Equivalent to `gethash`.
  - `($_ k ..)`: is equivalent to `($ _ k ..)`.
  - `($cat ..)`: add all keys from these `kvs` to a new `kv`. left to right.
- - `($new :k1 expr1 ..)`: new `kv` with these keys and values.
+ - `($new :k1 expr1 ..)`: new `kv` with these keys and values/expressions.
 
-### Vectors
+### Vectors / Sequences
  - `(*cat a ..)`: concatenate all `vectors` in these `vectors`. Non-vectors are
    included in their position.
- - `(*n v i)`: get these index `i` from `v`. Equivalent to `aref`.
+ - `(*n v i)`: get this index from `v`. Equivalent to `aref`.
  - `(*new ..)`: new `vector` with these elements.
- - `(*sel ..)`: get new vector with these `*n`s or `*seq`s.
  - `(*seq v i [j])`: get range `i ..` or `i .. (1- j)` from `v`. Equivalent to
    `subseq`.
- - `(head s [n=10])`: first n items. Works on `strings` too.
- - `(tail s [n=10])`: last n items. Works on `strings` too.
+ - `(*sel ..)`: get new vector with these `*n`s or `*seq`s.
+ - `(head s [n=10])`: first `n` items of `sequence`.
+ - `(tail s [n=10])`: last `n` items of `sequence`.
 
-### Types
- - `(flt? f)`: `f` if it is a `float`.
- - `(int? i)`: `i` if it is an `integer`.
- - `(kv?  k)`: `k` if it is a `kv` (`hash-table`).
- - `(lst? l)`: `l` if it is a `list`.
- - `(num? n)`: `n` if it is a `number`.
- - `(str? s)`: `s` if it is a `string`.
- - `(vec? v)`: `v` if it is a `vector`.
- - `(seq? s)`: `s` if it is `str`, `vector` or `list`.
- - `(str! s)`: `s` coerce `s` to string.
+### Type Tests
+`(is? o [d])` returns `o` if not `nil`, empty sequence or empty `kv`; otherwise `d`.
+
+These functions return the argument if the argument is the corresponding type:
+`flt?`, `int?`, `kv?`, `lst?`, `num?`, `str?`, `vec?`, `seq?`
+
+These functions return the argument parsed as the corresponding type if
+possible; otherwise they return the optional second argument: `int!?`, `flt!?`,
+`num!?`, `str!?`, `vec!?`, `seq!?`
+
+### Type Coercion
+ - `(str! s ..)`: coerce everything to a `string`.
+ - `(vec! v)`: coerce sequence to `vector`; or return `(*new v)`
 
 ## Options
 
 Command line options:
   - `-v` show compiled query.
-  - `-m` minify output [indented is default].
   - `-j, -t, -l` use `json`, `txt` or `ldn` output format.
+  - `-m` minify JSON output [indented is default].
+  - `-h` show help.
 
 ## Install
 

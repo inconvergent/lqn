@@ -1,40 +1,5 @@
 (in-package :lqn)
 
-(defun ct/kv/key (s)
-  (typecase s (string s) (symbol (sdwn (mkstr s)))
-              (number (mkstr s)) (cons `(mkstr ,s))))
-
-(defun flt? (f &optional d) "f if float; or d"    (if (floatp f) f d))
-(defun int? (i &optional d) "i if int; or d"      (if (integerp i) i d))
-(defun kv?  (k &optional d) "k if kv; or d"       (if (hash-table-p k) k d))
-(defun lst? (l &optional d) "l if list; or d"     (if (listp l) l d))
-(defun num? (n &optional d) "n if number; or d"   (if (numberp n) n d))
-(defun str? (s &optional d) "s if string; or d"   (if (stringp s) s d))
-(defun vec? (v &optional d) "v if vector; or d"   (if (vectorp v) v d))
-(defun seq? (s &optional d) "s if sequence; or d" (or (lst? s) (str? s) (vec? s) d))
-
-(defun str! (s) "coerce to string"
-  (typecase s (string s) (symbol (sdwn s)) (otherwise (mkstr s))))
-(defun vec! (v) "coerce v to vector. if v is not a vector, list, string it will return a
-vector with v as the only element"
-  (etypecase v (vector v) (list (coerce v 'vector)) (atom `#(,v))))
-
-(defun int!? (i &optional d) "i as int if it can be parsed as int; or d"
-  (handler-case (or (int? i) (int? (read-from-string i nil nil)) d) (error () d)))
-(defun flt!? (f &optional d) "f as float if it can be parsed as float; or d"
-  (handler-case (or (flt? f) (flt? (read-from-string f nil nil)) d) (error () d)))
-(defun num!? (n &optional d) "n as number if it can be parsed as number; or d"
-  (handler-case (or (num? n) (num? (read-from-string n nil nil)) d) (error () d)))
-
-(defmacro something? (v &body body) ; TODO: recursive strip with ext function
-  (declare (symbol v))
-  `(typecase ,v (sequence (when (> (length ,v) 0) (progn ,@body)))
-                (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
-                (otherwise (when ,v (progn ,@body)))))
-(defun is? (k &optional d)
-  "k if k is not nil ,not an empty sequence, and not an empty hash-table; or d"
-  (if (something? k t) k d))
-
 (defun unpack-mode (o &optional (default :+) merciful)
   (labels ((valid-mode (m) (member m *qmodes* :test #'eq))
            (repack- (s s*) (etypecase s (symbol (psymb (symbol-package s) (subseq s* 2)))
@@ -50,7 +15,7 @@ vector with v as the only element"
       (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
 (defmacro ?? (fx arg &rest args) ; ?!
-  (declare (symbol fx)) "run (fx arg) only if arg is not nil."
+  (declare (symbol fx)) "run (fx arg ..) only if arg is not nil."
   (awg (arg*) `(let ((,arg* ,arg)) (when ,arg* (,fx ,arg* ,@args)))))
 
 (defun gk (conf k &optional silent &aux (hit (cdr (assoc k conf))))
@@ -58,20 +23,22 @@ vector with v as the only element"
   (if (or silent hit) hit (warn "LQN: missing conf key: ~a~%conf: ~s" k conf)))
 
 (defun group (n l) (declare (list l) (fixnum n)) "group l into lists of n elements."
-  (if (< n 1) (error "group error: group size is smaller than 1"))
+  (if (< n 1) (error "group: group size is smaller than 1"))
   (labels ((rec (l acc)
              (let ((rest (nthcdr n l)))
-               (if (consp rest)
-                   (rec rest (cons (subseq l 0 n) acc))
-                   (nreverse (cons l acc))))))
+               (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
+                                (nreverse (cons l acc))))))
     (if l (rec l nil) nil)))
 
-(defun strcat (&rest rest) "concatenate all strings in sequences rest"
+(defun strcat (&rest rest) "concatenate all strings in sequences"
   (apply #'mkstr
     (mapcar (lambda (s) (etypecase s (string s)
                           (list (apply #'concatenate 'string s))
                           (vector (apply #'concatenate 'string (coerce s 'list)))))
             rest)))
+(defun trim (s &optional (chars '(#\Space #\Newline #\Backspace #\Tab #\Linefeed
+                                  #\Page #\Return #\Rubout)))
+  (declare (string s)) "trim string" (string-trim chars s))
 
 (defmacro out (s &rest rest) "print to standard out"
   (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
@@ -129,22 +96,30 @@ vector with v as the only element"
                                      :element-type type :adjustable t)
            (make-array size :fill-pointer 0 :element-type type :adjustable t)))
 
-(defun head (s &optional (n 10)) ; TODO: negative indices, tests
-  (declare (sequence s) (fixnum n)) "first n elements."
-  (subseq s 0 (min n (length s))))
+; (defun *rng (a &optional b)) TODO:
+
+(defun *seq (v i &optional j) ; TODO: negative indices, tests
+  (declare (vector v) (fixnum i)) "(subseq v ,@rest)"
+  (subseq v i j))
+(defun *n (v &optional (i 0)) (declare (vector v) (fixnum i)) "get index." (aref v i))
+
+(defun head (s &optional (n 10) &aux (l (length s)))
+  (declare (sequence s) (fixnum n l)) "first ±n elements"
+  (cond ((zerop n) #()) ((plusp n) (subseq s 0 (min n l)))
+                        (t         (subseq s 0 (max 0 (+ l n))))))
+
 (defun tail (s &optional (n 10) &aux (l (length s)))
-  (declare (sequence s) (fixnum n l)) "last n elements."
-  (subseq s (max 0 (- l n)) l))
+  (declare (sequence s) (fixnum n l)) "last ±n elements"
+  (cond ((zerop n) #()) ((plusp n) (subseq s (max 0 (- l n)) l))
+                        (t         (subseq s (max 0 (+ l n)) l) )))
+
 (defun size (l) "length of sequence l or number of keys in kv l."
   (etypecase l (sequence (length l)) (hash-table (hash-table-count l))))
-(defun size? (l &optional d) "length of sequence l or number of keys in kv l."
+(defun size? (l &optional d) "length of sequence/number of keys in kv."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
 
 (defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
 (defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
-
-(defun *seq (v i &optional j) (declare (vector v) (fixnum i)) "(subseq v ,@rest)" (subseq v i j))
-(defun *n (v &optional (i 0)) (declare (vector v) (fixnum i)) "get this index from vector." (aref v i))
 
 (defun *sel (v &rest seqs)
   (declare (vector v))
@@ -152,13 +127,13 @@ vector with v as the only element"
 ranges are lists that behave like arguments to *seq."
   (apply #'concatenate 'vector
     (loop for s in seqs collect
-      (etypecase s (list (apply #'*seq v s)) (fixnum (list (*n v s)))))))
+      (etypecase s (list (apply #'*seq v s)) (fixnum `(,(*n v s)))))))
 
 (defun $make (&optional kv &aux (res (make-hash-table :test #'equal))) "new/soft copy kv."
   (when kv (loop for k being the hash-keys of kv using (hash-value v)
                  do (setf (gethash k res) (gethash k kv))))
   res)
-(defun $nil (kv) "return nil for emtpy hash-tables. otherwise return kv."
+(defun $nil (kv) "return nil for emtpy hash-tables. otherwise return kv." ; TODO: use kv?
   (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
                (otherwise kv)))
 

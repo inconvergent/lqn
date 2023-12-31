@@ -26,7 +26,7 @@
   (ecase (format? opts d)
     (:json (handler-case (jsnout res :indent (indent? opts))
              (error (e) (exit-with-msg 5 "failed to serialize JSON.~%~a" (mkstr e)))))
-    (:lqn (handler-case (format t "~&~a~&" (lqnout res))
+    (:lqn (handler-case (format t "~&~s~&" (lqnout res))
             (error (e) (exit-with-msg 5 "failed to serialize LQN.~%~a" (mkstr e)))))
     (:txt (handler-case
             (labels ((prln (s) (format t "~&~a~%" s)))

@@ -4,11 +4,11 @@
   (:export #:d? #:v?
     #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
     #:jsnloads #:jsnloadf #:jsnout #:lqnout #:fmt #:out #:jsnstr
-    #:*new #:$new #:$cat #:*cat #:size #:size?
+    #:*new #:$new #:$cat #:*cat #:*$cat #:size #:size?
     #:?? #:>< #:$ #:noop #:tfnd?
-    #:is? #:kv?
+    #:is? #:kv? #:trim
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
-    #:lst? #:seq? #:str! #:str? #:vec! #:vec? #:*n #:*sel #:*seq
+    #:lst? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!? #:*n #:*sel #:*seq
     #:sup #:sdwn #:strcat #:repl #:mkstr #:splt
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
     #:head #:tail))

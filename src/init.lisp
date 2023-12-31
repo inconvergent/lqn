@@ -4,12 +4,12 @@
 (defvar *fxns* '(:fmt :out :jsnstr
                  :fn :fi :ctx :num :cnt :par :$ :$_ :>< :??
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq
-                 :*new :$new :*cat :$cat :head :tail :size
+                 :*new :$new :*cat :$cat :*$cat :head :tail :size :size?
                  :sup :sdwn :mkstr :repl :strcat :splt
-                 :tfnd?  :is? :kv?
+                 :tfnd? :is? :kv? :trim
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :num!? :num? :flt!? :flt? :int!? :int?
-                 :lst? :seq? :str! :str? :vec! :vec?))
+                 :lst? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?))
 
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*
@@ -32,16 +32,13 @@
 (abbrev mvc multiple-value-call) (abbrev mvl multiple-value-list)
 (abbrev vpe vector-push-extend) (defmacro vex (v o) `(vpe ,o ,v))
 
-(defun internal-path-string (path &optional (pkg :lqn))
-  (declare (string path))
+(defun internal-path-string (path &optional (pkg :lqn)) (declare (string path))
   (namestring (asdf:system-relative-pathname pkg path)))
 
 (defun d? (s) "describe symbol." (describe s)) (defun i? (s) "inspect s" (inspect s))
 (defun v? (&optional (silent t)
            &aux (v (slot-value (asdf:find-system 'lqn) 'asdf:version)))
-  "return/print lqn version."
-  (unless silent (format t "~&LQN version: ~a~%." v))
-  v)
+  "return/print lqn version." (unless silent (format t "~&LQN version: ~a~%." v)) v)
 
 (defun mkstr (&rest args) "coerce all arguments to a string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
@@ -59,12 +56,56 @@
                (values nil d)))
 (defun symbol-not-kv (d) (and (symbolp d) (not (keywordp d))))
 (defun all?   (d) (and (symbolp d) (eq (kv d) :_)))
+(defun pipe?  (d) (and (symbol-not-kv d) (eq (kv d) :||)))
 (defun $$sel? (d) (and (symbol-not-kv d) (eq (kv d) :$$)))
+(defun $*sel? (d) (and (symbol-not-kv d) (eq (kv d) :$*)))
 (defun *$sel? (d) (and (symbol-not-kv d) (eq (kv d) :*$)))
 (defun **sel? (d) (and (symbol-not-kv d) (eq (kv d) :**)))
-(defun $*sel? (d) (and (symbol-not-kv d) (eq (kv d) :$*)))
+(defun is*?   (d) (and (symbol-not-kv d) (eq (kv d) :*?)))
 (defun *map?  (d) (and (symbol-not-kv d) (eq (kv d) :*map)))
 (defun *fld?  (d) (and (symbol-not-kv d) (eq (kv d) :*fld)))
-(defun pipe?  (d) (and (symbol-not-kv d) (eq (kv d) :||)))
 (defun lqnfx? (d) (and (symbol-not-kv d) (member (kv d) *fxns* :test #'eq)))
+
+(defun ct/kv/key (s) (typecase s (string s) (symbol (sdwn (mkstr s)))
+                                 (number (mkstr s)) (cons `(mkstr ,s))))
+; IS TYPE?
+(defun flt? (f &optional d) "f if float; or d"    (if (floatp f) f d))
+(defun int? (i &optional d) "i if int; or d"      (if (integerp i) i d))
+(defun kv?  (k &optional d) "k if kv; or d"       (if (hash-table-p k) k d))
+(defun lst? (l &optional d) "l if list; or d"     (if (listp l) l d))
+(defun num? (n &optional d) "n if number; or d"   (if (numberp n) n d))
+(defun str? (s &optional d) "s if string; or d"   (if (stringp s) s d))
+(defun vec? (v &optional d) "v if vector; or d"   (if (vectorp v) v d))
+(defun seq? (s &optional d) "s if sequence; or d" (or (lst? s) (str? s) (vec? s) d))
+
+; PARSE AS TYPE OR DEFAULT
+(defun int!? (i &optional d) "i as int if it can be parsed; or d"
+  (handler-case (or (int? i) (int? (read-from-string i nil nil)) d) (error () d)))
+(defun flt!? (f &optional d) "f as float if it can be parsed; or d"
+  (handler-case (or (flt? f) (flt? (read-from-string f nil nil)) d) (error () d)))
+(defun num!? (n &optional d) "n as number if it can be parsed; or d"
+  (handler-case (or (num? n) (num? (read-from-string n nil nil)) d) (error () d)))
+(defun str!? (n &optional d) "s as str if it can be parsed; or d"
+  (handler-case (or (str? n) (str? (read-from-string n nil nil)) d) (error () d)))
+(defun vec!? (n &optional d) "v as vector if it can be parsed; or d"
+  (handler-case (or (vec? n) (vec? (read-from-string n nil nil)) d) (error () d)))
+(defun seq!? (n &optional d) "s as seq if it can be parsed; or d"
+  (handler-case (or (seq? n) (seq? (read-from-string n nil nil)) d) (error () d)))
+
+; COERCE TO TYPE
+(defun str! (&rest rest) "coerce to string"
+  (apply #'mkstr (loop for s in rest collect
+                   (typecase s (string s) (symbol (sdwn s)) (otherwise (mkstr s))))))
+(defun vec! (v) "coerce v to vector. if v is not a vector, list, string it will return a
+vector with v as the only element"
+  (etypecase v (vector v) (list (coerce v 'vector)) (atom `#(,v))))
+
+(defmacro something? (v &body body) ; TODO: recursive strip with ext function
+  (declare (symbol v))
+  `(typecase ,v (sequence (when (> (length ,v) 0) (progn ,@body)))
+                (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
+                (otherwise (when ,v (progn ,@body)))))
+(defun is? (k &optional d)
+  "k if k is not nil ,not an empty sequence, and not an empty hash-table; or d"
+  (if (something? k t) k d))
 
