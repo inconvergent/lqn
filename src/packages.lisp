@@ -5,8 +5,8 @@
     #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
     #:jsnloads #:jsnloadf #:jsnout #:lqnout #:fmt #:out #:jsnstr
     #:*new #:$new #:$cat #:*cat #:*$cat #:size #:size?
-    #:?? #:>< #:$ #:noop #:tfnd?
-    #:is? #:kv? #:trim
+    #:?? #:>< #:$ #:noop
+    #:is? #:kv? #:sym? #:trim
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
     #:lst? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!? #:*n #:*sel #:*seq
     #:sup #:sdwn #:strcat #:repl #:mkstr #:splt

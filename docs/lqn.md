@@ -284,7 +284,7 @@
  ;   Lambda-list: (K &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     k if k is not nil ,not an empty sequence, and not an empty hash-table; or d
+ ;     k if k is not nil, empty sequence, or empty hash-table; or d
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -551,10 +551,9 @@
  ;   Documentation:
  ;     query data.
  ;     ex: (lqn:qry "1 x 1 x 7 x 100 $ 3 x 8 x 30"
- ;           (splt _ :$)
- ;           (*map k (splt k :x) int!? ; for each row, split and parse as int
- ;                   ($new :num (num)  ; new nested dict for each row
- ;                         :items (*map ($new :v _ :i (cnt))))))
+ ;           (splt _ :$) (*map (splt _ :x) int!? ; for each row, split and parse as int
+ ;                             ($new :num (num)  ; new nested dict
+ ;                                   :items (*map ($new :v _ :i (cnt))))))
  ;   Source file: /data/x/lqn/src/qry.lisp
 ```
 
@@ -802,6 +801,20 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:SYM?
+
+```
+ ; LQN:SYM?
+ ;   [symbol]
+ ; 
+ ; SYM? names a compiled function:
+ ;   Lambda-list: (S &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     s if sym; or d
+ ;   Source file: /data/x/lqn/src/init.lisp
+```
+
 #### LQN:TAIL
 
 ```
@@ -817,19 +830,6 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     last ±n elements
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:TFND?
-
-```
-:missing:todo:
-
- ; LQN:TFND?
- ;   [symbol]
- ; 
- ; TFND? names a macro:
- ;   Lambda-list: (ROOT &REST Q)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -879,11 +879,10 @@
  ;   [symbol]
  ; 
  ; VEC! names a compiled function:
- ;   Lambda-list: (V)
- ;   Derived type: (FUNCTION (T) (VALUES VECTOR &OPTIONAL))
+ ;   Lambda-list: (V &OPTIONAL (D `#(,V)))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     coerce v to vector. if v is not a vector, list, string it will return a
- ;     vector with v as the only element
+ ;     coerce v to vector. if v is not a vector, list, string it returns d
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 

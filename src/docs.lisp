@@ -14,7 +14,6 @@
     (mapcar (lambda (o) (mkstr o #\Newline))
             (remove-if-not #'identity (list (documentation sym 'function)
                                             (documentation sym 'setf))))))
-
 (defun select-docs (sym)
   (declare (symbol sym))
   (let* ((docs (find-if (lambda (c) (eq sym c)) *docstring-map* :key #'car))
@@ -49,9 +48,7 @@ use :pretty to print verbose output to stdout in a readable form."
         `(loop for (,str ,sym) in (pckgs ,pkg)
                do (mvb (,doc ,skip) (select-docs ,sym)
                        (unless ,skip (format t "~&#### ~a:~a~%~%~a~&~%"
-                                             (mkstr ,pkg)
-                                             (-md-sanitize ,str)
-                                             ,doc)))))
+                                       (mkstr ,pkg) (-md-sanitize ,str) ,doc)))))
       (:pairs `(loop for (,str ,sym) in (pckgs ,pkg)
                      collect (list ,str (select-docs ,sym))))
       (otherwise `(loop for (,str ,sym) in (pckgs ,pkg) collect ,str)))))

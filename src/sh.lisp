@@ -4,7 +4,7 @@
 (defun help? (opts)    (member :-h opts :test #'equal))
 (defun indent? (opts)  (null (member :-m opts :test #'equal)))
 (defun format? (opts &optional (d :json))
-  (cond ((member :-l opts :test #'eq) :lqn)
+  (cond ((member :-l opts :test #'eq) :ldn)
         ((member :-t opts :test #'eq) :txt)
         ((member :-j opts :test #'eq) :json)
         (t d)))
@@ -26,7 +26,7 @@
   (ecase (format? opts d)
     (:json (handler-case (jsnout res :indent (indent? opts))
              (error (e) (exit-with-msg 5 "failed to serialize JSON.~%~a" (mkstr e)))))
-    (:lqn (handler-case (format t "~&~s~&" (lqnout res))
+    (:ldn (handler-case (format t "~&~s~&" (lqnout res))
             (error (e) (exit-with-msg 5 "failed to serialize LQN.~%~a" (mkstr e)))))
     (:txt (handler-case
             (labels ((prln (s) (format t "~&~a~%" s)))

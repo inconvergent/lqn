@@ -13,6 +13,7 @@
   (with-open-file (in fn)
     (loop for l = (read-line in nil nil) while l do (vex res l)))
   res)
+; (setf (readtable-case *readtable*) :preserve)
 (defun read-file-as-data-vector (fn &aux (res (make-adjustable-vector)))
   (with-open-file (in fn)
     (loop for l = (read in nil nil) while l do (vex res l)))

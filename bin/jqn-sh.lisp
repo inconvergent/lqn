@@ -2,7 +2,7 @@
 (in-package :lqn)
 
 (defvar *ex* "
-QUERY AND TRANSFORM JSON
+JQN - JSON QUERY NOTATION
 
 Usage:
   jqn [options] <qry> [files ...]
@@ -29,6 +29,9 @@ Examples:
   (handler-case (qryl dat q :conf conf :db db)
     (error (e) (exit-with-msg 4 "jqn: failed to execute qry:~%~a" e))))
 
+(defun jqn/parse-pipe-json ()
+  (handler-case (jsnloads *standard-input*)
+    (error (e) (exit-with-msg 2 "jqn: failed to parse json from pipe:~%~a" e))))
 (defun jqn/loadf-with-err (f)
   (handler-case (jsnloadf f)
     (error (e) (exit-with-msg 2 "jqn: failed to read json file: ~a~%~a" f e))))
@@ -50,7 +53,7 @@ Examples:
 (defun jqn/run-pipe (opts q)
   (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
   (sh/out :json opts
-    (jqn/execute-query opts (jsnloads *standard-input*) (jqn/parse-query q)
+    (jqn/execute-query opts (jqn/parse-pipe-json) (jqn/parse-query q)
       :conf `((:mode . :jqn) (:ctx . :pipe))
       :db (verbose? opts))))
 

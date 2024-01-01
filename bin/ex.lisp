@@ -45,7 +45,20 @@
                   ($new :num (num)  ; new nested dict for each row
                         :items (*map ($new :v _ :i (cnt)))))))
   ; same output as above
-  )
+
+  ; (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim (*? (isubx? _ :k) (*new _ (par))))
+
+  (print
+    (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+       (splt _ :x) trim (*map (xpr? :a :-@b sup nil))))
+
+
+  (print (lqn:qry '#((a b xxx) (a b c) (a b (c xxx)))
+                   (*map (txpr? (msym? _ xxx)
+                                (lqn::symb _ :-HIT---)))))
+  ; result
+  ; #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
+   )
 
 (main)
 

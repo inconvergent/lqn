@@ -2,7 +2,7 @@
 (in-package :lqn)
 
 (defvar *ex* "
-QUERY AND TRANSFORM TXT
+LQN - LISP QUERY NOTATION
 
 Usage:
   lqn [options] <qry> [files ...]
@@ -58,8 +58,9 @@ Examples:
   (multiple-value-bind (opts args) (split-opts-args args)
     (cond ((interactive-stream-p *standard-input*)
            (lqn/run-files opts (car args) (cdr args)))
-          (t (error "bad") (lqn/run-pipe opts (car args)))
-          )))
+          (t (error "lqn: pipe not implemented")
+             ; (lqn/run-pipe opts (car args))
+             ))))
 
 (lqn/run-from-shell (cdr (cmd-args)))
 

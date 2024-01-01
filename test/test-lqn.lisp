@@ -22,8 +22,8 @@
   (is (lqn:lqnout (lqn:jsnloadf *test-data-2-fn*)) *test-data-2-raw* :test #'equalp)
   (is-str (lqn::jsnstr (lqn:jsnloadf *test-data-2-fn*))
           "{\"credit\":\"Mega Corp.\",\"credit_URL\":\"http://fax.megacorp\",\"disclaimer_url\":null,\"copyright_url\":\"http://fax.megacorp/about/terms.asp\",\"image\":{\"url\":\"http://fax.megacorp/images/Logo.jpg\",\"title\":\"Mega Corp\",\"link\":\"http://fax.megacorp/yyyyyyyyy\"},\"suggested_pickup\":\"15 minutes after the hour\",\"suggested_pickup_period\":\"60\",\"dewpoint_c\":-22.2,\"dewpoint_f\":null,\"dewpoint_string\":\"-8.0 F (-22.2 C)\",\"heat_index_c\":-20.6,\"heat_index_f\":-5.0,\"heat_index_string\":\"-5.0 F (-20.6 C)\",\"observation_time\":\"Last Updated on Dec 5 2023, 9:37 pm CET\",\"current_observation\":{\"station_name\":\"Gulhuset\",\"observation_age\":42,\"dewpoint_day_high_f\":\"-7\",\"dewpoint_day_high_time\":\"8:47pm\",\"dewpoint_day_low_f\":-8.0,\"windchill_month_low_f\":-9,\"windchill_year_low_f\":-9},\"time_to_generate\":0.012046}")
-  (is (string-downcase (lqn::jsnstr (lqn:jsnloadf *test-data-2-fn*)))
-      (string-downcase (lqn::jsnstr *test-data-2-raw*))))
+  (is (lqn:sdwn (lqn::jsnstr (lqn:jsnloadf *test-data-2-fn*)))
+      (lqn:sdwn (lqn::jsnstr *test-data-2-raw*))))
 
 (subtest "lqn qry identities"
   (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _))
@@ -46,11 +46,11 @@
        (:? "bb" :_) (:+ "cc" (PROGN _)) (:+ "%" "ABC") (:% "ABC" _)))
   (is (lqn::preproc/**
         '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
-          (% "ABC" (print _)) (:% "ABC" _)))
-      `((:? (CCC LQN::_)) (:? (LQN:ISUB? LQN::_ "ddd"))
-       (:? (LQN:SUB? LQN::_ "IIUJ")) (:% (LQN:SUB? LQN::_ "UU")) (:? (AA LQN::_))
-       (:? (BB LQN::_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
-       (:% (LQN:SUB? LQN::_ "ABC"))))
+          (% "ABC" (print _)) (:% "ABC")))
+      '((:? (WHEN (CCC :_) :_)) (:? (WHEN (LQN:ISUB? :_ "ddd") :_))
+       (:? (WHEN (LQN:SUB? :_ "IIUJ") :_)) (:% (WHEN (LQN:SUB? :_ "UU") :_))
+       (:? (WHEN (AA :_) :_)) (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _)))
+       (:? (% "ABC" (PRINT _))) (:% (WHEN (LQN:SUB? :_ "ABC") :_))))
 
   (is (lqn:lqnout (lqn:jsnqryf *test-data-fn*
         (*$  _id (+@things (*$ name id))
@@ -131,8 +131,7 @@
   (is (lqn:lqnout
         (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*map ($new :v _ :n (cnt)))))
       #(((:V . 1) (:N . 0)) ((:V . 1) (:N . 1))
-        ((:V . 7) (:N . 2)) ((:V . 100) (:N . 3)))
-      :test #'equalp)
+        ((:V . 7) (:N . 2)) ((:V . 100) (:N . 3))) :test #'equalp)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 (+ _))) 109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 1000 +)) 1109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- acc _))) -109)
@@ -142,8 +141,19 @@
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) (*? (isubx? _ :k) (*new _ (trim (par)))))
       #(#(2 "abk c") #(2 "dkef") #(1 "kkkk1")) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim (*? (isubx? _ :k) (*new _ (par))))
-      #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp))
-
+      #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (*map (xpr? :a :-@b sup sdwn)))
+      #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (*map (xpr? :a :-@b sup nil)))
+      #("AAAYYY" NIL NIL NIL NIL "AUIUU" "AAAAA") :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (*map (hld :k _) (xpr? :a :-@b (str! (sup _) (ghv :k)) sdwn)))
+      #("AAAYYYaaayyy" "abc" "def" "uuu" "sss" "AUIUUauiuu" "AAAAAaaaaa") :test #'equalp)
+  (is (lqn:qry '#((a b xxx) (a b c) (a b (c xxx)))
+               (txpr? (msym? _ xxx) (lqn::symb _ :-HIT---)))
+      #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp))
 
 (unless (finalize) (error "error in lqn"))
 

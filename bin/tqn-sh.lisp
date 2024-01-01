@@ -2,7 +2,7 @@
 (in-package :lqn)
 
 (defvar *ex* "
-QUERY AND TRANSFORM TXT
+TQN - TXT QUERY NOTATION
 
 Usage:
   tqn [options] <qry> [files ...]
@@ -36,6 +36,9 @@ Examples:
 (defun tqn/load-with-err (f)
   (handler-case (read-file-as-vector f)
     (error (e) (exit-with-msg 2 "tqn: failed to read txt file: ~a~%~a" f e))))
+(defun tqn/read-from-pipe ()
+  (handler-case (read-stream-lines-as-vector)
+    (error (e) (exit-with-msg 2 "tqn: failed to read from pipe:~%~a" e))))
 
 (defun tqn/parse-query (args)
   (handler-case `(|| ,@(read-all-str args))
@@ -57,7 +60,7 @@ Examples:
   (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *ex*))
   (labels ((one-line (v) (if (> (length v) 1) v (aref v 0))))
    (sh/out :txt opts
-    (tqn/execute-query opts (one-line (read-stream-lines-as-vector)) (tqn/parse-query q)
+    (tqn/execute-query opts (one-line (tqn/read-from-pipe)) (tqn/parse-query q)
       :conf `((:mode . :tqn) (:ctx . :pipe))
       :db (verbose? opts)))))
 
