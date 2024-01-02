@@ -52,6 +52,16 @@ echo '1 x 1 x 7 x 100' | \
   tqn -j '(splt _ :x) int!? (*map ($new :v _))'
 ```
 
+## Lisp Example
+Using the `lqn` compiler in lisp looks like this.
+```lisp
+(lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
+          (txpr? (-@msym? _ "bbb") (+@msym? _ "xxx")
+                 (lqn:symb _ :-HIT---)))
+; #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
+```
+See [bin/ex.lisp](bin/ex.lisp) for more examples.
+
 ## Object Representation
 
 Internally JSON arrays are represented as `vector`. JSON objects/dicts are

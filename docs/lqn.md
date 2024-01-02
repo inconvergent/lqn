@@ -830,6 +830,20 @@
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
+#### LQN:SYMB
+
+```
+ ; LQN:SYMB
+ ;   [symbol]
+ ; 
+ ; SYMB names a compiled function:
+ ;   Lambda-list: (&REST ARGS)
+ ;   Derived type: (FUNCTION * (VALUES SYMBOL &OPTIONAL))
+ ;   Documentation:
+ ;     mkstr, make symbol.
+ ;   Source file: /data/x/lqn/src/init.lisp
+```
+
 #### LQN:TAIL
 
 ```

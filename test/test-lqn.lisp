@@ -146,17 +146,27 @@
         (splt _ :x) trim (*map (xpr? :a :-@b sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (txpr? :a :-@b sup))
+      #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
         (splt _ :x) trim (*map (xpr? :a :-@b sup nil)))
       #("AAAYYY" NIL NIL NIL NIL "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
         (splt _ :x) trim (*map (hld :k _) (xpr? :a :-@b (str! (sup _) (ghv :k)) sdwn)))
       #("AAAYYYaaayyy" "abc" "def" "uuu" "sss" "AUIUUauiuu" "AAAAAaaaaa") :test #'equalp)
   (is (lqn:qry '#((a b xxx) (a b c) (a b (c xxx)))
-               (txpr? (msym? _ xxx) (lqn::symb _ :-HIT---)))
+               (txpr? (+@msym? _ xxx) (lqn::symb _ :-HIT---)))
       #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
+  (is (lqn:qry '#((a bbbxxx xxx) (a b c) (a b (c xxx)))
+               (txpr? (msym? _ "xxx") (lqn::symb _ :-HIT---)))
+      #((A BBBXXX-HIT--- XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
+  (is (lqn:qry '#((a bbbxxx xxx) (a b c) (a b (c xxx)))
+               (txpr? (-@msym? _ "bbb") (msym? _ "xxx") (lqn::symb _ :-HIT---)))
+      #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
                           (|| #{ things } (txpr? "Star" "noooooooo!!"))))
-          "[{\"things\":[{\"id\":0,\"name\":\"Chris\",\"extra\":\"extra99\"}]},{\"things\":[{\"id\":10,\"name\":\"Winters\",\"extra\":\"extra1\"},{\"id\":11,\"name\":\"Haii\",\"extra\":\"extra2\"},{\"id\":12,\"name\":\"Klein\"}]},{\"things\":[{\"id\":31,\"name\":\"noooooooo!!\"},{\"id\":32,\"name\":\"Ball\"}]}]"))
+          "[{\"things\":[{\"id\":0,\"name\":\"Chris\",\"extra\":\"extra99\"}]},{\"things\":[{\"id\":10,\"name\":\"Winters\",\"extra\":\"extra1\"},{\"id\":11,\"name\":\"Haii\",\"extra\":\"extra2\"},{\"id\":12,\"name\":\"Klein\"}]},{\"things\":[{\"id\":31,\"name\":\"noooooooo!!\"},{\"id\":32,\"name\":\"Ball\"}]}]")
+  )
 
 (unless (finalize) (error "error in lqn"))
 

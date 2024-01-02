@@ -8,6 +8,6 @@
     #:?? #:>< #:$ #:noop #:is? #:kv? #:sym? #:msym? #:trim
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
     #:lst? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!? #:*n #:*sel #:*seq
-    #:sup #:sdwn #:strcat #:repl #:mkstr #:splt
+    #:sup #:sdwn #:strcat #:repl #:mkstr #:splt #:symb
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?))
 

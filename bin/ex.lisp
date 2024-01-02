@@ -55,9 +55,18 @@
 
   (print (lqn:qry '#((a b xxx) (a b c) (a b (c xxx)))
                    (*map (txpr? (msym? _ xxx)
-                                (lqn::symb _ :-HIT---)))))
-  ; result
+                                (lqn:symb _ :-HIT---)))))
   ; #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
+
+  (print
+   (lqn:qry '#((a bbbxxx xxx) (a b c) (a b (c xxx)))
+               (txpr? (-@msym? _ "bbb") (+@msym? _ "xxx")
+                      (lqn:symb _ :-HIT---))))
+  ; #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
+
+  (print (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (txpr? :a :-@b sup)))
+
    )
 
 (main)

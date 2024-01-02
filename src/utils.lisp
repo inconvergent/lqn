@@ -82,7 +82,7 @@ match. If `b` is an expression, `a` is compared to the evaluated value of `b`."
                       ,(etypecase q
                                 (keyword `(eq ,s* q))
                                 (symbol `(eq ,s* ',q)) ; direct match
-                                (string `(isub (ct/kv/key ,s*) ,q))
+                                (string `(isub? (ct/kv/key ,s*) ,q))
                                 (cons   `(equalp (ct/kv/key ,s*) ,q))))))
       (if ,res ,s* ,d))))
 
