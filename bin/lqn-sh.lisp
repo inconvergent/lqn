@@ -1,8 +1,8 @@
 (ql:quickload :lqn :silent t)
 (in-package :lqn)
 
-(defvar *ex* "
-LQN - LISP QUERY NOTATION
+(defvar *ex* (format nil "
+LQN - LISP QUERY NOTATION (~a)
 
 Usage:
   lqn [options] <qry> [files ...]
@@ -20,19 +20,19 @@ Options:
 
 Examples:
 
-")
+" (lqn:v?)))
 
 (defun lqn/execute-query (opts dat q &key conf db)
   (handler-case (qryl dat q :conf conf :db db)
-    (error (e) (exit-with-msg 4 "lqn: failed to execute qry:~%~a" e))))
+    (error (e) (exit-with-msg 50 "lqn: failed to execute qry:~%~a" e))))
 
 (defun lqn/load-with-err (f)
   (handler-case (read-file-as-data-vector f)
-    (error (e) (exit-with-msg 2 "lqn: failed to read txt file: ~a~%~a" f e))))
+    (error (e) (exit-with-msg 30 "lqn: failed to read txt file: ~a~%~a" f e))))
 
 (defun lqn/parse-query (args)
   (handler-case `(|| ,@(read-all-str args))
-    (error (e) (exit-with-msg 3 "lqn: failed to parse qry:~%~a" (mkstr e)))))
+    (error (e) (exit-with-msg 10 "lqn: failed to parse qry:~%~a" (mkstr e)))))
 
 (defun lqn/run-files (opts q files)
   (when (help? opts) (exit-with-msg 0 *ex*))

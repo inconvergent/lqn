@@ -179,8 +179,10 @@
   (awg (f dat)
     `(let ((,dat ,(gk conf :dat)))
        (tree-repl-fx ,dat
-         (lambda (,f) ,(funcall rec `((:dat . ,f) (:par . ,dat)) `(xpr? ,@(butlast d 1) t nil)))
-         (lambda (,f) ,@(funcall rec `((:dat . ,f) (:par . ,dat)) (last d)))))))
+         (lambda (,f) (declare (ignorable ,f))
+           ,(funcall rec `((:dat . ,f) (:par . ,dat)) `(xpr? ,@(butlast d 1) t nil)))
+         (lambda (,f) (declare (ignorable ,f))
+            ,@(funcall rec `((:dat . ,f) (:par . ,dat)) (last d)))))))
 
 (defun compile/** (rec conf d) ; [...] ; filter
   (awg (i ires dat vv)
@@ -241,7 +243,7 @@
     `(/fxs/qry ,conf* ,(rec conf* q))))
 
 (defun qry/show (q compiled)
- (format t "
+  (format t "
 ██ COMPILED ██████████████████████████
 ██ q:   ~s
 ██ ---

@@ -7,13 +7,12 @@
   (let ((d (with-output-to-string (*standard-output*)
              (describe sym))))
     (strcat (mapcar (lambda (s) (mkstr " ; " s #\Newline))
-                         (butlast (split d (mkstr #\Newline)))))))
+                    (butlast (split d (mkstr #\Newline)))))))
 
 (defun docstrings (sym)
-  (strcat
-    (mapcar (lambda (o) (mkstr o #\Newline))
-            (remove-if-not #'identity (list (documentation sym 'function)
-                                            (documentation sym 'setf))))))
+  (strcat (mapcar (lambda (o) (mkstr o #\Newline))
+                  (remove-if-not #'identity (list (documentation sym 'function)
+                                                  (documentation sym 'setf))))))
 (defun select-docs (sym)
   (declare (symbol sym))
   (let* ((docs (find-if (lambda (c) (eq sym c)) *docstring-map* :key #'car))
@@ -36,8 +35,7 @@
 
 (defun -md-sanitize (d)
   (let ((sp (split d "*")))
-    (strcat `(,@(mapcar (lambda (s) (mkstr s "\\*")) (butlast sp))
-                             ,@(last sp)))))
+    (strcat `(,@(mapcar (lambda (s) (mkstr s "\\*")) (butlast sp)) ,@(last sp)))))
 
 (defmacro ext-symbols? (pkg &optional mode)
   "list all external symbols in pkg. use :verbose to inlcude docstring.
@@ -54,9 +52,7 @@ use :pretty to print verbose output to stdout in a readable form."
       (otherwise `(loop for (,str ,sym) in (pckgs ,pkg) collect ,str)))))
 
 (defun map-docstring (&rest rest)
-  (declare (list rest))
-  "register docs info associated with symbol (car rest)."
-  (setf *docstring-map* (remove-if (lambda (cand) (eq (car cand) (car rest)))
-                                   *docstring-map*))
+  (declare (list rest)) "register docs info associated with symbol (car rest)."
+  (setf *docstring-map* (remove-if (lambda (cand) (eq (car cand) (car rest))) *docstring-map*))
   (push rest *docstring-map*))
 

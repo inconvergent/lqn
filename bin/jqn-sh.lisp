@@ -1,8 +1,8 @@
 (ql:quickload :lqn :silent t)
 (in-package :lqn)
 
-(defvar *ex* "
-JQN - JSON QUERY NOTATION
+(defvar *ex* (format nil "
+JQN - JSON QUERY NOTATION (~a)
 
 Usage:
   jqn [options] <qry> [files ...]
@@ -22,23 +22,23 @@ Examples:
   jqn _ sample.json                  # get everything in the file
   jqn '#{k1 k2}' sample.json         # get k1, k2 from list of objects
   jqn '{k1 k2}' sample.json          # get k1, k2 from object
-  echo '{\"_id\": 1}' | jqn '{_id}'  # query data from pipe
-")
+  echo '{\"_id\": 1}' | jqn '{_id}'    # query data from pipe
+" (lqn:v?)))
 
 (defun jqn/execute-query (opts dat q &key conf db)
   (handler-case (qryl dat q :conf conf :db db)
-    (error (e) (exit-with-msg 4 "jqn: failed to execute qry:~%~a" e))))
+    (error (e) (exit-with-msg 50 "jqn: failed to execute qry:~%~a" e))))
 
 (defun jqn/parse-pipe-json ()
   (handler-case (jsnloads *standard-input*)
-    (error (e) (exit-with-msg 2 "jqn: failed to parse json from pipe:~%~a" e))))
+    (error (e) (exit-with-msg 30 "jqn: failed to parse json from pipe:~%~a" e))))
 (defun jqn/loadf-with-err (f)
   (handler-case (jsnloadf f)
-    (error (e) (exit-with-msg 2 "jqn: failed to read json file: ~a~%~a" f e))))
+    (error (e) (exit-with-msg 30 "jqn: failed to read json file: ~a~%~a" f e))))
 
 (defun jqn/parse-query (args)
   (handler-case `(|| ,@(read-all-str args))
-    (error (e) (exit-with-msg 3 "jqn: failed to parse qry:~%~a" (mkstr e)))))
+    (error (e) (exit-with-msg 10 "jqn: failed to parse qry:~%~a" (mkstr e)))))
 
 (defun jqn/run-files (opts q files)
   (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))

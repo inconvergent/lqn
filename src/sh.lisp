@@ -25,14 +25,14 @@
 (defun sh/out (d opts res)
   (ecase (format? opts d)
     (:json (handler-case (jsnout res :indent (indent? opts))
-             (error (e) (exit-with-msg 5 "failed to serialize JSON.~%~a" (mkstr e)))))
+             (error (e) (exit-with-msg 70 "failed to serialize JSON.~%~a" (mkstr e)))))
     (:ldn (handler-case (format t "~&~s~&" (lqnout res))
-            (error (e) (exit-with-msg 5 "failed to serialize LQN.~%~a" (mkstr e)))))
+            (error (e) (exit-with-msg 70 "failed to serialize LQN.~%~a" (mkstr e)))))
     (:txt (handler-case
             (labels ((prln (s) (format t "~&~a~%" s)))
               (etypecase res (vector (loop for s across res if s do (prln s)))
                              (list (loop for s in res if s do (prln s)))
                              (hash-table (prln res)) ; coerce to jsn line?
                              (string (prln res)) (number (prln res))))
-            (error (e) (exit-with-msg 5 "failed to serialize TXT.~%~a" (mkstr e)))))))
+            (error (e) (exit-with-msg 70 "failed to serialize TXT.~%~a" (mkstr e)))))))
 

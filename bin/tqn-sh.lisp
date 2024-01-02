@@ -1,8 +1,8 @@
 (ql:quickload :lqn :silent t)
 (in-package :lqn)
 
-(defvar *ex* "
-TQN - TXT QUERY NOTATION
+(defvar *ex* (format nil "
+TQN - TXT QUERY NOTATION (~a)
 
 Usage:
   tqn [options] <qry> [files ...]
@@ -27,22 +27,22 @@ Examples:
   # split string and make a new JSON structure:
   echo '1 x 1 x 7 x 100' | \
      tqn -j '(split _ :x) int!? (*map ($new :v _))'
-")
+" (lqn:v?)))
 
 (defun tqn/execute-query (opts dat q &key conf db)
   (handler-case (qryl dat q :conf conf :db db)
-    (error (e) (exit-with-msg 4 "tqn: failed to execute qry:~%~a" e))))
+    (error (e) (exit-with-msg 50 "tqn: failed to execute qry:~%~a" e))))
 
 (defun tqn/load-with-err (f)
   (handler-case (read-file-as-vector f)
-    (error (e) (exit-with-msg 2 "tqn: failed to read txt file: ~a~%~a" f e))))
+    (error (e) (exit-with-msg 30 "tqn: failed to read txt file: ~a~%~a" f e))))
 (defun tqn/read-from-pipe ()
   (handler-case (read-stream-lines-as-vector)
-    (error (e) (exit-with-msg 2 "tqn: failed to read from pipe:~%~a" e))))
+    (error (e) (exit-with-msg 30 "tqn: failed to read from pipe:~%~a" e))))
 
 (defun tqn/parse-query (args)
   (handler-case `(|| ,@(read-all-str args))
-    (error (e) (exit-with-msg 3 "tqn: failed to parse qry:~%~a" (mkstr e)))))
+    (error (e) (exit-with-msg 10 "tqn: failed to parse qry:~%~a" (mkstr e)))))
 
 (defun tqn/run-files (opts q files)
   (when (help? opts) (exit-with-msg 0 *ex*))

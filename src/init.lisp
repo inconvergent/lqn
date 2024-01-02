@@ -6,8 +6,7 @@
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq
                  :*new :$new :*cat :$cat :*$cat :head :tail :size :size?
                  :sup :sdwn :mkstr :repl :strcat :splt
-                 :msym?
-                 :is? :kv? :sym? :trim
+                 :msym? :is? :kv? :sym? :trim
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :num!? :num? :flt!? :flt? :int!? :int?
                  :lst? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?))

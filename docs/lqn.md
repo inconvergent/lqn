@@ -457,6 +457,21 @@
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
+#### LQN:MSYM?
+
+```
+ ; LQN:MSYM?
+ ;   [symbol]
+ ; 
+ ; MSYM? names a macro:
+ ;   Lambda-list: (S Q &OPTIONAL D)
+ ;   Documentation:
+ ;     compare symbol `a` to `b`. if `b` is a keword or symbol
+ ;     a perfect match is required. if `b` is a string it performs a substring
+ ;     match. If `b` is an expression, `a` is compared to the evaluated value of `b`.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
 #### LQN:NOOP
 
 ```

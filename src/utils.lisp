@@ -73,6 +73,9 @@
 (defun isub? (s sub &optional d) "ignore case sub?" (if (isubx? s sub) s d))
 
 (defmacro msym? (s q &optional d)
+  "compare symbol `a` to `b`. if `b` is a keword or symbol
+a perfect match is required. if `b` is a string it performs a substring
+match. If `b` is an expression, `a` is compared to the evaluated value of `b`."
   (awg (s* res)
    `(let* ((,s* ,s)
            (,res (and (symbolp ,s*)
@@ -199,14 +202,13 @@ copy all keys into new kv. left to right."
              (when l (setf res `(,@l ,@res)))
              (when r (setf res `(,@r ,@res))))
            res)))
-(defun tree-repl-fx (d fndfx txfx) ; todo: hash-tables
+(defun tree-repl-fx (d fndfx txfx)
   (declare (function fndfx txfx)) "search for (fndfx hit); replace w/ (txfx hit)."
   (cond ((funcall fndfx d) (funcall txfx d))
-        ((hash-table-p d)
-         (loop with kv = (make-hash-table :test #'equal)
-               for k being the hash-key of d using (hash-value v)
-               do (setf (gethash k kv) (tree-repl-fx v fndfx txfx))
-               finally (return kv)))
+        ((hash-table-p d) (loop with kv = (make-hash-table :test #'equal)
+                                for k being the hash-key of d using (hash-value v)
+                                do (setf (gethash k kv) (tree-repl-fx v fndfx txfx))
+                                finally (return kv)))
         ((stringp d) d)
         ((vectorp d) (map 'vector (lambda (o) (tree-repl-fx o fndfx txfx)) d))
         ((atom d) d)
