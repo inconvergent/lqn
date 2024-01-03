@@ -466,9 +466,9 @@
  ; MSYM? names a macro:
  ;   Lambda-list: (S Q &OPTIONAL D)
  ;   Documentation:
- ;     compare symbol `a` to `b`. if `b` is a keword or symbol
- ;     a perfect match is required. if `b` is a string it performs a substring
- ;     match. If `b` is an expression, `a` is compared to the evaluated value of `b`.
+ ;     compare symbol a to b. if b is a keword or symbol
+ ;     a perfect match is required. if b is a string it performs a substring
+ ;     match. If b is an expression, a is compared to the evaluated value of b.
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -533,7 +533,7 @@
  ;   [symbol]
  ; 
  ; PREF? names a compiled function:
- ;   Lambda-list: (S PREF &OPTIONAL D &AUX (S (STR! S)) (PREF (STR! PREF)))
+ ;   Lambda-list: (S PREF &OPTIONAL D)
  ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
@@ -769,7 +769,7 @@
  ;   Lambda-list: (S SUB &OPTIONAL D)
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     s if sub is substring of s; ord
+ ;     s if sub is substring of s; or d
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -780,8 +780,8 @@
  ;   [symbol]
  ; 
  ; SUBX? names a compiled function:
- ;   Lambda-list: (S SUB &AUX (S (STR! S)) (SUB (STR! SUB)))
- ;   Derived type: (FUNCTION (T T)
+ ;   Lambda-list: (S SUB)
+ ;   Derived type: (FUNCTION (STRING STRING)
  ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
  ;   Documentation:
  ;     returns index where substring matches s from left to right. otherwise nil
@@ -795,8 +795,8 @@
  ;   [symbol]
  ; 
  ; SUF? names a compiled function:
- ;   Lambda-list: (S SUF &OPTIONAL D &AUX (S (STR! S)) (SUF (STR! SUF)))
- ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
+ ;   Lambda-list: (S SUF &OPTIONAL D)
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T) *)
  ;   Documentation:
  ;     s if s ends with suf; or d
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -814,6 +814,20 @@
  ;   Documentation:
  ;     mkstr and upcase
  ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:SYM!
+
+```
+ ; LQN:SYM!
+ ;   [symbol]
+ ; 
+ ; SYM! names a compiled function:
+ ;   Lambda-list: (&REST REST)
+ ;   Derived type: (FUNCTION * (VALUES SYMBOL &OPTIONAL))
+ ;   Documentation:
+ ;     stringify, make symbol
+ ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
 #### LQN:SYM?

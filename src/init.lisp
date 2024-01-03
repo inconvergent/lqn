@@ -6,7 +6,7 @@
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq
                  :*new :$new :*cat :$cat :*$cat :head :tail :size :size?
                  :sup :sdwn :mkstr :repl :strcat :splt
-                 :msym? :is? :kv? :sym? :trim
+                 :msym? :is? :kv? :sym? :sym! :trim
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :num!? :num? :flt!? :flt? :int!? :int?
                  :lst? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?))
@@ -86,6 +86,7 @@
   (handler-case (or (seq? n) (seq? (read-from-string n nil nil)) d) (error () d)))
 
 ; COERCE TO TYPE
+(defun sym! (&rest rest) "stringify, make symbol" (apply #'symb rest))
 (defun str! (&rest rest) "coerce to string"
   (apply #'mkstr (loop for s in rest collect
                    (typecase s (string s) (symbol (sdwn s)) (t (mkstr s))))))

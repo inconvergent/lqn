@@ -49,15 +49,15 @@ echo '1 x 1 x 7 x 100' | \
 
 # split string and make a new JSON structure:
 echo '1 x 1 x 7 x 100' | \
-  tqn -j '(splt _ :x) int!? (*map ($new :v _))'
+  tqn -j '(splt _ :x) int!? #(($new :v _))'
 ```
 
 ## Lisp Example
 Using the `lqn` compiler in lisp looks like this.
 ```lisp
 (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
-          (txpr? (-@msym? _ "bbb") (+@msym? _ "xxx")
-                 (lqn:symb _ :-HIT---)))
+          (?txpr (-@msym? _ "bbb") (+@msym? _ "xxx")
+                 (sym! _ :-HIT---)))
 ; #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
 ```
 See [bin/ex.lisp](bin/ex.lisp) for more examples.
@@ -76,7 +76,7 @@ The following operators have special behaviour. You can also write generic CL
 code, anywhere you can use an operator. Including the functions further down.
 Note that you can use `_`/`(dat)` to refer to the current data object.
 
-## Pipe Operator. `||`
+### Pipe Operator - `||`
 `(|| ..)` pipes the results from the first operator into the second etc.
 Returns the result of the last operator. Pipe is the operator that surrounds
 all terminal queries by default.
@@ -88,12 +88,14 @@ translations:
   - `"Word"`: to `[(sub? _ "Word")]` to filter all items by this `string` with case.
   - `(expr ..)`: to itself.
 
-## Map Operator - `#()`/`*map`
+### Map Operator - `#()`/`*map`
+Map operations over `vector`:
   - `#(fx)` or `(*map fx)`: map `(fx _)` across all items.
-  - `#((fx .. _ ..) ..)` or `(*map (fx .. _ ..) ..)`: map `(fx .. _ ..)` across
+  - `#((fx .. _ ..) ..)` or `(*map (fx .. _ ..) ..)`: map all `(fx .. _ ..)` across
     all items.
 
-## Fold Operator - `*fld`
+### Fold Operator - `*fld`
+Reduce `vector`:
   - `(*fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
     `acc` is inserted as the first argument to `fx`.
   - `(*fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. The accumulator is
@@ -101,17 +103,19 @@ translations:
   - `(*fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. Use this
     if you need to name the accumulator explicity.
 
-## Filter Operator - `*?`
+### Filter Operator - `*?`
+Filter and map operations over `vector`:
   - `(*? test [expr=test])` new `vector` with `(expr _)` for all items where
     where test is not `nil`
 
-## Selector Operators - `{}`/`$$`, `[]`/`**`, `#{}`/`*$`, `#[]`/`$*`
+### Selector Operators - `{}`/`$$`, `[]`/`**`, `#{}`/`*$`, `#[]`/`$*`
+Select from on structure into a new data structure:
   - `#{s1 ..}` or `(*$ ..)`: from `vector` of `kvs` into new `vector` of `kvs` using `kv` selectors.
   - `#[s1 ..]` or `($* ..)`: from `vector` of `kvs` into new `vector` using `kv` selectors.
   - ` {s1 ..}` or `($$ ..)`: from `kv` into new `kv` using `kv` selectors.
   - ` [s1 ..]` or `(** ..)`: from `vector` into new `vector` using `expr` selectors.
 
-### KV Selectors
+#### KV Selectors
 A `kv` Selector is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
 `#{}`.  Only the key is required. If `expr` is not provided the `expr` is `_`,
 that is: the value of the `key`.
@@ -153,9 +157,9 @@ entirely:
   -@key3}         ; drop key3
 ```
 
-### EXPR Selectors
-`expr` selectors are similar to `kv` Selectors, but they are used with `xpr?`,
-`txpr?` and `[]`.
+#### EXPR Selectors
+`expr` selectors are similar to `kv` Selectors, but they are used with `?xpr`,
+`?txpr`, `?mxpr`, and `[]`.
 ```lisp
 [:hello]              ; items that contain `"hello"`.
 [:hi :hello]          ; items that contain either `"hello"` or `"hi"`.
@@ -168,10 +172,14 @@ entirely:
  (+@post? _ "end")]
 ```
 
-## Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
+### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
+Perform operation on when pattern or condition is satisfied:
   - `(?xpr sel .. hit miss)` match current data object agains these `vector`
     selectors and execute either `hit` or `miss`. `hit`/`miss` can be a
     function name, or an expression, but must be defined.
+
+Recursively traverse a structure of `sequences` and `kvs` and perform operations
+when patterns or conditions are satisfied:
   - `(?txpr sel .. tx)` recursively traverse current data object and replace
     matches with `tx`. `tx` can be a function name or expression. Also
     traverses vectors and `kv` values (not keys).
@@ -186,42 +194,46 @@ you can use the regular CL utilities such as `gethash`, `aref`, `subseq`,
 
 But for convenience there are a few special functions defined in `lqn`.
 
-## Global Query Context Fxs
- - `(ctx)`: returns `:pipe` if input is from `stdin`; otherwise `:file`.
+### Global Query Context Fxs
+Defined in the query scope:
+ - `(ctx)`: returns `:pipe` if input is from `*standard-input*`; otherwise `:file`.
  - `(fi [k=0])`: index of the current file; start at `k`.
  - `(fn)`: name of the current file; or `nil`.
  - `(hld k v)`: hold this value at this key in a global key value store.
  - `(ghv k [d])`: get the value of this key; or `d`.
 
-## Operator Context Fxs
-Available in all operators:
+### Operator Context Fxs
+Defined in all operators:
  - `_` or `(dat)`: the current data object.
  - `($_ k [d])`: this key from current data object; or `d`.
  - `(par)`: the parent data object.
  - `(num)`: length of the `vector` being iterated.
  - `(cnt [k=0])`: counts from `k` over the `vector` being iterated.
 
-## Generic Fxs
+### Generic Fxs
+General utilities:
  - `(>< a)`: condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
  - `(?? fx a ..)`: execute `(fx a ..)` only if `a` is not `nil`; otherwise `nil`.
  - `(fmt f ..)`: format `f` as `string` with these (`format`) args.
  - `(fmt s)`: get printed representation of `s`.
- - `(out f ..)`: format `f` to `*standard-out*` with these (`format`) args. returns `nil`.
- - `(out s)`: output printed representation of `s` to `*standard-out*`. return `nil`.
+ - `(out f ..)`: format `f` to `*standard-output*` with these (`format`) args. returns `nil`.
+ - `(out s)`: output printed representation of `s` to `*standard-output*`. returns `nil`.
  - `(size? o [d])`: length of `sequence` or number of keys in `kv`; or `d`.
  - `(msym? a b)`: compare symbol `a` to `b`. if `b` is a keword or symbol
    a perfect match is required. if `b` is a string it performs a substring
    match. If `b` is an expression, `a` is compared to the evaluated value of
    `b`.
 
-## KV Fxs
+### KV Fxs
+Functions for making or accessing hash-tables:
  - `($ kv k [d])`: get key `k` from `kv`.
  - `($_ k ..)`: is equivalent to `($ _ k ..)`.
  - `($cat ..)`: add all keys from these `kvs` to a new `kv`. left to right.
  - `($new :k1 expr1 ..)`: new `kv` with these keys and expressions.
 
-## Strings / Vectors / Sequences Fxs
-Note that `string`, `list` and `vector` are all `sequence`s.
+### Strings / Vectors / Sequences Fxs
+Note that `string`, `list` and `vector` are all `sequence`s. Several of these
+functions work on all three:
  - `(*cat a ..)`: concatenate all `vectors` in these `vectors`.
  - `(*n v i)`: get this index from `sequence`.
  - `(*new ..)`: new `vector` with these elements.
@@ -236,12 +248,12 @@ Note that `string`, `list` and `vector` are all `sequence`s.
  - `(repl s from to)`: replace `from` with `to` in `s`.
  - `(sdwn s ..)`: `mkstr` and downcase.
  - `(splt s x)`: split `s` at all `x`.
- - `(strcat s ..)`: concatenate all `string`s in these `sequence`s with `string`s.
+ - `(strcat s ..)`: concatenate all `strings` in these `sequences` of `strings`.
  - `(sup s ..)`: `mkstr` and upcase.
  - `(tail s [n=10])`: last `n` items of `sequence`.
  - `(trim s)`: trim leading and trailing whitespace from `string`.
 
-## Type Test Fxs
+### Type Test Fxs
 `(is? o [d])` returns `o` if not `nil`, empty `sequence` or empty `kv`; or `d`.
 
 These functions return the argument if the argument is the corresponding type:
@@ -251,9 +263,10 @@ These functions return the argument parsed as the corresponding type if
 possible; otherwise they return the optional second argument: `int!?`, `flt!?`,
 `num!?`, `str!?`, `vec!?`, `seq!?`
 
-## Type Coercion Fxs
+### Type Coercion Fxs
  - `(str! s ..)`: coerce everything to a `string`.
  - `(vec! v)`: coerce `sequence` to `vector`; or return `(*new v)`
+ - `(sym! s ..)`: stringify, make `symbol`
 
 ## Install
 

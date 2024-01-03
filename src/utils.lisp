@@ -14,7 +14,7 @@
     (typecase o (symbol (unpack- o)) (string (unpack- o)) (cons (unpack-cons o))
       (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
-(defmacro ?? (fx arg &rest args) ; ?!
+(defmacro ?? (fx arg &rest args)
   (declare (symbol fx)) "run (fx arg ..) only if arg is not nil."
   (awg (arg*) `(let ((,arg* ,arg)) (when ,arg* (,fx ,arg* ,@args)))))
 
@@ -48,19 +48,22 @@
 (defmacro fmt (s &rest rest) "format to string."
   (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
 
-(defun pref? (s pref &optional d &aux (s (str! s)) (pref (str! pref)))
-  (declare (string s pref)) "s if s starts with pref; or d"
+(defun pref? (s pref &optional d)
+  (declare (optimize speed (safety 2)) (string s pref))
+  "s if s starts with pref; or d"
   (if (and (<= (length pref) (length s))
            (string= pref s :end2 (length pref)))
        s d))
 (defun ipref? (s suf &optional d) "ignore case pref?" (pref? (sup s) (sup suf) d))
 
-(defun suf? (s suf &optional d &aux (s (str! s)) (suf (str! suf)))
-  "s if s ends with suf; or d" (pref? (reverse s) (reverse suf) d))
+(defun suf? (s suf &optional d)
+  (declare (optimize speed (safety 2)) (string s suf))
+  "s if s ends with suf; or d"
+  (pref? (reverse s) (reverse suf) d))
 (defun isuf? (s suf &optional d) "ignore case suf?" (suf? (sup s) (sup suf) d))
 
-(defun subx? (s sub &aux (s (str! s)) (sub (str! sub)))
-  (declare (optimize speed (safety 2)))
+(defun subx? (s sub)
+  (declare (optimize speed (safety 2)) (string s sub))
   "returns index where substring matches s from left to right. otherwise nil"
   (loop with sub0 of-type character = (char sub 0)
         with lc = (length sub)
@@ -69,24 +72,24 @@
                 (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
         do (return-from subx? i)))
 (defun isubx? (s sub) "ignore case subx?" (subx? (sup s) (sup sub)))
-(defun sub? (s sub &optional d) "s if sub is substring of s; ord" (if (subx? s sub) s d))
+(defun sub? (s sub &optional d) "s if sub is substring of s; or d" (if (subx? s sub) s d))
 (defun isub? (s sub &optional d) "ignore case sub?" (if (isubx? s sub) s d))
 
 (defmacro msym? (s q &optional d)
-  "compare symbol `a` to `b`. if `b` is a keword or symbol
-a perfect match is required. if `b` is a string it performs a substring
-match. If `b` is an expression, `a` is compared to the evaluated value of `b`."
+  "compare symbol a to b. if b is a keword or symbol
+a perfect match is required. if b is a string it performs a substring
+match. If b is an expression, a is compared to the evaluated value of b."
   (awg (s* res)
    `(let* ((,s* ,s)
            (,res (and (symbolp ,s*)
                       ,(etypecase q
-                                (keyword `(eq ,s* q))
-                                (symbol `(eq ,s* ',q)) ; direct match
-                                (string `(isub? (ct/kv/key ,s*) ,q))
-                                (cons   `(equalp (ct/kv/key ,s*) ,q))))))
+                          (keyword `(eq ,s* q))
+                          (symbol `(eq ,s* ',q)) ; direct match
+                          (string `(isub? (ct/kv/key ,s*) ,q))
+                          (cons `(equalp (ct/kv/key ,s*) ,q))))))
       (if ,res ,s* ,d))))
 
-(defun split (s x &key prune &aux(lx (length x)))
+(defun split (s x &key prune &aux (lx (length x)))
   (declare (optimize speed) (boolean prune))
   "split string at substring. prune removes empty strings"
   (labels ((lst (s) (typecase s (list s) (t (list s))))
@@ -109,8 +112,6 @@ match. If `b` is an expression, `a` is compared to the evaluated value of `b`."
   (if init (make-array (length init) :fill-pointer t :initial-contents init
                                      :element-type type :adjustable t)
            (make-array size :fill-pointer 0 :element-type type :adjustable t)))
-
-; (defun *rng (a &optional b)) TODO:
 
 (defun *seq (v i &optional j) ; TODO: negative indices, tests
   (declare (vector v) (fixnum i)) "(subseq v ,@rest)"
@@ -135,15 +136,16 @@ match. If `b` is an expression, `a` is compared to the evaluated value of `b`."
 (defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
 (defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
 
-(defun *sel (v &rest seqs)
-  (declare (vector v))
+(defun *sel (v &rest seqs) (declare (vector v))
   "new vector with indices or ranges from v.
 ranges are lists that behave like arguments to *seq."
   (apply #'concatenate 'vector
     (loop for s in seqs collect
       (etypecase s (list (apply #'*seq v s)) (fixnum `(,(*n v s)))))))
 
-(defun $make (&optional kv &aux (res (make-hash-table :test #'equal))) "new/soft copy kv."
+(defun $make (&optional kv &aux (res (make-hash-table
+                                       :test (if kv (hash-table-test kv) #'equal))))
+  "new/soft copy kv."
   (when kv (loop for k being the hash-keys of kv using (hash-value v)
                  do (setf (gethash k res) (gethash k kv))))
   res)
@@ -154,9 +156,8 @@ ranges are lists that behave like arguments to *seq."
 (defun $cat (&rest rest &aux (res (make-hash-table :test #'equal)))
   "add all keys from all hash tables in rest. left to right."
   (loop for kv of-type hash-table in rest
-            do (loop for k being the hash-keys of ($make kv)
-                     using (hash-value v)
-                     do (setf (gethash k res) (gethash k kv))))
+    do (loop for k being the hash-keys of ($make kv)
+         using (hash-value v) do (setf (gethash k res) (gethash k kv))))
   res)
 (defun *cat (&rest rest &aux (res (make-adjustable-vector)))
   "concatenate all vectors in these vectors."
@@ -193,30 +194,19 @@ copy all keys into new kv. left to right."
                           o)
               (otherwise o)))
 
-(defun t/fndfx (d fx &optional (res (list))) ; TODO: vector / ht
-  (declare (optimize speed) (function fx) (list res)) "find all elements where fx is t."
-  (cond ((funcall fx d) (return-from t/fndfx (cons d res)))
-        ((atom d) nil)
-        (t (let ((l (t/fndfx (car d) fx res))
-                 (r (t/fndfx (cdr d) fx res)))
-             (when l (setf res `(,@l ,@res)))
-             (when r (setf res `(,@r ,@res))))
-           res)))
-
-(defmacro m/replfx ((d &optional (safe t)) &body body)
+(defmacro m/replfx ((d &optional (f* (gensym "F")) (safe t)) &body body)
   (unless d (error "m/replfx: missing args."))
-  (awg (rec d*)
-    `(labels ((,rec (,d*)
-       (cond ,@(loop for (fx tx) in body
-                     collect `((funcall ,fx ,d*)
-                              ,(if safe `(funcall ,tx ,d*)
-                                        `(,rec (funcall ,tx ,d*)))))
-             ((hash-table-p ,d*)
-              (loop with kv = (make-hash-table :test (hash-table-test ,d*))
-                for k being the hash-key of ,d* using (hash-value v)
-                do (setf (gethash k kv) (,rec v))
-                finally (return kv)))
-             ((stringp ,d*) ,d*) ((vectorp ,d*) (map 'vector #',rec ,d*))
-             ((atom ,d*) ,d*) (t (cons (,rec (car ,d*)) (,rec (cdr ,d*)))))))
-       (,rec ,d))))
+  (awg (rec) `(locally (declare (optimize speed))
+    (labels ((,rec (,f*)
+      (cond ,@(loop for (fx tx) in body collect `(,fx ,(if safe tx `(,rec ,tx))))
+            ((hash-table-p ,f*)
+             (loop with kv = (make-hash-table :test (hash-table-test ,f*))
+               for k being the hash-key of ,f* using (hash-value v)
+               do (setf (gethash k kv) (,rec v))
+               finally (return kv)))
+            ((stringp ,f*) ,f*)
+            ((vectorp ,f*) (map 'vector #',rec ,f*))
+            ((consp ,f*) (cons (,rec (car ,f*)) (,rec (cdr ,f*))))
+            (t ,f*))))
+      (,rec ,d)))))
 

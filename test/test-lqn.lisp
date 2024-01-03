@@ -38,19 +38,17 @@
       (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* ($$ _)))))
 
 (subtest "lqn qry 1"
-
-  (is (lqn::preproc/$$
-        '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
-          (% "ABC" (print _)) (:% "ABC" _)))
+  (is (lqn::preproc/$$ '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
+                        (% "ABC" (print _)) (:% "ABC" _)))
       '((:+ "ccc" :_) (:+ "ddd" :_) (:+ "IIUJ" :_) (:% "UU" :_) (:? "aa" :_)
        (:? "bb" :_) (:+ "cc" (PROGN _)) (:+ "%" "ABC") (:% "ABC" _)))
-  (is (lqn::preproc/**
-        '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
-          (% "ABC" (print _)) (:% "ABC")))
-      '((:? (WHEN (CCC :_) :_)) (:? (WHEN (LQN:ISUB? :_ "ddd") :_))
-       (:? (WHEN (LQN:SUB? :_ "IIUJ") :_)) (:% (WHEN (LQN:SUB? :_ "UU") :_))
-       (:? (WHEN (AA :_) :_)) (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _)))
-       (:? (% "ABC" (PRINT _))) (:% (WHEN (LQN:SUB? :_ "ABC") :_))))
+  (is (lqn::preproc/** '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
+                        (% "ABC" (print _)) (:% "ABC")))
+      '((:? (WHEN (CCC :_) :_)) (:? (AND (STRINGP :_) (LQN:ISUB? :_ "ddd")))
+       (:? (AND (STRINGP :_) (LQN:SUB? :_ "IIUJ")))
+       (:% (AND (STRINGP :_) (LQN:SUB? :_ "UU"))) (:? (WHEN (AA :_) :_))
+       (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
+       (:% (AND (STRINGP :_) (LQN:SUB? :_ "ABC")))))
 
   (is (lqn:lqnout (lqn:jsnqryf *test-data-fn*
         (*$  _id (+@things (*$ name id))
@@ -154,13 +152,13 @@
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
         (splt _ :x) trim (*map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))
       #("AAAYYYaaayyy" "abc" "def" "uuu" "sss" "AUIUUauiuu" "AAAAAaaaaa") :test #'equalp)
-  (is (lqn:qry '#((a b xxx) (a b c) (a b (c xxx)))
+  (is (lqn:qry #((a b xxx) (a b c) (a b (c xxx)))
                (?txpr (+@msym? _ xxx) (lqn::symb _ :-HIT---)))
       #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
-  (is (lqn:qry '#((a bbbxxx xxx) (a b c) (a b (c xxx)))
+  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
                (?txpr (msym? _ "xxx") (lqn::symb _ :-HIT---)))
       #((A BBBXXX-HIT--- XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
-  (is (lqn:qry '#((a bbbxxx xxx) (a b c) (a b (c xxx)))
+  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
                (?txpr (-@msym? _ "bbb") (msym? _ "xxx") (lqn::symb _ :-HIT---)))
       #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
 
@@ -172,6 +170,11 @@
                (splt _ :x) trim (?txpr :a :-@b sup) #(#(_)))
       #(#(#\A #\A #\Y #\Y) #(#\a #\b #\c) #(#\d #\e #\f) #(#\u #\u #\u)
         #(#\s #\s #\s) #(#\A #\U #\U) #(#\A #\A)) :test #'equalp)
+  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx "ss")))
+               (?mxpr ((-@msym? _ "bbb") (msym? _ "xxx")
+                       (sym! _ :-HIT---))
+                      ("ss" sup)))
+      #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT--- "SS"))) :test #'equalp)
 
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
                           (|| #{ things } (?txpr "Star" "noooooooo!!"))))
