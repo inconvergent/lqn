@@ -55,12 +55,13 @@
                 (cons ty)
                 (boolean `(when (eq ,ty ,k) ,k))))
 
-(defun preproc/pipe (qq)
+(defun preproc/|| (qq)
   (unless qq (error "||lqn: missing args."))
   (loop for q in qq collect
     (if (all? q) (kv q)
       (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
                   (string `(** ,q)) (number `(** ,(ct/kv/key q)))
+                  (vector `(*map ,@(coerce q 'list)))
                   (otherwise (error "||lqn: invalid clause: ~a" q))))))
 
 (defun preproc/$$ (q &optional (m :+))
@@ -82,7 +83,7 @@
     (let* ((q* (remove-if #'all? q)) (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 
-(defun compile/pipe (rec conf d &aux (dat* (gk conf :dat))) ; (|| ...)
+(defun compile/|| (rec conf d &aux (dat* (gk conf :dat))) ; (|| ...)
   (awg (pipe-)
     (if (< (length d) 2)
         `(//fxs/op/ (,dat*) ,(funcall rec conf (car d)))
@@ -94,19 +95,18 @@
 
 (defun compile/*map (rec conf d &aux (dat* (gk conf :dat))) ; (*map ...)
   (awg (i ires dat)
-    (when (car- all? d) (return-from compile/*map dat*))
-    (labels ((do-map (curr expr)
-               (unless (and (symbolp curr) (consp expr))
-                       (error "*map: bad args: ~a ~a" curr expr))
+    (labels ((do-map (expr)
                `(loop with ,ires = (mav)
-                      for ,curr across (vec! ,dat*) for ,i from 0
-                      do (//fxs/op/ (,dat* ,curr ,i)
-                           (vex ,ires ,(funcall rec (dat/new conf curr) expr)))
-                      finally (return ,ires))))
-      (case (length d)
-        (0 (error "*map: missing args."))
-        (1 (typecase (car d) (symbol (do-map dat `(,(car d) ,dat)))
-                             (cons (do-map dat (car d)))))
+                  for ,dat across (vec! ,dat*) for ,i from 0
+                  do (//fxs/op/ (,dat* ,dat ,i)
+                       (vex ,ires ,(funcall rec (dat/new conf dat) expr)))
+                  finally (return ,ires))))
+      (case (length d) (0 (error "*map: missing args."))
+        (1 (let ((cd (car d)))
+             (etypecase cd (string cd) (number cd) (keyword cd) (boolean cd)
+                           (vector (funcall rec conf cd))
+                           (symbol (do-map (if (all? cd) :_ `(,cd ,dat))))
+                           (cons (do-map cd)))))
         (otherwise (compile/*map rec conf `((|| ,@d))))))))
 
 (defun compile/*fld (rec conf d &aux (dat* (gk conf :dat))) ; (*fld ...)
@@ -161,30 +161,6 @@
                 (vex ,ires ($nil ,kv)))
            finally (return ,ires))))
 
-(defun compile/xpr (rec conf d &aux (dat (gk conf :dat)) (cd (butlast d 2))) ; (xpr sel .. hit miss)
-  (unless (> (length d) 2) (error "xpr: missing args: ~a" d))
-  (labels ((get-modes (&rest mm)
-             (let ((res (loop for (m expr) in (strip-all cd)
-                              if (member m mm :test #'eq)
-                              collect (funcall rec conf expr))))
-               (if res res '(nil)))))
-     `(//fxs/op/ (,(gk conf :par t) ,dat ,(gk conf :i t))
-        (if (and (or ,(car- all? cd) ,@(get-modes :? :%) (and ,@(get-modes :+)))
-                 (not (or ,@(get-modes :-))))
-          ,@(mapcar (lambda (d) (funcall rec conf (preproc/fx-or-expr d)))
-                    (last d 2))))))
-
-(defun compile/txpr (rec conf d)
-  (awg (f dat)
-    `(let ((,dat ,(gk conf :dat)))
-       (tree-repl-fx ,dat
-         (lambda (,f) (declare (ignorable ,f))
-           ,(funcall rec `((:dat . ,f) (:par . ,dat) (:i . 0))
-                         `(xpr? ,@(butlast d 1) t nil)))
-         (lambda (,f) (declare (ignorable ,f))
-           ,(funcall rec `((:dat . ,f) (:par . ,dat) (:i . 0))
-                          (preproc/fx-or-expr (car (last d)))))))))
-
 (defun compile/** (rec conf d) ; [...] ; filter
   (awg (i ires dat vv)
     (labels ((get-modes (&rest mm
@@ -211,6 +187,31 @@
                               (funcall rec (dat/new conf dat*) (preproc/fx-or-expr sd))))))
        finally (return ,ires))))
 
+(defun compile/xpr (rec conf d &aux (dat (gk conf :dat)) (cd (butlast d 2))) ; (xpr sel .. hit miss)
+  (unless (> (length d) 2) (error "xpr: missing args: ~a" d))
+  (labels ((get-modes (&rest mm)
+             (let ((res (loop for (m expr) in (strip-all cd)
+                              if (member m mm :test #'eq)
+                              collect (funcall rec conf expr))))
+               (if res res '(nil)))))
+     `(//fxs/op/ (,(gk conf :par t) ,dat ,(gk conf :i t))
+        (if (and (or ,(car- all? cd) ,@(get-modes :? :%) (and ,@(get-modes :+)))
+                 (not (or ,@(get-modes :-))))
+          ,@(mapcar (lambda (d) (funcall rec conf (preproc/fx-or-expr d)))
+                    (last d 2))))))
+(defun compile/mxpr (rec conf d)
+  (awg (f dat)
+    (labels ((do-fxtx (d)
+               `((lambda (,f) (declare (ignorable ,f))
+                  ,(funcall rec `((:dat . ,f) (:par . ,dat) (:i . 0))
+                                `(?xpr ,@(butlast d 1) t nil)))
+                (lambda (,f) (declare (ignorable ,f))
+                  ,(funcall rec `((:dat . ,f) (:par . ,dat) (:i . 0))
+                                 (preproc/fx-or-expr (car (last d))))))))
+      `(let ((,dat ,(gk conf :dat)))
+         (m/replfx (,dat) ,@(loop for d* in d collect (do-fxtx d*)))))))
+(defun compile/txpr (rec conf d) (funcall rec conf `(?mxpr ,d)))
+
 (defmacro //fxs/qry (conf &body body &aux (meta (gensym "META")))
   `(let ((,meta (make-hash-table :test #'eq)))
      (labels ((ctx () ,(gk conf :ctx t)) (fn () ,(gk conf :fn t)) (dat () ,(gk conf :dat))
@@ -223,22 +224,26 @@
 
 (defun proc-qry (conf* q) "compile lqn query"
   (labels
-    ((rec (conf d &aux (dat (gk conf :dat)))
-       (cond ((all? d) dat) ((atom d) d)
-             ((car- pipe?  d) (compile/pipe #'rec conf (preproc/pipe  (cdr d))))
-             ((car- **sel? d) (compile/**   #'rec conf (preproc/** (cdr d))))
-             ((car- *$sel? d) (compile/*$   #'rec conf (preproc/$$ (cdr d))))
-             ((car- $$sel? d) (compile/$$   #'rec conf (preproc/$$ (cdr d))))
-             ((car- $*sel? d) (compile/$*   #'rec conf (preproc/$$ (cdr d))))
-             ((car- is*?   d) (compile/*?   #'rec conf (cdr d)))
-             ((car- *map?  d) (compile/*map #'rec conf (cdr d)))
-             ((car- *fld?  d) (compile/*fld #'rec conf (cdr d)))
-             ((car- txpr?  d) (compile/txpr #'rec conf (cdr d)))
-             ((car- xpr?   d) (compile/xpr  #'rec conf
-                                `(,@(preproc/** (cdr (butlast d 2))) ,@(last d 2))))
-             ((car- lqnfx? d) `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
-             ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
-             (t (error "lqn compile error in: ~a" d)))))
+    ((rec (conf d)
+       (cond ((all? d) (gk conf :dat))
+         ((stringp d) d)
+         ((vectorp d) (compile/*map #'rec conf (coerce d 'list)))
+         ((atom d) d)
+         ((optrig? :||    d) (compile/||   #'rec conf (preproc/|| (cdr d))))
+         ((optrig? :**    d) (compile/**   #'rec conf (preproc/** (cdr d))))
+         ((optrig? :*$    d) (compile/*$   #'rec conf (preproc/$$ (cdr d))))
+         ((optrig? :$$    d) (compile/$$   #'rec conf (preproc/$$ (cdr d))))
+         ((optrig? :$*    d) (compile/$*   #'rec conf (preproc/$$ (cdr d))))
+         ((optrig? :*?    d) (compile/*?   #'rec conf (cdr d)))
+         ((optrig? :*map  d) (compile/*map #'rec conf (cdr d)))
+         ((optrig? :*fld  d) (compile/*fld #'rec conf (cdr d)))
+         ((optrig? :?txpr d) (compile/txpr #'rec conf (cdr d)))
+         ((optrig? :?mxpr d) (compile/mxpr #'rec conf (cdr d)))
+         ((optrig? :?xpr  d) (compile/xpr  #'rec conf
+                               `(,@(preproc/** (cdr (butlast d 2))) ,@(last d 2))))
+         ((car- lqnfx? d) `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
+         ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
+         (t (error "lqn: compile error in: ~a" d)))))
     `(//fxs/qry ,conf* ,(rec conf* q))))
 
 (defun qry/show (q compiled)
@@ -247,7 +252,7 @@
 ██ q:   ~s
 ██ ---
    ~a
-██ ██████████████████████████~%" q compiled))
+██ END      ██████████████████████████~%" q compiled))
 
 (defmacro qryd (dat q &key conf db) "run lqn query on dat"
   (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) ,@conf) q)))

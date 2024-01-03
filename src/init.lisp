@@ -22,6 +22,7 @@
   #+gcl (common-lisp-user::bye status) #+ecl (ext:quit status))
 
 (defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil." nil)
+(defmacro lit (a) `(progn ,a))
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s)))) syms) ,@body))
 
@@ -54,19 +55,9 @@
 (defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
 (defun sym-not-kv (d) (and (symbolp d) (not (keywordp d))))
 (defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
-  (if mode-sym (values-list (unpack-mode mode-sym d :?))
-               (values nil d)))
+  (if mode-sym (values-list (unpack-mode mode-sym d :?)) (values nil d)))
+(defun optrig? (s d &aux (d (and (listp d) (car d)))) (and d (sym-not-kv d) (eq s (kv d))))
 (defun all?    (d) (and (symbolp d)    (eq (kv d) :_)))
-(defun pipe?   (d) (and (sym-not-kv d) (eq (kv d) :||)))
-(defun $$sel?  (d) (and (sym-not-kv d) (eq (kv d) :$$)))
-(defun $*sel?  (d) (and (sym-not-kv d) (eq (kv d) :$*)))
-(defun *$sel?  (d) (and (sym-not-kv d) (eq (kv d) :*$)))
-(defun **sel?  (d) (and (sym-not-kv d) (eq (kv d) :**)))
-(defun is*?    (d) (and (sym-not-kv d) (eq (kv d) :*?)))
-(defun *map?   (d) (and (sym-not-kv d) (eq (kv d) :*map)))
-(defun *fld?   (d) (and (sym-not-kv d) (eq (kv d) :*fld)))
-(defun xpr?    (d) (and (sym-not-kv d) (eq (kv d) :xpr?)))
-(defun txpr?   (d) (and (sym-not-kv d) (eq (kv d) :txpr?)))
 (defun lqnfx?  (d) (and (sym-not-kv d) (member (kv d) *fxns* :test #'eq)))
 
 ; IS TYPE?

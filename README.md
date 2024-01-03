@@ -76,7 +76,7 @@ The following operators have special behaviour. You can also write generic CL
 code, anywhere you can use an operator. Including the functions further down.
 Note that you can use `_`/`(dat)` to refer to the current data object.
 
-### Pipe Operator
+## Pipe Operator. `||`
 `(|| ..)` pipes the results from the first operator into the second etc.
 Returns the result of the last operator. Pipe is the operator that surrounds
 all terminal queries by default.
@@ -88,11 +88,12 @@ translations:
   - `"Word"`: to `[(sub? _ "Word")]` to filter all items by this `string` with case.
   - `(expr ..)`: to itself.
 
-### Map/Reduce Operators
-  - `(*? test [expr=test])` new `vector` with `(expr _)` for all items where
-    where test is not `nil`
-  - `(*map fx)`: map `(fx _)` across all items.
-  - `(*map (fx .. _ ..) ..)`: map `(fx .. _ ..)` across all items.
+## Map Operator - `#()`/`*map`
+  - `#(fx)` or `(*map fx)`: map `(fx _)` across all items.
+  - `#((fx .. _ ..) ..)` or `(*map (fx .. _ ..) ..)`: map `(fx .. _ ..)` across
+    all items.
+
+## Fold Operator - `*fld`
   - `(*fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
     `acc` is inserted as the first argument to `fx`.
   - `(*fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. The accumulator is
@@ -100,25 +101,17 @@ translations:
   - `(*fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. Use this
     if you need to name the accumulator explicity.
 
-### Transformer Operators
-  - `(xpr? sel .. hit miss)` match current data object agains these `vector`
-    selectors and execute either `hit` or `miss`. `hit`/`miss` can be a
-    function name, or an expression, but must be defined.
-  - `(txpr? sel .. tx)` recursively traverse current data object and replace
-    matches with `tx`. `tx` can be a function name or expression. Also
-    traverses vectors and `kv` values (not keys).
+## Filter Operator - `*?`
+  - `(*? test [expr=test])` new `vector` with `(expr _)` for all items where
+    where test is not `nil`
 
-### Selector Operators
-  - `#{s1 ..}` or `(*$ ..)`: select from `vector` of `kvs` into new `vector` of
-    `kvs` using `kv` selectors.
-  - `#[s1 ..]` or `($* ..)`: select from `vector` of `kvs` into new `vector`
-    using `kv` selectors.
-  - ` {s1 ..}` or `($$ ..)`: select from `kv` into new `kv` using `kv`
-    selectors.
-  - ` [s1 ..]` or `(** ..)`: select from `vector` into new `vector` using
-    `expr` selectors.
+## Selector Operators - `{}`/`$$`, `[]`/`**`, `#{}`/`*$`, `#[]`/`$*`
+  - `#{s1 ..}` or `(*$ ..)`: from `vector` of `kvs` into new `vector` of `kvs` using `kv` selectors.
+  - `#[s1 ..]` or `($* ..)`: from `vector` of `kvs` into new `vector` using `kv` selectors.
+  - ` {s1 ..}` or `($$ ..)`: from `kv` into new `kv` using `kv` selectors.
+  - ` [s1 ..]` or `(** ..)`: from `vector` into new `vector` using `expr` selectors.
 
-### kv Selectors
+### KV Selectors
 A `kv` Selector is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
 `#{}`.  Only the key is required. If `expr` is not provided the `expr` is `_`,
 that is: the value of the `key`.
@@ -160,7 +153,7 @@ entirely:
   -@key3}         ; drop key3
 ```
 
-### expr Selectors
+### EXPR Selectors
 `expr` selectors are similar to `kv` Selectors, but they are used with `xpr?`,
 `txpr?` and `[]`.
 ```lisp
@@ -175,6 +168,16 @@ entirely:
  (+@post? _ "end")]
 ```
 
+## Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
+  - `(?xpr sel .. hit miss)` match current data object agains these `vector`
+    selectors and execute either `hit` or `miss`. `hit`/`miss` can be a
+    function name, or an expression, but must be defined.
+  - `(?txpr sel .. tx)` recursively traverse current data object and replace
+    matches with `tx`. `tx` can be a function name or expression. Also
+    traverses vectors and `kv` values (not keys).
+  - `(?mxpr (sel .. tx) (sel .. tx))` multiple matches and transforms. performs
+    the transform of the first match only.
+
 ## Query Utility Functions
 
 The internal representation of JSON data as `vectors` and `kvs` in `lqn` means
@@ -183,14 +186,14 @@ you can use the regular CL utilities such as `gethash`, `aref`, `subseq`,
 
 But for convenience there are a few special functions defined in `lqn`.
 
-### Global Query Context
+## Global Query Context Fxs
  - `(ctx)`: returns `:pipe` if input is from `stdin`; otherwise `:file`.
  - `(fi [k=0])`: index of the current file; start at `k`.
  - `(fn)`: name of the current file; or `nil`.
  - `(hld k v)`: hold this value at this key in a global key value store.
  - `(ghv k [d])`: get the value of this key; or `d`.
 
-### Operator Context
+## Operator Context Fxs
 Available in all operators:
  - `_` or `(dat)`: the current data object.
  - `($_ k [d])`: this key from current data object; or `d`.
@@ -198,7 +201,7 @@ Available in all operators:
  - `(num)`: length of the `vector` being iterated.
  - `(cnt [k=0])`: counts from `k` over the `vector` being iterated.
 
-### Generic
+## Generic Fxs
  - `(>< a)`: condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
  - `(?? fx a ..)`: execute `(fx a ..)` only if `a` is not `nil`; otherwise `nil`.
  - `(fmt f ..)`: format `f` as `string` with these (`format`) args.
@@ -211,13 +214,13 @@ Available in all operators:
    match. If `b` is an expression, `a` is compared to the evaluated value of
    `b`.
 
-### Kvs
+## KV Fxs
  - `($ kv k [d])`: get key `k` from `kv`.
  - `($_ k ..)`: is equivalent to `($ _ k ..)`.
  - `($cat ..)`: add all keys from these `kvs` to a new `kv`. left to right.
  - `($new :k1 expr1 ..)`: new `kv` with these keys and expressions.
 
-### Strings / Vectors / Sequences
+## Strings / Vectors / Sequences Fxs
 Note that `string`, `list` and `vector` are all `sequence`s.
  - `(*cat a ..)`: concatenate all `vectors` in these `vectors`.
  - `(*n v i)`: get this index from `sequence`.
@@ -238,7 +241,7 @@ Note that `string`, `list` and `vector` are all `sequence`s.
  - `(tail s [n=10])`: last `n` items of `sequence`.
  - `(trim s)`: trim leading and trailing whitespace from `string`.
 
-### Type Tests
+## Type Test Fxs
 `(is? o [d])` returns `o` if not `nil`, empty `sequence` or empty `kv`; or `d`.
 
 These functions return the argument if the argument is the corresponding type:
@@ -248,7 +251,7 @@ These functions return the argument parsed as the corresponding type if
 possible; otherwise they return the optional second argument: `int!?`, `flt!?`,
 `num!?`, `str!?`, `vec!?`, `seq!?`
 
-### Type Coercion
+## Type Coercion Fxs
  - `(str! s ..)`: coerce everything to a `string`.
  - `(vec! v)`: coerce `sequence` to `vector`; or return `(*new v)`
 
