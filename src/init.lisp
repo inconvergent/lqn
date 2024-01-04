@@ -3,8 +3,8 @@
 (defvar *qmodes* '(:+ :? :- :%))
 (defvar *fxns* '(:fmt :out :jsnstr :hld :ghv
                  :fn :fi :ctx :num :cnt :par :$ :$_ :>< :??
-                 :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq
-                 :*new :$new :*cat :$cat :*$cat :head :tail :size :size?
+                 :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*n :*sel :*seq :pck
+                 :*new :$new :*cat :$cat :*$cat :*head :*tail :size :size?
                  :sup :sdwn :mkstr :repl :strcat :splt
                  :msym? :is? :kv? :sym? :sym! :trim
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?

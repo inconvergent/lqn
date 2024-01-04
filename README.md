@@ -192,7 +192,8 @@ The internal representation of JSON data as `vectors` and `kvs` in `lqn` means
 you can use the regular CL utilities such as `gethash`, `aref`, `subseq`,
 `length` etc.
 
-But for convenience there are a few special functions defined in `lqn`.
+But for convenience there are a few special functions defined in `lqn`.  `[d]`
+represents a default value if key/index is missing, or if a functon fails.
 
 ### Global Query Context Fxs
 Defined in the query scope:
@@ -203,7 +204,7 @@ Defined in the query scope:
  - `(ghv k [d])`: get the value of this key; or `d`.
 
 ### Operator Context Fxs
-Defined in all operators:
+Defined in all operators.
  - `_` or `(dat)`: the current data object.
  - `($_ k [d])`: this key from current data object; or `d`.
  - `(par)`: the parent data object.
@@ -212,46 +213,56 @@ Defined in all operators:
 
 ### Generic Fxs
 General utilities:
- - `(>< a)`: condense `a`. Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
  - `(?? fx a ..)`: execute `(fx a ..)` only if `a` is not `nil`; otherwise `nil`.
  - `(fmt f ..)`: format `f` as `string` with these (`format`) args.
  - `(fmt s)`: get printed representation of `s`.
  - `(out f ..)`: format `f` to `*standard-output*` with these (`format`) args. returns `nil`.
  - `(out s)`: output printed representation of `s` to `*standard-output*`. returns `nil`.
- - `(size? o [d])`: length of `sequence` or number of keys in `kv`; or `d`.
  - `(msym? a b)`: compare symbol `a` to `b`. if `b` is a keword or symbol
    a perfect match is required. if `b` is a string it performs a substring
    match. If `b` is an expression, `a` is compared to the evaluated value of
    `b`.
 
-### KV Fxs
-Functions for making or accessing hash-tables:
+### KV / Strings / Vectors / Sequences Fxs
+Access values in objects:
+ - `(pck a d i ..)`: pick these indices/keys from `sequence`/`kv` into new `vector`.
+
+Size of objects:
+ - `(size? o [d])`: length of `sequence` or number of keys in `kv`
+
+Condense objects:
+ - `(>< a)`: Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
+
+Access values in `kvs`:
  - `($ kv k [d])`: get key `k` from `kv`.
  - `($_ k ..)`: is equivalent to `($ _ k ..)`.
  - `($cat ..)`: add all keys from these `kvs` to a new `kv`. left to right.
  - `($new :k1 expr1 ..)`: new `kv` with these keys and expressions.
 
-### Strings / Vectors / Sequences Fxs
-Note that `string`, `list` and `vector` are all `sequence`s. Several of these
-functions work on all three:
+Primarily for sequences (`string`, `vector`, `list`):
  - `(*cat a ..)`: concatenate all `vectors` in these `vectors`.
  - `(*n v i)`: get this index from `sequence`.
  - `(*new ..)`: new `vector` with these elements.
  - `(*sel ..)`: get new `vector` with these `*n`s or `*seq`s from `sequence`.
  - `(*seq v i [j])`: get range `i ..` or `i .. (1- j)` from `sequence`.
+ - `(*head s [n=10])`: first `n` items of `sequence`.
+ - `(*tail s [n=10])`: last `n` items of `sequence`.
+
+Primarlily for string searching. `[i]` means case insensitive:
  - `([i]pref? s pref [d])`: `s` if `pref` is a prefix of `s`; or `d`.
  - `([i]sub? s sub [d])`: `s` if `sub` is a substring of `s`; or `d`.
- - `([i]subx? s sub)`: index where `sub` starts in `s`
+ - `([i]subx? s sub)`: index where `sub` starts in `s`.
  - `([i]suf? s suf [d])`: `s` if `suf` is a suffix of `s`; or `d`.
- - `(head s [n=10])`: first `n` items of `sequence`.
- - `(mkstr s ..)`: stringify and concatenate all arguments.
  - `(repl s from to)`: replace `from` with `to` in `s`.
- - `(sdwn s ..)`: `mkstr` and downcase.
+
+String maniuplation:
+ - `(trim s)`: trim leading and trailing whitespace from `string`.
+ - `(join s x ..)`: join sequence with `x` (strings or `chars`), returns `string`.
  - `(splt s x)`: split `s` at all `x`.
+ - `(mkstr s ..)`: stringify and concatenate all arguments.
  - `(strcat s ..)`: concatenate all `strings` in these `sequences` of `strings`.
  - `(sup s ..)`: `mkstr` and upcase.
- - `(tail s [n=10])`: last `n` items of `sequence`.
- - `(trim s)`: trim leading and trailing whitespace from `string`.
+ - `(sdwn s ..)`: `mkstr` and downcase.
 
 ### Type Test Fxs
 `(is? o [d])` returns `o` if not `nil`, empty `sequence` or empty `kv`; or `d`.

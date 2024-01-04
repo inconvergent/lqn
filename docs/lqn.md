@@ -50,8 +50,7 @@
  ;                 (RES (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
  ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
  ;   Documentation:
- ;     for all vectors in rest; for all kvs in these vectors;
- ;     copy all keys into new kv. left to right.
+ ;     copy keys from all these kvs into new kv. left to right.
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -67,6 +66,24 @@
  ;                  (VALUES (AND ARRAY (NOT SIMPLE-ARRAY)) &OPTIONAL))
  ;   Documentation:
  ;     concatenate all vectors in these vectors.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:\*HEAD
+
+```
+ ; LQN:*HEAD
+ ;   [symbol]
+ ; 
+ ; *HEAD names a compiled function:
+ ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     first ±n elements
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -129,6 +146,24 @@
  ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
  ;   Documentation:
  ;     (subseq v ,@rest)
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:\*TAIL
+
+```
+ ; LQN:*TAIL
+ ;   [symbol]
+ ; 
+ ; *TAIL names a compiled function:
+ ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     last ±n elements
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -211,24 +246,6 @@
  ;   Lambda-list: (S &REST REST)
  ;   Documentation:
  ;     format to string.
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:HEAD
-
-```
- ; LQN:HEAD
- ;   [symbol]
- ; 
- ; HEAD names a compiled function:
- ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
- ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
- ;                  (VALUES
- ;                   (OR LIST (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
- ;   Documentation:
- ;     first ±n elements
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -327,6 +344,19 @@
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
  ;     ignore case suf?
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:JOIN
+
+```
+ ; LQN:JOIN
+ ;   [symbol]
+ ; 
+ ; JOIN names a macro:
+ ;   Lambda-list: (V &REST S)
+ ;   Documentation:
+ ;     join sequence v with s into new string.
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -526,6 +556,21 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:PCK
+
+```
+ ; LQN:PCK
+ ;   [symbol]
+ ; 
+ ; PCK names a compiled function:
+ ;   Lambda-list: (A D &REST REST &AUX L)
+ ;   Derived type: (FUNCTION (T T &REST T)
+ ;                  (VALUES (OR SIMPLE-VECTOR NULL) &OPTIONAL))
+ ;   Documentation:
+ ;     pick these indices/keys from sequence/hash-table into new vector.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
 #### LQN:PREF?
 
 ```
@@ -564,11 +609,7 @@
  ; QRY names a macro:
  ;   Lambda-list: (DAT &REST REST)
  ;   Documentation:
- ;     query data.
- ;     ex: (lqn:qry "1 x 1 x 7 x 100 $ 3 x 8 x 30"
- ;           (splt _ :$) (*map (splt _ :x) int!? ; for each row, split and parse as int
- ;                             ($new :num (num)  ; new nested dict
- ;                                   :items (*map ($new :v _ :i (cnt))))))
+ ;     query data. rest is wrapped in the pipe operator.
  ;   Source file: /data/x/lqn/src/qry.lisp
 ```
 
@@ -606,9 +647,8 @@
  ;   [symbol]
  ; 
  ; REPL names a compiled function:
- ;   Lambda-list: (S FROM TO &AUX (S (STR! S)) (FROM (STR! FROM))
- ;                 (TO (STR! TO)))
- ;   Derived type: (FUNCTION (T T T)
+ ;   Lambda-list: (S FROM TO)
+ ;   Derived type: (FUNCTION (STRING STRING STRING)
  ;                  (VALUES
  ;                   (OR LIST (SIMPLE-ARRAY * (*))
  ;                       SB-KERNEL:EXTENDED-SEQUENCE)
@@ -696,10 +736,10 @@
  ;   [symbol]
  ; 
  ; SPLT names a compiled function:
- ;   Lambda-list: (S X &OPTIONAL PRUNE &AUX (S (STR! S)) (X (STR! X)))
+ ;   Lambda-list: (S X &OPTIONAL PRUNE)
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
- ;     split s at substring x. returns vector.
+ ;     split s at substrings x to vector.
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -856,24 +896,6 @@
  ;   Documentation:
  ;     mkstr, make symbol.
  ;   Source file: /data/x/lqn/src/init.lisp
-```
-
-#### LQN:TAIL
-
-```
- ; LQN:TAIL
- ;   [symbol]
- ; 
- ; TAIL names a compiled function:
- ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
- ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
- ;                  (VALUES
- ;                   (OR LIST (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
- ;   Documentation:
- ;     last ±n elements
- ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:TRIM

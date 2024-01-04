@@ -38,17 +38,17 @@
       (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* ($$ _)))))
 
 (subtest "lqn qry 1"
-  (is (lqn::preproc/$$ '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
-                        (% "ABC" (print _)) (:% "ABC" _)))
+  (is (lqn::pre/$$ '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
+                    (% "ABC" (print _)) (:% "ABC" _)))
       '((:+ "ccc" :_) (:+ "ddd" :_) (:+ "IIUJ" :_) (:% "UU" :_) (:? "aa" :_)
        (:? "bb" :_) (:+ "cc" (PROGN _)) (:+ "%" "ABC") (:% "ABC" _)))
-  (is (lqn::preproc/** '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
-                        (% "ABC" (print _)) (:% "ABC")))
-      '((:? (WHEN (CCC :_) :_)) (:? (AND (STRINGP :_) (LQN:ISUB? :_ "ddd")))
-       (:? (AND (STRINGP :_) (LQN:SUB? :_ "IIUJ")))
-       (:% (AND (STRINGP :_) (LQN:SUB? :_ "UU"))) (:? (WHEN (AA :_) :_))
+  (is (lqn::pre/** '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
+                    (% "ABC" (print _)) (:% "ABC")))
+     '((:? (WHEN (CCC :_) :_)) (:? (AND (LQN:STR? :_) (LQN:ISUB? :_ "ddd")))
+       (:? (AND (LQN:STR? :_) (LQN:SUB? :_ "IIUJ")))
+       (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "UU"))) (:? (WHEN (AA :_) :_))
        (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
-       (:% (AND (STRINGP :_) (LQN:SUB? :_ "ABC")))))
+       (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "ABC")))))
 
   (is (lqn:lqnout (lqn:jsnqryf *test-data-fn*
         (*$  _id (+@things (*$ name id))
@@ -57,13 +57,11 @@
          (:THINGS . #(((:NAME . "Chris") (:ID . 0))))
          (:MSG . "this is a message"))
         ((:_ID . "65679d23fe33bc4c240675c0")
-         (:THINGS
-          . #(((:NAME . "Winters") (:ID . 10)) ((:NAME . "Haii") (:ID . 11))
-              ((:NAME . "Klein") (:ID . 12))))
+         (:THINGS . #(((:NAME . "Winters") (:ID . 10)) ((:NAME . "Haii") (:ID . 11))
+                      ((:NAME . "Klein") (:ID . 12))))
          (:MSG . "hello, undefined! you have 1 unread messages."))
         ((:_ID . "65679d235b4143d2932ea17a")
-         (:THINGS
-          . #(((:NAME . "Star") (:ID . 31)) ((:NAME . "Ball") (:ID . 32))))
+         (:THINGS . #(((:NAME . "Star") (:ID . 31)) ((:NAME . "Ball") (:ID . 32))))
          (:MSG . "hello, undefined! you have 5 unread messages.")))
          :test #'equalp)
 
@@ -134,8 +132,8 @@
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 1000 +)) 1109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- acc _))) -109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 3 acc (- _ acc))) 96)
-  (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ 7) (tail _ 3)) #(5 6 7) :test #'equalp)
-  (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ -6) (tail _ -6)) #(1 2 3 4) :test #'equalp)
+  (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (*head _ 7) (*tail _ 3)) #(5 6 7) :test #'equalp)
+  (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (*head _ -6) (*tail _ -6)) #(1 2 3 4) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) (*? (isubx? _ :k) (*new _ (trim (par)))))
       #(#(2 "abk c") #(2 "dkef") #(1 "kkkk1")) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim (*? (isubx? _ :k) (*new _ (par))))

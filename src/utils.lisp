@@ -6,11 +6,11 @@
                                         (string (subseq s* 2))))
            (unpack-cons (cns) (if (valid-mode (car cns)) cns
                                   (dsb (m s) (unpack- (car cns)) `(,m (,s ,@(cdr cns))))))
-           (unpack- (s &aux (s* (mkstr s)) (splt (subx? s* "@")))
-             (if (and splt (= splt 1)) (let ((m (kv (subseq s* 0 1)))) ; nil -> :nil
-                                         (if (or merciful (valid-mode m)) (list m (repack- s s*))
-                                             (error "lqn: invalid mode in: ~a" s)))
-                                       (list default s))))
+           (unpack- (s &aux (s* (mkstr s)) (sx (subx? s* "@")))
+             (if (and sx (= sx 1)) (let ((m (kv (subseq s* 0 1)))) ; nil -> :nil
+                                     (if (or merciful (valid-mode m)) (list m (repack- s s*))
+                                       (error "lqn: invalid mode in: ~a" s)))
+                                   (list default s))))
     (typecase o (symbol (unpack- o)) (string (unpack- o)) (cons (unpack-cons o))
       (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
@@ -90,7 +90,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
       (if ,res ,s* ,d))))
 
 (defun split (s x &key prune &aux (lx (length x)))
-  (declare (optimize speed) (boolean prune))
+  (declare (optimize speed) (string s x) (boolean prune))
   "split string at substring. prune removes empty strings"
   (labels ((lst (s) (typecase s (list s) (t (list s))))
            (splt (s &aux (i (subx? s x)))
@@ -98,14 +98,11 @@ match. If b is an expression, a is compared to the evaluated value of b."
     (let ((res (lst (splt s))))
       (if prune (remove-if (lambda (s) (zerop (length s))) res)
                 res))))
-(defun splt (s x &optional prune &aux (s (str! s)) (x (str! x)))
-  "split s at substring x. returns vector."
-  (vec! (split s x :prune prune)))
+(defun splt (s x &optional prune) "split s at substrings x to vector."
+  (vec! (split (ct/kv/key s) (ct/kv/key x) :prune prune)))
 
-(defun repl (s from to &aux (s (str! s)) (from (str! from)) (to (str! to)))
-  "replace from with to in s"
-  (let ((s (strcat (mapcar (lambda (s) (mkstr s to))
-                           (split s from)))))
+(defun repl (s from to) (declare (string s from to)) "replace from with to in s"
+  (let ((s (strcat (mapcar (lambda (s) (mkstr s to)) (split s from)))))
     (subseq s 0 (- (length s) (length to)))))
 
 (defun make-adjustable-vector (&key init (type t) (size 128))
@@ -118,12 +115,12 @@ match. If b is an expression, a is compared to the evaluated value of b."
   (subseq v i j))
 (defun *n (v &optional (i 0)) (declare (vector v) (fixnum i)) "get index." (aref v i))
 
-(defun head (s &optional (n 10) &aux (l (length s)))
+(defun *head (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "first ±n elements"
   (cond ((zerop n) #()) ((plusp n) (subseq s 0 (min n l)))
                         (t         (subseq s 0 (max 0 (+ l n))))))
 
-(defun tail (s &optional (n 10) &aux (l (length s)))
+(defun *tail (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "last ±n elements"
   (cond ((zerop n) #()) ((plusp n) (subseq s (max 0 (- l n)) l))
                         (t         (subseq s (max 0 (+ l n)) l) )))
@@ -167,20 +164,34 @@ ranges are lists that behave like arguments to *seq."
                                        (otherwise (vex res a)))))
   res)
 (defun *$cat (&rest rest &aux (res (make-hash-table :test #'equal)))
-  "for all vectors in rest; for all kvs in these vectors;
-copy all keys into new kv. left to right."
+  "copy keys from all these kvs into new kv. left to right."
   (loop for v of-type vector in rest
-        do (loop for kv of-type hash-table across v
-                 do (loop for k being the hash-keys of ($make kv)
-                          using (hash-value v)
-                          do (setf (gethash k res) v))))
+    do (loop for kv of-type hash-table across v
+         do (loop for k being the hash-keys of ($make kv) using (hash-value v)
+              do (setf (gethash k res) v))))
   res)
 
+(defun pck (a d &rest rest &aux l)
+  "pick these indices/keys from sequence/hash-table into new vector."
+  (labels ((lt (l) (or (nth l a) d))
+           (kv (k) (gethash a k d))
+           (gt (i) (if (< i l) (aref a i) d)))
+    (typecase a (vector (setf l (length a)) (map 'vector #'gt rest))
+                (hash-table (map 'vector #'kv rest))
+                (list (map 'vector #'lt rest)))))
+
+(defmacro join (v &rest s)
+  (declare (sequence v)) "join sequence v with s into new string."
+  (awg (o n i s*) `(with-output-to-string (*standard-output*)
+                     (loop with ,n = (1- (length ,v))
+                       with ,s* = (if s (str! ,@s) "")
+                       for ,o across ,v for ,i from 0
+                       do (format t "~a~a" ,o (if (< ,i ,n) ,s* ""))))))
+
 (defun $rget (o pp d) "recursively get p from some/path/thing."
-  (labels ((rec (o pp)
-             (unless pp (return-from rec (or o d)))
-             (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
-                         (otherwise (return-from rec (or o d))))))
+  (labels ((rec (o pp) (unless pp (return-from rec (or o d)))
+                       (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
+                                   (otherwise (return-from rec (or o d))))))
     (rec o (split pp "/"))))
 (defmacro $ (o k &optional d) "get key k from o" `($rget ,o (ct/kv/key ,k) ,d))
 
@@ -198,7 +209,7 @@ copy all keys into new kv. left to right."
   (unless d (error "m/replfx: missing args."))
   (awg (rec) `(locally (declare (optimize speed))
     (labels ((,rec (,f*)
-      (cond ,@(loop for (fx tx) in body collect `(,fx ,(if safe tx `(,rec ,tx))))
+      (cond ,@(loop for (fx tx) in (group 2 body) collect `(,fx ,(if safe tx `(,rec ,tx))))
             ((hash-table-p ,f*)
              (loop with kv = (make-hash-table :test (hash-table-test ,f*))
                for k being the hash-key of ,f* using (hash-value v)
