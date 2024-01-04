@@ -53,7 +53,7 @@
                                  (number (mkstr s)) (cons `(mkstr ,s))))
 
 (defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
-(defun sym-not-kv (d) (and (symbolp d) (not (keywordp d))))
+(defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))
 (defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
   (if mode-sym (values-list (unpack-mode mode-sym d :?)) (values nil d)))
 (defun optrig? (s d &aux (d (and (listp d) (car d)))) (and d (sym-not-kv d) (eq s (kv d))))

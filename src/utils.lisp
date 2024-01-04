@@ -171,7 +171,12 @@ ranges are lists that behave like arguments to *seq."
               do (setf (gethash k res) v))))
   res)
 
-(defun pck (a d &rest rest &aux l)
+(defun @@ (a d i) "get ind/key from sequence/hash-table."
+  (typecase a (vector (if (< i (length a)) (aref a i) d))
+              (hash-table ($rget a k d))
+              (list (or (nth i a) d))))
+
+(defun @* (a d &rest rest &aux l)
   "pick these indices/keys from sequence/hash-table into new vector."
   (labels ((lt (l) (or (nth l a) d))
            (kv (k) (gethash a k d))
@@ -180,13 +185,12 @@ ranges are lists that behave like arguments to *seq."
                 (hash-table (map 'vector #'kv rest))
                 (list (map 'vector #'lt rest)))))
 
-(defmacro join (v &rest s)
-  (declare (sequence v)) "join sequence v with s into new string."
-  (awg (o n i s*) `(with-output-to-string (*standard-output*)
-                     (loop with ,n = (1- (length ,v))
-                       with ,s* = (if s (str! ,@s) "")
-                       for ,o across ,v for ,i from 0
-                       do (format t "~a~a" ,o (if (< ,i ,n) ,s* ""))))))
+(defmacro join (v &rest s) "join sequence v with s into new string."
+  (awg (o n i s* v*)
+    `(let* ((,v* ,v) (,n (1- (length ,v))) (,s* ,(if s `(str! ,@s) "")))
+       (with-output-to-string (*standard-output*)
+         (loop for ,o across ,v* for ,i from 0
+           do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
 
 (defun $rget (o pp d) "recursively get p from some/path/thing."
   (labels ((rec (o pp) (unless pp (return-from rec (or o d)))

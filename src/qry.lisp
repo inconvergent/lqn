@@ -54,8 +54,11 @@
                 (symbol `(when (,ty ,k) ,k))
                 (cons ty) (boolean `(when-equal ,ty ,k))))
 
+(defun prescan (qq)
+  (loop for q in qq do (when (equal :@ (kv (sym-not-kv q))) (warn "unexpected @ in: ~a" qq)))
+  qq)
 (defun pre/|| (qq) (unless qq (warn "||: missing args."))
-  (loop for q in qq collect
+  (loop for q in (prescan qq) collect
     (if (all? q) (kv q)
         (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
                     (string `(** ,q)) (number `(** ,(ct/kv/key q)))
@@ -196,6 +199,15 @@
                                 ,(funcall rec conf* (pre/or-all (car (last d*))))))))))
 (defun compile/txpr (rec conf d) (funcall rec conf `(?mxpr ,d)))
 
+
+
+(defun compile/@ (rec conf d)
+  (case (length d)
+    (1 `(@@ (dat) nil ,(funcall rec conf (car d))))                    ; (@ ind)
+    (2 `(@@ ,(car d) nil ,(second d)))            ; (@ o ind)
+    (3 `(@@ ,(car d) ,(third d) ,(second d)))) ; (@ o ind [d])
+  )
+
 (defmacro //fxs/qry (conf &body body &aux (meta (gensym "META")))
   `(let ((,meta (make-hash-table :test #'eq)))
      (labels ((ctx () ,(gk conf :ctx t)) (fn () ,(gk conf :fn t)) (dat () ,(gk conf :dat))
@@ -216,6 +228,7 @@
          ((optrig? :*$    d) (compile/*$   #'rec conf (pre/$$ (cdr d))))
          ((optrig? :**    d) (compile/**   #'rec conf (pre/** (cdr d))))
          ((optrig? :||    d) (compile/||   #'rec conf (pre/|| (cdr d))))
+         ((optrig? :@     d) (compile/@    #'rec conf (cdr d)))
          ((optrig? :*?    d) (compile/*?   #'rec conf (cdr d)))
          ((optrig? :*fld  d) (compile/*fld #'rec conf (cdr d)))
          ((optrig? :*map  d) (compile/*map #'rec conf (cdr d)))

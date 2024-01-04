@@ -559,16 +559,10 @@
 #### LQN:PCK
 
 ```
+:missing:todo:
+
  ; LQN:PCK
  ;   [symbol]
- ; 
- ; PCK names a compiled function:
- ;   Lambda-list: (A D &REST REST &AUX L)
- ;   Derived type: (FUNCTION (T T &REST T)
- ;                  (VALUES (OR SIMPLE-VECTOR NULL) &OPTIONAL))
- ;   Documentation:
- ;     pick these indices/keys from sequence/hash-table into new vector.
- ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:PREF?
