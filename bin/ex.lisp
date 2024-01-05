@@ -11,7 +11,6 @@
 
   (pretty-json (lqn:jsnqryf (lqn::internal-path-string "data/sample.json")
                             (|| #{_id (things #[name])})))
-
   (print (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 (+ _))))
   (print (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 +)))
   (print (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- _ acc))))
@@ -61,10 +60,7 @@
 
   (print (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
                   (splt _ :x) trim
-                  (?txpr :a :-@b sup)))
-
-  (print (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (@ :a/b)))
-   )
+                  (?txpr :a :-@b sup))))
 
 (main)
 

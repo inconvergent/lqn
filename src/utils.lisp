@@ -182,13 +182,13 @@ ranges are lists that behave like arguments to *seq."
          (loop for ,o across ,v* for ,i from 0
            do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
 
-
 (defun $rget (o pp &optional d) "recursively get p from some/path/thing."
-  (labels ((rec (o pp) (unless pp (return-from rec (or o d)))
-                       (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
-                                   (otherwise (return-from rec (or o d))))))
-    (rec o (str-split (ct/kv/str pp) "/"))))
-(defmacro $ (o k &optional d) "get key k from o" `($rget ,o ,(ct/kv/str k) ,d))
+  (labels ((lookup (o pp &aux hit)
+             (loop for p in pp do
+               (if (and (hash-table-p o) (gethash p o)) (setf o (gethash p o))
+                                                        (return-from lookup d)))
+             (or o d)))
+    (lookup o (str-split (ct/kv/str pp) "/"))))
 
 (defun @@ (a i &optional d) "get ind/key from sequence/hash-table."
   (typecase a (vector (if (< i (length a)) (aref a i) d))

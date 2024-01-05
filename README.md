@@ -19,7 +19,7 @@ echo '[ { "_id": "65679", "msg": "HAI!",
         { "_id": "6AABB", "msg": "NIH!",
           "things": [ { "id": 32, "name": "Bal" },
                       { "id": 31, "name": "Sta", "extra": null} ] } ]' | \
-  jqn '#{_id (things #[name ?@extra]) (msg (sup _))}'
+  jqn '#{:_id (:things #[:name :?@extra]) (:msg (sup _))}'
 ```
 which returns (something like):
 ```json
@@ -76,6 +76,11 @@ The following operators have special behaviour. You can also write generic CL
 code, anywhere you can use an operator. Including the functions further down.
 Note that you can use `_`/`(dat)` to refer to the current data object.
 
+### Strings and :keywords
+In operators, and many functions, `:keywords` can be used to represent
+lowercase `strings`. This is useful in the terminal to avoid escaping strings.
+Particularly when using `Selector` operators.
+
 ### Pipe Operator - `||`
 `(|| ..)` pipes the results from the first operator into the second etc.
 Returns the result of the last operator. Pipe is the operator that surrounds
@@ -108,12 +113,17 @@ Filter and map operations over `vector`:
   - `(*? test [expr=test])` new `vector` with `(expr _)` for all items where
     where test is not `nil`
 
-### Selector Operators - `{}`/`$$`, `[]`/`**`, `#{}`/`*$`, `#[]`/`$*`
-Select from on structure into a new data structure:
+### Selector Operators - `{}`/`$$`, `[]`/`**`, `#{}`/`*$`, `#[]`/`$*`, `@`
+Select from on structure into a new data structure. Selectors are explained below:
   - `#{s1 ..}` or `(*$ ..)`: from `vector` of `kvs` into new `vector` of `kvs` using `kv` selectors.
   - `#[s1 ..]` or `($* ..)`: from `vector` of `kvs` into new `vector` using `kv` selectors.
   - ` {s1 ..}` or `($$ ..)`: from `kv` into new `kv` using `kv` selectors.
   - ` [s1 ..]` or `(** ..)`: from `vector` into new `vector` using `expr` selectors.
+
+select keys or indexes:
+ - `(@ k)`: get this key/index from current data object.
+ - `(@ k [d])`: get this key/index from current data object.
+ - `(@ o k [d])`: get this key/index from `o`.
 
 #### KV Selectors
 A `kv` Selector is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
@@ -130,14 +140,14 @@ The modes are:
 Selectors can either be written out in full, or they can be be written in short
 form depending on what you want to achieve. Note that the `@` in the following
 examples is used to append a mode to a key without having to wrap the selector
-in parenthesis. If you need the litteral key you can use `strings`:
+in parenthesis. If you need eg. case or spaces you can use `"strings"`:
 ```lisp
 {_}               ; select everything in current data object
-{key1 key2}       ; select key1 and key2 [+ mode is default]
-{+@key}           ; same as key
+{:key1 "key2"}    ; select key1 and key2
+{:+@key}          ; same as key [+ mode is default]
 {"+@Key"}         ; select "Key"
-{?@key }          ; select key if the value is not nil.
-{(%@key expr)}    ; select key if expr is not nil.
+{:?@key }         ; select key if the value is not nil.
+{(:%@key expr)}   ; select key if expr is not nil.
 {("?@Key" expr)}  ; select "Key" if the value is not nil.
 {("%@Key" expr)}  ; select "Key" if expr is not nil.
 {(:+ "Key" expr)} ; same as ("+@Key" expr).
@@ -145,31 +155,40 @@ in parenthesis. If you need the litteral key you can use `strings`:
 An `expr` is any Operator or valid CL code. Use `_` in `expr` to refer to the
 value of the selected key.
 ```lisp
-#{(key1 (sup _))       ; convert value of key1 to uppercase
-  (key3 (or _ "That")) ; select the value of key3 or literally "That".
-  (key2 (+ 33 _))}     ; add 33 to value of key2
+#{(:key1 (sup _))       ; convert value of key1 to uppercase
+  (:key3 (or _ "That")) ; select the value of key3 or literally "That".
+  (:key2 (+ 33 _))}     ; add 33 to value of key2
 ```
 To select everything, but replace some keys with new values or drop keys
 entirely:
 ```lisp
-#{_               ; select all keys, then override these:
-  (key2 (sdwn _)) ; lowercase the value of key2
-  -@key3}         ; drop key3
+#{_                ; select all keys, then override these:
+  (:key2 (sdwn _)) ; lowercase the value of key2
+   :-@key3}        ; drop key3
 ```
 
 #### EXPR Selectors
 `expr` selectors are similar to `kv` Selectors, but they are used with `?xpr`,
-`?txpr`, `?mxpr`, and `[]`.
+`?txpr`, `?mxpr`, and `[]` operators, and the modes behave a little differently:
+  - `+`: if there are multiple selector clauses with `+` mode it requires all
+    of them to be `t`.
+  - `?`: if there are any clauses with `?` mode it will select items where
+    either of these clauses is `t`
+  - `-`: items that match any clause with `-` mode will be ignored.
+if this is not what you need, you can compose your conditions with regular CL
+boolen operators. Here are some examples:
 ```lisp
-[:hello]              ; items that contain `"hello"`.
-[:hi :hello]          ; items that contain either `"hello"` or `"hi"`.
-[:+@hi :+@hello]      ; items that contain `"hi"` and `"hello"`.
-[:+@hi :+@hello "OH"] ; items that contain (`"hi"` and `"hello"`) or `"OH"`.
-[int!?]               ; items that can be parsed as `int`.
-[(> _ 3)]             ; items larger than `3`.
-[_ :-@hi]             ; items except those that contain `"hi"`.
-[(+@pref? _ "start")  ; items that start with `"start"` and end with `"end"`.
+[:hello]                  ; strings that contain `"hello"`.
+[:hi "Hello"]             ; strings that contain either `"Hello"` or `"hi"`.
+[:+@hi :+@hello]          ; strings that contain `"hi"` and `"hello"`.
+[:+@hi :+@hello "OH"]     ; strings that contain (`"hi"` and `"hello"`) or `"OH"`.
+[int!?]                   ; items that can be parsed as `int`.
+[(> _ 3)]                 ; numbers larger than `3`.
+[_ :-@hi]                 ; strings except those that contain `"hi"`.
+[(+@pref? _ "start")      ; strings that start with `"start"` and end with `"end"`.
  (+@post? _ "end")]
+[(myfx _)]                ; items matching this expression are selected.
+[(or (myfx _) (myfx2 _))] ; items matching this expression are selected.
 ```
 
 ### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
@@ -206,7 +225,6 @@ Defined in the query scope:
 ### Operator Context Fxs
 Defined in all operators.
  - `_` or `(dat)`: the current data object.
- - `($_ k [d])`: this key from current data object; or `d`.
  - `(par)`: the parent data object.
  - `(num)`: length of the `vector` being iterated.
  - `(cnt [k=0])`: counts from `k` over the `vector` being iterated.
@@ -225,7 +243,7 @@ General utilities:
 
 ### KV / Strings / Vectors / Sequences Fxs
 Access values in objects:
- - `(pck a d i ..)`: pick these indices/keys from `sequence`/`kv` into new `vector`.
+ - `(@* a d i ..)`: pick these indices/keys from `sequence`/`kv` into new `vector`.
 
 Size of objects:
  - `(size? o [d])`: length of `sequence` or number of keys in `kv`
@@ -234,8 +252,6 @@ Condense objects:
  - `(>< a)`: Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
 
 Access values in `kvs`:
- - `($ kv k [d])`: get key `k` from `kv`.
- - `($_ k ..)`: is equivalent to `($ _ k ..)`.
  - `($cat ..)`: add all keys from these `kvs` to a new `kv`. left to right.
  - `($new :k1 expr1 ..)`: new `kv` with these keys and expressions.
 

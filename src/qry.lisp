@@ -26,7 +26,7 @@
 (defmacro *add+ (lft k v &optional d) (declare (ignore k) (symbol lft)) "do (vex lft (or v d))"
   `(vex ,lft (or ,v ,d)))
 (defmacro *add? (lft k v) (declare (symbol lft)) "do (vex lft v) if (gethash k dat) is not nil"
-  `(when (aref (dat) ,k) (vex ,lft ,v)))
+  `(when ($rget (dat) ,k) (vex ,lft ,v)))
 (defmacro *add% (lft k v) (declare (ignore k) (symbol lft)) "do (vex lft v) if v is not nil or empty"
   (awg (v*) `(let ((,v* ,v)) (something? ,v* (vex ,lft ,v*)))))
 
@@ -39,7 +39,7 @@
 (defmacro //fxs/op/ ((par &optional (dat par) (i 0)) &body body)
   (declare (symbol par))
   `(labels ((par () ,par) (dat () ,dat) (cnt (&optional (k 0)) (+ ,i k))
-            (num (&optional (d 0)) (size? ,par d)) ($_ (k &optional d) ($ ,dat k d)))
+            (num (&optional (d 0)) (size? ,par d)))
      ,@body))
 
 (defun pre/or-all (d)
@@ -63,11 +63,13 @@
         (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
                     (string `(** ,q)) (number `(** ,(ct/kv/str q)))
                     (vector `(*map ,@(coerce q 'list)))
-                    (otherwise (error "||lqn: invalid clause: ~a" q))))))
+                    (otherwise (error "||: expected cons/symbol/vector/number. got: ~a" q))))))
 
 (defun pre/$$ (q &optional (m :+)) (unless q (warn "$$: missing args."))
   (labels
-    ((str- (a b c) `(,a ,(etypecase b (symbol (sdwn (mkstr b))) (string b)) ,c))
+    ((str- (a b c) `(,a ,(typecase b (keyword (sdwn (mkstr b))) (string b)
+                           (otherwise (error "$$: expected string/:keyword. got: ~a" b)))
+                        ,c))
      (repack- (o) (subseq `(,@o :_) 0 3))
      (repack-cons (ck k) (ecase (length k) (3 k) (2 `(,ck ,(caadr k) ,(cadadr k)))))
      (unpack- (o &aux (k (unpack-mode o m)) (ck (car k)))
@@ -202,13 +204,13 @@
 (defun compile/@ (rec conf d)
   (case (length d)
     (1 `(@@ (dat) ,(funcall rec conf (car d))))
-    ((2 3) `(@@ ,@(funcall rec conf d)))))
+    (2 `(@@ (dat) ,@(funcall rec conf d)))
+    (3 `(@@ ,@(funcall rec conf d)))))
 
 (defmacro //fxs/qry (conf &body body &aux (meta (gensym "META")))
   `(let ((,meta (make-hash-table :test #'eq)))
      (labels ((ctx () ,(gk conf :ctx t)) (fn () ,(gk conf :fn t)) (dat () ,(gk conf :dat))
               (fi (&optional (k 0)) (+ k ,(or (gk conf :fi t) 0)))
-              ($_ (k &optional d) ($ ,(gk conf :dat) k d))
               (ghv (k &optional d) (declare (symbol k)) (gethash k ,meta d))
               (hld (k &optional v) (declare (symbol k))
                 (if v (setf (gethash k ,meta) v) (remhash k ,meta)) v))
@@ -240,7 +242,7 @@
   (format t "
 ██ COMPILED ██████████████████████████
 ██ q:   ~s
-██ ---------~%   ~a
+██ ---------~%   ~s
 ██ END      ██████████████████████████~%" q compiled))
 
 (defmacro qryd (dat q &key conf db) "run lqn query on dat"

@@ -1,14 +1,10 @@
 #### LQN:$
 
 ```
+:missing:todo:
+
  ; LQN:$
  ;   [symbol]
- ; 
- ; $ names a macro:
- ;   Lambda-list: (O K &OPTIONAL D)
- ;   Documentation:
- ;     get key k from o
- ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:$CAT
@@ -194,6 +190,21 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:@\*
+
+```
+ ; LQN:@*
+ ;   [symbol]
+ ; 
+ ; @* names a compiled function:
+ ;   Lambda-list: (A D &REST REST &AUX L)
+ ;   Derived type: (FUNCTION (T T &REST T)
+ ;                  (VALUES (OR SIMPLE-VECTOR NULL) &OPTIONAL))
+ ;   Documentation:
+ ;     pick these indices/keys from sequence/hash-table into new vector.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
 #### LQN:D?
 
 ```
@@ -285,7 +296,7 @@
  ; 
  ; IPREF? names a compiled function:
  ;   Lambda-list: (S SUF &OPTIONAL D)
- ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T) *)
  ;   Documentation:
  ;     ignore case pref?
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -341,7 +352,8 @@
  ; 
  ; ISUF? names a compiled function:
  ;   Lambda-list: (S SUF &OPTIONAL D)
- ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     ignore case suf?
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -554,15 +566,6 @@
  ;   Documentation:
  ;     print to standard out
  ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:PCK
-
-```
-:missing:todo:
-
- ; LQN:PCK
- ;   [symbol]
 ```
 
 #### LQN:PREF?
@@ -829,7 +832,8 @@
  ; 
  ; SUF? names a compiled function:
  ;   Lambda-list: (S SUF &OPTIONAL D)
- ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T) *)
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if s ends with suf; or d
  ;   Source file: /data/x/lqn/src/utils.lisp
