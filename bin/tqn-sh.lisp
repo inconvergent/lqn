@@ -22,11 +22,11 @@ Examples:
 
   # split string and sum as integers:
   echo '1 x 1 x 7 x 100' | \
-    tqn '(split _ :x) int!? (*fld 0 +)'
+    tqn '(splt _ :x) int!? (*fld 0 +)'
 
   # split string and make a new JSON structure:
   echo '1 x 1 x 7 x 100' | \
-     tqn -j '(split _ :x) int!? #(($new :v _))'
+     tqn -j '(splt _ :x) int!? #(($new :v _))'
 " (lqn:v?)))
 
 (defun tqn/execute-query (opts dat q &key conf db)

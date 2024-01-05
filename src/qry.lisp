@@ -11,26 +11,26 @@
 (defmacro $new (&rest d) "new kv/hash-table from these (k v) pairs"
   (awg (kv) `(let ((,kv ($make)))
                ,@(loop for (kk expr) in (group 2 d)
-                       collect `(setf (gethash ,(ct/kv/key kk) ,kv) ,expr))
+                       collect `(setf (gethash ,(ct/kv/str kk) ,kv) ,expr))
                ,kv)))
 
-(defun path-to-key (pp) (first (last (split pp "/"))))
+(defun ct/path/key (pp) (first (last (str-split pp "/"))))
 (defmacro $add+ (lft k v &optional d) (declare (symbol lft)) "do (setf lft (or v default))"
-  `(setf (gethash ,(path-to-key k) ,lft) (or ,v ,d)))
-(defmacro $add? (lft k v) (declare (symbol lft)) "do (setf lft v) if ($_ k) is not nil"
-  `(when ($_ ,k) (setf (gethash ,(path-to-key k) ,lft) ,v)))
+  `(setf (gethash ,(ct/path/key k) ,lft) (or ,v ,d)))
+(defmacro $add? (lft k v) (declare (symbol lft)) "do (setf lft v) if value of key is not nil"
+  `(when ($rget (dat) ,k) (setf (gethash ,(ct/path/key k) ,lft) ,v)))
 (defmacro $add% (lft k v) (declare (symbol lft)) "do (setf lft v) if v is not nil"
-  (awg (v*) `(let ((,v* ,v)) (something? ,v* (setf (gethash (path-to-key ,k) ,lft) ,v*)))))
+  (awg (v*) `(let ((,v* ,v)) (something? ,v* (setf (gethash (ct/path/key ,k) ,lft) ,v*)))))
 (defmacro $del (lft k v) (declare (ignore v) (symbol lft)) "delete key" `(remhash ,k ,lft))
 
 (defmacro *add+ (lft k v &optional d) (declare (ignore k) (symbol lft)) "do (vex lft (or v d))"
   `(vex ,lft (or ,v ,d)))
 (defmacro *add? (lft k v) (declare (symbol lft)) "do (vex lft v) if (gethash k dat) is not nil"
-  `(when ($_ ,k) (vex ,lft ,v)))
+  `(when (aref (dat) ,k) (vex ,lft ,v)))
 (defmacro *add% (lft k v) (declare (ignore k) (symbol lft)) "do (vex lft v) if v is not nil or empty"
   (awg (v*) `(let ((,v* ,v)) (something? ,v* (vex ,lft ,v*)))))
 
-(defun dat/key (conf kk)  `((:dat . ($_ ,kk)) ,@conf))
+(defun dat/key (conf kk)  `((:dat . ($rget (dat) ,kk)) ,@conf))
 (defun dat/new (conf dat) `((:dat . ,dat) ,@conf))
 (defun $add (m) (declare (keyword m)) (ecase m (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
 (defun *add (m) (declare (keyword m)) (ecase m (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
@@ -49,7 +49,7 @@
 (defun when-equal (a b) (when (equal a b) a))
 (defun pre/xpr-sel (ty k) (declare (symbol k))
   (etypecase ty (number `(when-equal ,k ,ty))
-                (keyword `(and (str? ,k) (isub? ,k ,(ct/kv/key ty))))
+                (keyword `(and (str? ,k) (isub? ,k ,(ct/kv/str ty))))
                 (string `(and (str? ,k) (sub? ,k ,ty)))
                 (symbol `(when (,ty ,k) ,k))
                 (cons ty) (boolean `(when-equal ,ty ,k))))
@@ -61,13 +61,13 @@
   (loop for q in (prescan qq) collect
     (if (all? q) (kv q)
         (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
-                    (string `(** ,q)) (number `(** ,(ct/kv/key q)))
+                    (string `(** ,q)) (number `(** ,(ct/kv/str q)))
                     (vector `(*map ,@(coerce q 'list)))
                     (otherwise (error "||lqn: invalid clause: ~a" q))))))
 
 (defun pre/$$ (q &optional (m :+)) (unless q (warn "$$: missing args."))
   (labels
-    ((str- (a b c) `(,a ,(etypecase b (symbol (ct/kv/key b)) (string b)) ,c))
+    ((str- (a b c) `(,a ,(etypecase b (symbol (sdwn (mkstr b))) (string b)) ,c))
      (repack- (o) (subseq `(,@o :_) 0 3))
      (repack-cons (ck k) (ecase (length k) (3 k) (2 `(,ck ,(caadr k) ,(cadadr k)))))
      (unpack- (o &aux (k (unpack-mode o m)) (ck (car k)))
@@ -199,14 +199,10 @@
                                 ,(funcall rec conf* (pre/or-all (car (last d*))))))))))
 (defun compile/txpr (rec conf d) (funcall rec conf `(?mxpr ,d)))
 
-
-
 (defun compile/@ (rec conf d)
   (case (length d)
-    (1 `(@@ (dat) nil ,(funcall rec conf (car d))))                    ; (@ ind)
-    (2 `(@@ ,(car d) nil ,(second d)))            ; (@ o ind)
-    (3 `(@@ ,(car d) ,(third d) ,(second d)))) ; (@ o ind [d])
-  )
+    (1 `(@@ (dat) ,(funcall rec conf (car d))))
+    ((2 3) `(@@ ,@(funcall rec conf d)))))
 
 (defmacro //fxs/qry (conf &body body &aux (meta (gensym "META")))
   `(let ((,meta (make-hash-table :test #'eq)))

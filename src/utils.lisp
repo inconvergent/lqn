@@ -54,13 +54,16 @@
   (if (and (<= (length pref) (length s))
            (string= pref s :end2 (length pref)))
        s d))
-(defun ipref? (s suf &optional d) "ignore case pref?" (pref? (sup s) (sup suf) d))
+(defun ipref? (s suf &optional d)
+  (declare (optimize speed (safety 2)) (string s suf)) "ignore case pref?"
+  (pref? (sup s) (sup suf) d))
 
 (defun suf? (s suf &optional d)
-  (declare (optimize speed (safety 2)) (string s suf))
-  "s if s ends with suf; or d"
-  (pref? (reverse s) (reverse suf) d))
-(defun isuf? (s suf &optional d) "ignore case suf?" (suf? (sup s) (sup suf) d))
+  (declare (optimize speed (safety 2)) (string s suf)) "s if s ends with suf; or d"
+  (if (pref? (reverse s) (reverse suf)) s d))
+(defun isuf? (s suf &optional d)
+  (declare (optimize speed (safety 2)) (string s suf)) "ignore case suf?"
+  (if (pref? (sup (reverse s)) (sup (reverse suf))) s d))
 
 (defun subx? (s sub)
   (declare (optimize speed (safety 2)) (string s sub))
@@ -71,25 +74,26 @@
         if (and (eq sub0 (char s i)) ; this is more efficient
                 (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
         do (return-from subx? i)))
+
 (defun isubx? (s sub) "ignore case subx?" (subx? (sup s) (sup sub)))
 (defun sub? (s sub &optional d) "s if sub is substring of s; or d" (if (subx? s sub) s d))
 (defun isub? (s sub &optional d) "ignore case sub?" (if (isubx? s sub) s d))
 
-(defmacro msym? (s q &optional d)
+(defmacro msym? (a b &optional d)
   "compare symbol a to b. if b is a keword or symbol
 a perfect match is required. if b is a string it performs a substring
 match. If b is an expression, a is compared to the evaluated value of b."
   (awg (s* res)
-   `(let* ((,s* ,s)
+   `(let* ((,s* ,a) ; TODO: this is weird
            (,res (and (symbolp ,s*)
-                      ,(etypecase q
-                          (keyword `(eq ,s* q))
-                          (symbol `(eq ,s* ',q)) ; direct match
-                          (string `(isub? (ct/kv/key ,s*) ,q))
-                          (cons `(equalp (ct/kv/key ,s*) ,q))))))
+                      ,(etypecase b
+                          (keyword `(eq ,s* ,b))
+                          (symbol `(eq ,s* ',b)) ; direct match
+                          (string `(isub? (mkstr ,s*) ,b)) ; sdwn mkstr
+                          (cons `(eq ,s* ,b)))))) ; sdwn mkstr??
       (if ,res ,s* ,d))))
 
-(defun split (s x &key prune &aux (lx (length x)))
+(defun str-split (s x &key prune &aux (lx (length x)))
   (declare (optimize speed) (string s x) (boolean prune))
   "split string at substring. prune removes empty strings"
   (labels ((lst (s) (typecase s (list s) (t (list s))))
@@ -98,11 +102,11 @@ match. If b is an expression, a is compared to the evaluated value of b."
     (let ((res (lst (splt s))))
       (if prune (remove-if (lambda (s) (zerop (length s))) res)
                 res))))
-(defun splt (s x &optional prune) "split s at substrings x to vector."
-  (vec! (split (ct/kv/key s) (ct/kv/key x) :prune prune)))
+(defmacro splt (s x &optional prune) "split s at substrings x to vector."
+  `(vec! (str-split ,(ct/kv/str s) ,(ct/kv/str x) :prune ,prune)))
 
 (defun repl (s from to) (declare (string s from to)) "replace from with to in s"
-  (let ((s (strcat (mapcar (lambda (s) (mkstr s to)) (split s from)))))
+  (let ((s (strcat (mapcar (lambda (s) (mkstr s to)) (str-split s from)))))
     (subseq s 0 (- (length s) (length to)))))
 
 (defun make-adjustable-vector (&key init (type t) (size 128))
@@ -140,8 +144,8 @@ ranges are lists that behave like arguments to *seq."
     (loop for s in seqs collect
       (etypecase s (list (apply #'*seq v s)) (fixnum `(,(*n v s)))))))
 
-(defun $make (&optional kv &aux (res (make-hash-table
-                                       :test (if kv (hash-table-test kv) #'equal))))
+(defun $make (&optional kv
+              &aux (res (make-hash-table :test (if kv (hash-table-test kv) #'equal))))
   "new/soft copy kv."
   (when kv (loop for k being the hash-keys of kv using (hash-value v)
                  do (setf (gethash k res) (gethash k kv))))
@@ -171,20 +175,6 @@ ranges are lists that behave like arguments to *seq."
               do (setf (gethash k res) v))))
   res)
 
-(defun @@ (a d i) "get ind/key from sequence/hash-table."
-  (typecase a (vector (if (< i (length a)) (aref a i) d))
-              (hash-table ($rget a k d))
-              (list (or (nth i a) d))))
-
-(defun @* (a d &rest rest &aux l)
-  "pick these indices/keys from sequence/hash-table into new vector."
-  (labels ((lt (l) (or (nth l a) d))
-           (kv (k) (gethash a k d))
-           (gt (i) (if (< i l) (aref a i) d)))
-    (typecase a (vector (setf l (length a)) (map 'vector #'gt rest))
-                (hash-table (map 'vector #'kv rest))
-                (list (map 'vector #'lt rest)))))
-
 (defmacro join (v &rest s) "join sequence v with s into new string."
   (awg (o n i s* v*)
     `(let* ((,v* ,v) (,n (1- (length ,v))) (,s* ,(if s `(str! ,@s) "")))
@@ -192,12 +182,27 @@ ranges are lists that behave like arguments to *seq."
          (loop for ,o across ,v* for ,i from 0
            do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
 
-(defun $rget (o pp d) "recursively get p from some/path/thing."
+
+(defun $rget (o pp &optional d) "recursively get p from some/path/thing."
   (labels ((rec (o pp) (unless pp (return-from rec (or o d)))
                        (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
                                    (otherwise (return-from rec (or o d))))))
-    (rec o (split pp "/"))))
-(defmacro $ (o k &optional d) "get key k from o" `($rget ,o (ct/kv/key ,k) ,d))
+    (rec o (str-split (ct/kv/str pp) "/"))))
+(defmacro $ (o k &optional d) "get key k from o" `($rget ,o ,(ct/kv/str k) ,d))
+
+(defun @@ (a i &optional d) "get ind/key from sequence/hash-table."
+  (typecase a (vector (if (< i (length a)) (aref a i) d))
+              (hash-table ($rget a i d))
+              (list (or (nth i a) d))))
+
+(defun @* (a d &rest rest &aux l)
+  "pick these indices/keys from sequence/hash-table into new vector."
+  (labels ((lt (l) (or (nth l a) d))
+           (kv (k) ($rget a k d))
+           (gt (i) (if (< i l) (aref a i) d)))
+    (typecase a (vector (setf l (length a)) (map 'vector #'gt rest))
+                (hash-table (map 'vector #'kv rest))
+                (list (map 'vector #'lt rest)))))
 
 (defun >< (o) ; TODO: recursive?
   "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."

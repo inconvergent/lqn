@@ -494,7 +494,7 @@
  ;   [symbol]
  ; 
  ; MSYM? names a macro:
- ;   Lambda-list: (S Q &OPTIONAL D)
+ ;   Lambda-list: (A B &OPTIONAL D)
  ;   Documentation:
  ;     compare symbol a to b. if b is a keword or symbol
  ;     a perfect match is required. if b is a string it performs a substring
@@ -729,9 +729,8 @@
  ; LQN:SPLT
  ;   [symbol]
  ; 
- ; SPLT names a compiled function:
+ ; SPLT names a macro:
  ;   Lambda-list: (S X &OPTIONAL PRUNE)
- ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
  ;     split s at substrings x to vector.
  ;   Source file: /data/x/lqn/src/utils.lisp

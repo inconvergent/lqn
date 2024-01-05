@@ -1,8 +1,35 @@
 (in-package #:lqn-tests)
 
-(plan 8)
+(plan 9)
 
 (subtest "utils"
+
+  (is (lqn:sub? "aabb" "ab") "aabb")
+  (is (lqn:sub? "aabb" "abc") nil)
+  (is (lqn:sub? "AABB" "ab") nil)
+  (is (lqn:isub? "AABB" "ab") "AABB")
+  (is (lqn:isub? "AABB" "abc") nil)
+  (is (lqn:pref? "AABB" "AA") "AABB")
+  (is (lqn:ipref? "AABB" "aa") "AABB")
+
+  (is (lqn:suf? "AABB" "BB") "AABB")
+  (is (lqn:suf? "AABB" "bb") nil)
+  (is (lqn:isuf? "AABB" "bb") "AABB")
+
+  (is (lqn::ct/kv/str "AABB") "AABB")
+  (is (lqn::ct/kv/str :AABB) "aabb")
+  (is (lqn::ct/kv/str 'AABB) 'AABB)
+  (is (lqn::ct/kv/str (+ 1 2)) 3)
+  (is (lqn::ct/kv/str (progn 'abc)) 'abc)
+
+  (is (lqn:msym? 'aa 'aa) 'aa)
+  (is (lqn:msym? 'aa :aa) nil)
+  (is (lqn:msym? 'aabb "ab") 'aabb)
+  (is (lqn:msym? 'aabb (progn "ab")) nil)
+  (is (lqn:msym? 'aabb (progn 'aabb)) 'aabb)
+  (is (lqn:msym? 'AABB (progn 'aabb)) 'aabb)
+  (is (lqn:msym? :AABB (progn :aabb)) :aabb)
+
   (is (lqn::unpack-mode "?@fxfx")    '(:? "fxfx"))
   (is (lqn::unpack-mode '?@fxfx)     '(:? fxfx))
   (is (lqn::unpack-mode '(?@fxfx))   '(:? (fxfx)))
@@ -11,7 +38,8 @@
   (is (lqn::unpack-mode '(fxfx :ss)) '(:+ (fxfx :ss)))
   (is (lqn::unpack-mode "fxfx")      '(:+ "fxfx"))
   (is (lqn::unpack-mode 'fxfx :y)    '(:y fxfx))
-  (is (lqn::unpack-mode 'fxfx :y)    '(:y fxfx)))
+  (is (lqn::unpack-mode 'fxfx :y)    '(:y fxfx))
+  )
 
 (subtest "io"
   (is (lqn:lqnout *test-data-raw*) *test-data-raw* :test #'equalp)
@@ -118,9 +146,60 @@
   (is-str (lqn::jsnstr (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
                                   {a/b}))
           "{\"b\":3}")
-  (is-str (lqn::jsnstr (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}")
-                                  ($_ :a/b)))
-          "3"))
+  (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") ($_ :a/b)) 3)
+  (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (@ :a/b)) 3)
+  (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (@ "a/b")) 3))
+
+(subtest "lqn xpr"
+
+  (is (lqn:qry #((a b xxx) (a b c) (a b (c xxx)))
+               (?txpr (+@msym? _ xxx) (lqn::symb _ :-HIT---)))
+      #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
+  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
+               (?txpr (msym? _ "xxx") (lqn::symb _ :-HIT---)))
+      #((A BBBXXX-HIT--- XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
+  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
+               (?txpr (-@msym? _ "bbb") (msym? _ "xxx") (lqn::symb _ :-HIT---)))
+      #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
+  (is (lqn:qry #((a bbbxxx :xxx) (a b c) (a b (c xxx)))
+               (?txpr (msym? _ :xxx) :hit))
+      #((A BBBXXX :HIT) (A B C) (A B (C XXX))) :test #'equalp)
+  (is (lqn:qry #((a bbbxxx :xxx) (a b c) (a b (c xxx)))
+               (?txpr (msym? _ (progn :xxx)) :hit))
+      #((A BBBXXX :HIT) (A B C) (A B (C XXX))) :test #'equalp)
+  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
+               (?txpr (msym? _ (progn 'xxx)) :hit))
+      #((A BBBXXX :HIT) (A B C) (A B (C :HIT))) :test #'equalp)
+
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (*map (?xpr :a :-@b sup sdwn)))
+      #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (?txpr :a :-@b sup))
+      #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (*map (?xpr :a :-@b sup nil)))
+      #("AAAYYY" NIL NIL NIL NIL "AUIUU" "AAAAA") :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) trim (*map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))
+      #("AAAYYYaaayyy" "abc" "def" "uuu" "sss" "AUIUUauiuu" "AAAAAaaaaa") :test #'equalp)
+
+  (is (lqn:qry " aayy x abc x def x uuu x sss x auu x aa "
+               (splt _ :x) trim (?txpr :a :-@b sup) #((progn #(_))))
+      #(#(#\A #\A #\Y #\Y) #(#\a #\b #\c) #(#\d #\e #\f) #(#\u #\u #\u)
+        #(#\s #\s #\s) #(#\A #\U #\U) #(#\A #\A)) :test #'equalp)
+  (is (lqn:qry " aayy x abc x def x uuu x sss x auu x aa "
+               (splt _ :x) trim (?txpr :a :-@b sup) #(#(_)))
+      #(#(#\A #\A #\Y #\Y) #(#\a #\b #\c) #(#\d #\e #\f) #(#\u #\u #\u)
+        #(#\s #\s #\s) #(#\A #\U #\U) #(#\A #\A)) :test #'equalp)
+  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx "ss")))
+               (?mxpr ((-@msym? _ "bbb") (msym? _ "xxx")
+                       (sym! _ :-HIT---))
+                      ("ss" sup)))
+      #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT--- "SS"))) :test #'equalp)
+  (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
+                        (|| #{ things } (?txpr "Star" "noooooooo!!"))))
+          "[{\"things\":[{\"id\":0,\"name\":\"Chris\",\"extra\":\"extra99\"}]},{\"things\":[{\"id\":10,\"name\":\"Winters\",\"extra\":\"extra1\"},{\"id\":11,\"name\":\"Haii\",\"extra\":\"extra2\"},{\"id\":12,\"name\":\"Klein\"}]},{\"things\":[{\"id\":31,\"name\":\"noooooooo!!\"},{\"id\":32,\"name\":\"Ball\"}]}]"))
 
 (subtest "lqn qry 3"
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 +)) 109)
@@ -138,45 +217,6 @@
       #(#(2 "abk c") #(2 "dkef") #(1 "kkkk1")) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim (*? (isubx? _ :k) (*new _ (par))))
       #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
-  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (*map (?xpr :a :-@b sup sdwn)))
-      #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
-  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (?txpr :a :-@b sup))
-      #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
-  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (*map (?xpr :a :-@b sup nil)))
-      #("AAAYYY" NIL NIL NIL NIL "AUIUU" "AAAAA") :test #'equalp)
-  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (*map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))
-      #("AAAYYYaaayyy" "abc" "def" "uuu" "sss" "AUIUUauiuu" "AAAAAaaaaa") :test #'equalp)
-  (is (lqn:qry #((a b xxx) (a b c) (a b (c xxx)))
-               (?txpr (+@msym? _ xxx) (lqn::symb _ :-HIT---)))
-      #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
-  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
-               (?txpr (msym? _ "xxx") (lqn::symb _ :-HIT---)))
-      #((A BBBXXX-HIT--- XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
-  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
-               (?txpr (-@msym? _ "bbb") (msym? _ "xxx") (lqn::symb _ :-HIT---)))
-      #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---))) :test #'equalp)
-
-  (is (lqn:qry " aayy x abc x def x uuu x sss x auu x aa "
-               (splt _ :x) trim (?txpr :a :-@b sup) #((progn #(_))))
-      #(#(#\A #\A #\Y #\Y) #(#\a #\b #\c) #(#\d #\e #\f) #(#\u #\u #\u)
-        #(#\s #\s #\s) #(#\A #\U #\U) #(#\A #\A)) :test #'equalp)
-  (is (lqn:qry " aayy x abc x def x uuu x sss x auu x aa "
-               (splt _ :x) trim (?txpr :a :-@b sup) #(#(_)))
-      #(#(#\A #\A #\Y #\Y) #(#\a #\b #\c) #(#\d #\e #\f) #(#\u #\u #\u)
-        #(#\s #\s #\s) #(#\A #\U #\U) #(#\A #\A)) :test #'equalp)
-  (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx "ss")))
-               (?mxpr ((-@msym? _ "bbb") (msym? _ "xxx")
-                       (sym! _ :-HIT---))
-                      ("ss" sup)))
-      #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT--- "SS"))) :test #'equalp)
-
-  (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
-                          (|| #{ things } (?txpr "Star" "noooooooo!!"))))
-          "[{\"things\":[{\"id\":0,\"name\":\"Chris\",\"extra\":\"extra99\"}]},{\"things\":[{\"id\":10,\"name\":\"Winters\",\"extra\":\"extra1\"},{\"id\":11,\"name\":\"Haii\",\"extra\":\"extra2\"},{\"id\":12,\"name\":\"Klein\"}]},{\"things\":[{\"id\":31,\"name\":\"noooooooo!!\"},{\"id\":32,\"name\":\"Ball\"}]}]")
   )
 
 (unless (finalize) (error "error in lqn"))

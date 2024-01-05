@@ -45,12 +45,13 @@
 (defun kv (s) "mkstr, upcase, keyword."
   (intern (sup (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
           :keyword))
+(defun ct/kv/str (a)
+  (typecase a (string a) (keyword (sdwn (mkstr a))) (otherwise a)))
 (defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
 (defun psymb (&optional (pkg 'lqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
-(defun ct/kv/key (s) (typecase s (string s) (symbol (sdwn (mkstr s)))
-                                 (number (mkstr s)) (cons `(mkstr ,s))))
+
 
 (defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
 (defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))

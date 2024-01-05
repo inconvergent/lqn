@@ -62,6 +62,8 @@
   (print (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
                   (splt _ :x) trim
                   (?txpr :a :-@b sup)))
+
+  (print (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (@ :a/b)))
    )
 
 (main)

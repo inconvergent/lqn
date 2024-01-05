@@ -7,7 +7,7 @@
   (let ((d (with-output-to-string (*standard-output*)
              (describe sym))))
     (strcat (mapcar (lambda (s) (mkstr " ; " s #\Newline))
-                    (butlast (split d (mkstr #\Newline)))))))
+                    (butlast (str-split d (mkstr #\Newline)))))))
 
 (defun docstrings (sym)
   (strcat (mapcar (lambda (o) (mkstr o #\Newline))
@@ -34,7 +34,7 @@
            #'string-lessp :key #'car)))
 
 (defun -md-sanitize (d)
-  (let ((sp (split d "*")))
+  (let ((sp (str-split d "*")))
     (strcat `(,@(mapcar (lambda (s) (mkstr s "\\*")) (butlast sp)) ,@(last sp)))))
 
 (defmacro ext-symbols? (pkg &optional mode)
