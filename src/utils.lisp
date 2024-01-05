@@ -36,6 +36,8 @@
                           (list (apply #'concatenate 'string s))
                           (vector (apply #'concatenate 'string (coerce s 'list)))))
             rest)))
+(defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
+(defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
 (defun trim (s &optional (chars '(#\Space #\Newline #\Backspace #\Tab #\Linefeed
                                   #\Page #\Return #\Rubout)))
   (declare (string s)) "trim string" (string-trim chars s))
@@ -117,7 +119,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun *seq (v i &optional j) ; TODO: negative indices, tests
   (declare (vector v) (fixnum i)) "(subseq v ,@rest)"
   (subseq v i j))
-(defun *n (v &optional (i 0)) (declare (vector v) (fixnum i)) "get index." (aref v i))
+(defun *ind (v &optional (i 0)) (declare (vector v) (fixnum i)) "get index." (aref v i))
 
 (defun *head (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "first ±n elements"
@@ -134,9 +136,6 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun size? (l &optional d) "length of sequence/number of keys in kv."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
 
-(defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
-(defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
-
 (defun *sel (v &rest seqs) (declare (vector v))
   "new vector with indices or ranges from v.
 ranges are lists that behave like arguments to *seq."
@@ -145,10 +144,10 @@ ranges are lists that behave like arguments to *seq."
       (etypecase s (list (apply #'*seq v s)) (fixnum `(,(*n v s)))))))
 
 (defun $make (&optional kv
-              &aux (res (make-hash-table :test (if kv (hash-table-test kv) #'equal))))
+   &aux (res (make-hash-table :test (if kv (hash-table-test kv) #'equal))))
   "new/soft copy kv."
   (when kv (loop for k being the hash-keys of kv using (hash-value v)
-                 do (setf (gethash k res) (gethash k kv))))
+             do (setf (gethash k res) (gethash k kv))))
   res)
 (defun $nil (kv) "return nil for emtpy hash-tables. otherwise return kv." ; TODO: use kv?
   (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
@@ -160,20 +159,10 @@ ranges are lists that behave like arguments to *seq."
     do (loop for k being the hash-keys of ($make kv)
          using (hash-value v) do (setf (gethash k res) (gethash k kv))))
   res)
-(defun *cat (&rest rest &aux (res (make-adjustable-vector)))
-  "concatenate all vectors in these vectors."
-  (labels ((do-arg (aa) (loop for a across aa
-                              do (loop for b across a do (vex res b)))))
-    (loop for a in rest do (typecase a (vector (do-arg a))
-                                       (otherwise (vex res a)))))
-  res)
-(defun *$cat (&rest rest &aux (res (make-hash-table :test #'equal)))
-  "copy keys from all these kvs into new kv. left to right."
-  (loop for v of-type vector in rest
-    do (loop for kv of-type hash-table across v
-         do (loop for k being the hash-keys of ($make kv) using (hash-value v)
-              do (setf (gethash k res) v))))
-  res)
+(defun *cat (&rest rest) "concatenate sequences in rest to vector"
+  (apply #'concatenate 'vector rest))
+(defun *flatn (a &optional (n 1)) "flatten n times" ; inefficient?
+  (loop repeat n do (setf a (apply #'concatenate 'vector (coerce a 'list)))) a)
 
 (defmacro join (v &rest s) "join sequence v with s into new string."
   (awg (o n i s* v*)
@@ -182,13 +171,12 @@ ranges are lists that behave like arguments to *seq."
          (loop for ,o across ,v* for ,i from 0
            do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
 
-
 (defun $rget (o pp &optional d) "recursively get p from some/path/thing."
-  (labels ((rec (o pp) (unless pp (return-from rec (or o d)))
-                       (typecase o (hash-table (rec (gethash (car pp) o) (cdr pp)))
-                                   (otherwise (return-from rec (or o d))))))
-    (rec o (str-split (ct/kv/str pp) "/"))))
-(defmacro $ (o k &optional d) "get key k from o" `($rget ,o ,(ct/kv/str k) ,d))
+  (labels ((lookup (o pp) (loop for p in pp if (and (hash-table-p o) (gethash p o))
+                            do (setf o (gethash p o))
+                            else do (return-from lookup d))
+                          (or o d)))
+   (lookup o (str-split (ct/kv/str pp) "/"))))
 
 (defun @@ (a i &optional d) "get ind/key from sequence/hash-table."
   (typecase a (vector (if (< i (length a)) (aref a i) d))
