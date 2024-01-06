@@ -35,22 +35,21 @@
 
 (defun compile/$add (rec conf mode lft k v)
   (labels ((rec (x) (funcall rec conf x)))
-    (case mode (:? `(when ,(gk conf :dat)
-                      (setf (gethash ,(ct/path/key k) ,lft) ,(rec v))))
-               (:% (awg (v*) `(let ((,v* ,(rec v)))
-                                (smth? ,v*
-                                  (setf (gethash ,(ct/path/key k) ,lft) ,v*)))))
-               (:+ `(setf (gethash ,(ct/path/key k) ,lft) ,(rec v)))
-               (:- `(remhash ,k ,lft))
-               (otherwise (error "$: unexpected mode: ~a" mode)))))
+    (case mode
+      (:? `(when ,(gk conf :dat) (setf (gethash ,(ct/path/key k) ,lft) ,(rec v))))
+      (:% (awg (v*) `(let ((,v* ,(rec v)))
+                       (smth? ,v* (setf (gethash ,(ct/path/key k) ,lft) ,v*)))))
+      (:+ `(setf (gethash ,(ct/path/key k) ,lft) ,(rec v)))
+      (:- `(remhash ,k ,lft))
+      (otherwise (error "$: expected :?, :%, :+, :- mode, got: ~a" mode)))))
 
 (defun compile/*add (rec conf mode lft v)
   (labels ((rec (x) (funcall rec conf x)))
-    (case mode (:? `(when ,(gk conf :dat) (vex ,lft ,(rec v))))
-               (:% (awg (v*) `(let ((,v* ,(rec v)))
-                                (smth? ,v* (vex ,lft ,v*)))))
-               (:+ `(vex ,lft ,(rec v)))
-               (otherwise (error "*: unexpected mode: ~a" mode)))))
+    (case mode
+      (:? `(when ,(gk conf :dat) (vex ,lft ,(rec v))))
+      (:% (awg (v*) `(let ((,v* ,(rec v))) (smth? ,v* (vex ,lft ,v*)))))
+      (:+ `(vex ,lft ,(rec v)))
+      (otherwise (error "*: expected :?, :%, :+ mode, got: ~a" mode)))))
 
 ; PRE PROCESSORS
 
@@ -183,19 +182,6 @@
                 (vex ,ires ($nil ,kvres)))
            finally (return ,ires))))
 
-(defun compile/** (rec conf d) ; [...] ; filter
-  (awg (i ires itr par)
-    `(loop with ,ires of-type vector = (mav)
-           with ,par of-type vector = (vec! ,(gk conf :dat))
-           for ,itr across ,par for ,i from 0
-           do ,(compile/xpr rec `((:par . ,par) (:dat . ,itr) (:i . ,i) (:itr . ,itr))
-                                `(,@d (vex ,ires ,@(if (get-modes d :%)
-                                                      (get-modes d :%)
-                                                      `(,itr)
-
-                                                    )) nil))
-           finally (return ,ires))))
-
 ; REWRITE WITH XPR OR **?
 (defun compile/*? (rec conf d &aux (cd (car d)) (sd (second d))) ; (*? test expr) ; filter, map
   (unless (< 0 (length d) 3) (error "*?: bad args: ~a" d))
@@ -212,45 +198,52 @@
 (defun get-modes (cd &rest mm)
   (loop for (m expr) in (strip-all cd) if (member m mm :test #'eq) collect expr))
 
-(defun compile/xpr (rec conf d &aux (cd (butlast d 2))) ; (xpr sel .. hit miss)
-  (unless (> (length d) 2) (error "xpr: missing args: ~a" d))
-  (let ((ors (get-modes cd :?))
-        (nots (get-modes cd :-))
-        (ands (get-modes cd :+)))
+(defun compile/** (rec conf d) ; [...] ; filter
+  (awg (i ires itr par dat)
+    `(loop with ,ires of-type vector = (mav)
+           with ,par of-type vector = (vec! ,(gk conf :dat))
+           for ,itr across ,par for ,i from 0
+           do ,(compile/?xpr rec `((:par . ,par) (:dat . ,itr) (:i . ,i) (:itr . ,itr))
+                 `(,@d (vex ,ires ,@(or (get-modes d :%) `(,itr))) nil))
+           finally (return ,ires))))
+
+(defun compile/?xpr (rec conf d &aux (cd )) ; (xpr sel .. hit miss)
+  (labels ((do-last (d n) (mapcar (lambda (d) (funcall rec conf (pre/or-all d))) (last d n)))
+           (build-bool (cd &aux (ands (get-modes cd :+)) (nots (get-modes cd :-)))
+             (funcall rec conf
+               `(and (or ,(car- all? cd) ,@(get-modes cd :?) ,@(and ands `((and ,@ands))))
+                     ,@(when nots `((not (or ,@nots))))))))
     `(//fxs/op/ (,(gk conf :par t) ,(gk conf :i t) ,(gk conf :itr t))
-       (if ,(funcall rec conf
-            `(and (or ,(car- all? cd)
-                    ,@(when ors ors)
-                    ,@(when ands `((and ,@ands))))
-                ,@(when nots `((not (or ,@nots))))))
-         ,@(mapcar (lambda (d) (funcall rec conf (pre/or-all d)))
-                   (last d 2))))))
-(defun compile/mxpr (rec conf d)
+       ,(case (length d) ((0 (error "xpr: missing args")))
+          (1 (build-bool (pre/** d)))
+          (2 `(if ,(build-bool (pre/** (butlast d 1))) ,@(do-last d 1)))
+          (otherwise `(if ,(build-bool (pre/** (butlast d 2))) ,@(do-last d 2)))))))
+(defun compile/?mxpr (rec conf d)
   (awg (f dat)
     `(let ((,dat ,(gk conf :dat)))
        (m/replfx (,dat ,f)
         ,@(loop with conf* = `((:dat . ,f) (:itr . ,dat) (:par . ,dat) ,@conf)
             for d* in d nconc `(,(funcall rec conf* `(?xpr ,@(butlast d*) t nil))
                                 ,(funcall rec conf* (pre/or-all (car (last d*))))))))))
-(defun compile/txpr (rec conf d) (funcall rec conf `(?mxpr ,d)))
+(defun compile/?txpr (rec conf d) (funcall rec conf `(?mxpr ,d)))
 
 (defun proc-qry (conf* q) "compile lqn query"
   (labels
     ((rec (conf d)
        (cond ((all? d) (gk conf :dat)) ((stringp d) d)
          ((vectorp d) (compile/*map #'rec conf (coerce d 'list))) ((atom d) d)
-         ((optrig? :$$    d) (compile/$$   #'rec conf (pre/$$ (cdr d))))
-         ((optrig? :$*    d) (compile/$*   #'rec conf (pre/$$ (cdr d))))
-         ((optrig? :*$    d) (compile/*$   #'rec conf (pre/$$ (cdr d))))
-         ((optrig? :**    d) (compile/**   #'rec conf (pre/** (cdr d))))
-         ((optrig? :||    d) (compile/||   #'rec conf (pre/|| (cdr d))))
-         ((optrig? :@     d) (compile/@    #'rec conf (cdr d)))
-         ((optrig? :*?    d) (compile/*?   #'rec conf (cdr d)))
-         ((optrig? :*fld  d) (compile/*fld #'rec conf (cdr d)))
-         ((optrig? :*map  d) (compile/*map #'rec conf (cdr d)))
-         ((optrig? :?mxpr d) (compile/mxpr #'rec conf (cdr d)))
-         ((optrig? :?txpr d) (compile/txpr #'rec conf (cdr d)))
-         ((optrig? :?xpr  d) (compile/xpr  #'rec conf `(,@(pre/** (cdr (butlast d 2))) ,@(last d 2))))
+         ((optrig? :$$    d) (compile/$$    #'rec conf (pre/$$ (cdr d))))
+         ((optrig? :$*    d) (compile/$*    #'rec conf (pre/$$ (cdr d))))
+         ((optrig? :*$    d) (compile/*$    #'rec conf (pre/$$ (cdr d))))
+         ((optrig? :**    d) (compile/**    #'rec conf (pre/** (cdr d))))
+         ((optrig? :||    d) (compile/||    #'rec conf (pre/|| (cdr d))))
+         ((optrig? :@     d) (compile/@     #'rec conf (cdr d)))
+         ((optrig? :*?    d) (compile/*?    #'rec conf (cdr d)))
+         ((optrig? :*fld  d) (compile/*fld  #'rec conf (cdr d)))
+         ((optrig? :*map  d) (compile/*map  #'rec conf (cdr d)))
+         ((optrig? :?mxpr d) (compile/?mxpr #'rec conf (cdr d)))
+         ((optrig? :?txpr d) (compile/?txpr #'rec conf (cdr d)))
+         ((optrig? :?xpr  d) (compile/?xpr  #'rec conf (cdr d)))
          ((car- lqnfx? d) `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
          ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
          (t (error "lqn: unexpected clause: ~a" d)))))

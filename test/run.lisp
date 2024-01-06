@@ -9,17 +9,17 @@
                             f)))
     (loop with fails = 0
           for f in (rel files)
-          do (format t "~&~%starting tests in: ~a~%" (lqn:mkstr f))
+          do (format t "~&~%starting tests in: ~a~%" (lqn:str! f))
              (unless (prove:run f :reporter :fiveam)
                      (incf fails))
-             (format t "~&done: ~a~%" (lqn:mkstr f))
+             (format t "~&done: ~a~%" (lqn:str! f))
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
   (-run-tests '(#P"test/test-lqn.lisp")))
 
 (defun strip (s)
-  (lqn::repl s (lqn:mkstr #\Newline) ""))
+  (lqn::repl s (lqn:str! #\Newline) ""))
 (defmacro is-str (a b) `(is (strip ,a) (strip ,b)))
 
 (defvar *test-data-fn* (lqn::internal-path-string "test/sample.json"))

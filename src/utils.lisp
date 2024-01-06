@@ -77,9 +77,12 @@
                 (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
         do (return-from subx? i)))
 
-(defun isubx? (s sub) "ignore case subx?" (subx? (sup s) (sup sub)))
-(defun sub? (s sub &optional d) "s if sub is substring of s; or d" (if (subx? s sub) s d))
-(defun isub? (s sub &optional d) "ignore case sub?" (if (isubx? s sub) s d))
+(defun isubx? (s sub) "ignore case subx?"
+  (declare (string s sub)) (subx? (sup s) (sup sub)))
+(defun sub? (s sub &optional d) "s if sub is substring of s; or d"
+  (declare (string s sub)) (if (subx? s sub) s d))
+(defun isub? (s sub &optional d) "ignore case sub?"
+  (declare (string s sub)) (if (isubx? s sub) s d))
 
 (defmacro msym? (a b &optional d)
   "compare symbol a to b. if b is a keword or symbol
@@ -114,17 +117,17 @@ match. If b is an expression, a is compared to the evaluated value of b."
                                      :element-type type :adjustable t)
            (make-array size :fill-pointer 0 :element-type type :adjustable t)))
 
-(defun *seq (v i &optional j) ; TODO: negative indices, tests
+(defun seq* (v i &optional j) ; TODO: negative indices, tests
   (declare (vector v) (fixnum i)) "(subseq v ,@rest)"
   (subseq v i j))
-(defun *ind (v &optional (i 0)) (declare (vector v) (fixnum i)) "get index." (aref v i))
+(defun ind* (v &optional (i 0)) (declare (vector v) (fixnum i)) "get index." (aref v i))
 
-(defun *head (s &optional (n 10) &aux (l (length s)))
+(defun head* (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "first ±n elements"
   (cond ((zerop n) #()) ((plusp n) (subseq s 0 (min n l)))
                         (t         (subseq s 0 (max 0 (+ l n))))))
 
-(defun *tail (s &optional (n 10) &aux (l (length s)))
+(defun tail* (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "last ±n elements"
   (cond ((zerop n) #()) ((plusp n) (subseq s (max 0 (- l n)) l))
                         (t         (subseq s (max 0 (+ l n)) l) )))
@@ -134,12 +137,12 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun size? (l &optional d) "length of sequence/number of keys in kv."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
 
-(defun *sel (v &rest seqs) (declare (vector v))
+(defun sel* (v &rest seqs) (declare (vector v))
   "new vector with indices or ranges from v.
-ranges are lists that behave like arguments to *seq."
+ranges are lists that behave like arguments to seq*."
   (apply #'concatenate 'vector
     (loop for s in seqs collect
-      (etypecase s (list (apply #'*seq v s)) (fixnum `(,(*n v s)))))))
+      (etypecase s (list (apply #'seq* v s)) (fixnum `(,(*n v s)))))))
 
 (defun $make (&optional kv
    &aux (res (make-hash-table :test (if kv (hash-table-test kv) #'equal))))
@@ -151,15 +154,15 @@ ranges are lists that behave like arguments to *seq."
   (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
                (otherwise kv)))
 
-(defun $cat (&rest rest &aux (res (make-hash-table :test #'equal)))
+(defun cat$ (&rest rest &aux (res (make-hash-table :test #'equal)))
   "add all keys from all hash tables in rest. left to right."
   (loop for kv of-type hash-table in rest
     do (loop for k being the hash-keys of ($make kv)
          using (hash-value v) do (setf (gethash k res) (gethash k kv))))
   res)
-(defun *cat (&rest rest) "concatenate sequences in rest to vector"
+(defun cat* (&rest rest) "concatenate sequences in rest to vector"
   (apply #'concatenate 'vector rest))
-(defun *flatn (a &optional (n 1)) "flatten n times" ; inefficient?
+(defun flatn* (a &optional (n 1)) "flatten n times" ; inefficient?
   (loop repeat n do (setf a (apply #'concatenate 'vector (coerce a 'list)))) a)
 
 (defmacro join (v &rest s) "join sequence v with s into new string."
@@ -190,7 +193,7 @@ ranges are lists that behave like arguments to *seq."
                 (hash-table (map 'vector #'kv rest))
                 (list (map 'vector #'lt rest)))))
 
-(defun >< (o) ; TODO: recursive?
+(defun compct (o) ; TODO: recursive?
   "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
   (typecase o (sequence (remove-if-not (lambda (o*) (smth? o* t)) o))
               (hash-table (loop with keys = (list)
@@ -223,8 +226,8 @@ ranges are lists that behave like arguments to *seq."
                  (*n v (+ k ,i))))))
 (make-ind-getters 9)
 
-(defmacro *new (&rest d) "new vector with these elements" `(vector ,@d))
-(defmacro $new (&rest d) "new kv/hash-table from these (k v) pairs"
+(defmacro new* (&rest d) "new vector with these elements" `(vector ,@d))
+(defmacro new$ (&rest d) "new kv/hash-table from these (k v) pairs"
   (awg (kv) `(let ((,kv ($make)))
                ,@(loop for (kk expr) in (group 2 d)
                        collect `(setf (gethash ,(ct/kv/str kk) ,kv) ,expr))
