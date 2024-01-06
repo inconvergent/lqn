@@ -2,9 +2,9 @@
 
 (defvar *qmodes* '(:+ :? :- :%))
 (defvar *fxns* '(:fmt :out :jsnstr :hld :ghv
-                 :fn :fi :ctx :num :cnt :par :itr :>< :?? :@@ :@* :smth?
-                 :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*ind :*sel :*seq
-                 :*new :$new :*cat :$cat :*head :*tail :size :size? :*flatn
+                 :fn :fi :ctx :num :cnt :par :itr :compct :?? :@@ :@* :smth?
+                 :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :ind* :sel* :seq*
+                 :new* :new$ :cat* :cat$ :head* :tail* :size :size? :flatn*
                  :sup :sdwn :mkstr :repl :strcat :splt
                  :msym? :is? :kv? :sym? :sym! :trim
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
@@ -52,7 +52,6 @@
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 
-
 (defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
 (defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))
 (defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
@@ -89,21 +88,17 @@
 ; COERCE TO TYPE
 (defun sym! (&rest rest) "stringify, make symbol" (apply #'symb rest))
 (defun str! (&rest rest) "coerce to string"
-  (apply #'mkstr (loop for s in rest collect
-                   (typecase s (string s) (symbol (sdwn s)) (t (mkstr s))))))
-(defun vec! (v &optional (d `#(,v)))
-  "coerce v to vector. if v is not a vector, list, string it returns d"
+  (apply #'mkstr (loop for s in rest collect (typecase s (string s) (symbol (sdwn s)) (t (mkstr s))))))
+(defun vec! (v &optional (d `#(,v))) "coerce v to vector. if v is not a vector, list, string it returns d"
   (etypecase v (vector v) (list (coerce v 'vector)) (t d)))
 
-(defmacro smth? (v &body body)
-  (declare (symbol v))  ; TODO: recursive strip with ext function
-  "do body if v is not nil, empty sequence, or empty hash-table"
+(defmacro smth? (v &body body) ; TODO: recursive strip with ext function
+  (declare (symbol v)) "do body if v is not nil, empty sequence, or empty hash-table"
   (awg (v*)
-    `(let ((,v* ,v))
-    (typecase ,v* (sequence (when (> (length ,v) 0) (progn ,@body)))
-                  (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
-                  (otherwise (when ,v (progn ,@body)))))))
-(defun is? (k &optional d)
-  "k if k is not nil, empty sequence, or empty hash-table; or d"
+  `(let ((,v* ,v))
+     (typecase ,v* (sequence (when (> (length ,v) 0) (progn ,@body)))
+                   (hash-table (when (> (hash-table-count ,v) 0) (progn ,@body)))
+                   (otherwise (when ,v (progn ,@body)))))))
+(defun is? (k &optional d) "k if k is not nil, empty sequence, or empty hash-table; or d"
   (if (smth? k t) k d))
 

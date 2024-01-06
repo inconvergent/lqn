@@ -1,175 +1,3 @@
-#### LQN:$CAT
-
-```
- ; LQN:$CAT
- ;   [symbol]
- ; 
- ; $CAT names a compiled function:
- ;   Lambda-list: (&REST REST &AUX
- ;                 (RES (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
- ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
- ;   Documentation:
- ;     add all keys from all hash tables in rest. left to right.
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:$NEW
-
-```
- ; LQN:$NEW
- ;   [symbol]
- ; 
- ; $NEW names a macro:
- ;   Lambda-list: (&REST D)
- ;   Documentation:
- ;     new kv/hash-table from these (k v) pairs
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:\*CAT
-
-```
- ; LQN:*CAT
- ;   [symbol]
- ; 
- ; *CAT names a compiled function:
- ;   Lambda-list: (&REST REST)
- ;   Derived type: (FUNCTION *
- ;                  (VALUES
- ;                   (OR LIST (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
- ;   Documentation:
- ;     concatenate sequences in rest to vector
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:\*FLATN
-
-```
- ; LQN:*FLATN
- ;   [symbol]
- ; 
- ; *FLATN names a compiled function:
- ;   Lambda-list: (A &OPTIONAL (N 1))
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     flatten n times
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:\*HEAD
-
-```
- ; LQN:*HEAD
- ;   [symbol]
- ; 
- ; *HEAD names a compiled function:
- ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
- ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
- ;                  (VALUES
- ;                   (OR LIST (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
- ;   Documentation:
- ;     first ±n elements
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:\*IND
-
-```
- ; LQN:*IND
- ;   [symbol]
- ; 
- ; *IND names a compiled function:
- ;   Lambda-list: (V &OPTIONAL (I 0))
- ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM)
- ;                  (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     get index.
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:\*NEW
-
-```
- ; LQN:*NEW
- ;   [symbol]
- ; 
- ; *NEW names a macro:
- ;   Lambda-list: (&REST D)
- ;   Documentation:
- ;     new vector with these elements
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:\*SEL
-
-```
- ; LQN:*SEL
- ;   [symbol]
- ; 
- ; *SEL names a compiled function:
- ;   Lambda-list: (V &REST SEQS)
- ;   Derived type: (FUNCTION (VECTOR &REST T)
- ;                  (VALUES
- ;                   (OR LIST (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
- ;   Documentation:
- ;     new vector with indices or ranges from v.
- ;     ranges are lists that behave like arguments to *seq.
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:\*SEQ
-
-```
- ; LQN:*SEQ
- ;   [symbol]
- ; 
- ; *SEQ names a compiled function:
- ;   Lambda-list: (V I &OPTIONAL J)
- ;   Derived type: (FUNCTION (VECTOR FIXNUM &OPTIONAL T)
- ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
- ;   Documentation:
- ;     (subseq v ,@rest)
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:\*TAIL
-
-```
- ; LQN:*TAIL
- ;   [symbol]
- ; 
- ; *TAIL names a compiled function:
- ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
- ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
- ;                  (VALUES
- ;                   (OR LIST (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
- ;   Documentation:
- ;     last ±n elements
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
-#### LQN:><
-
-```
- ; LQN:><
- ;   [symbol]
- ; 
- ; >< names a compiled function:
- ;   Lambda-list: (O)
- ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
 #### LQN:??
 
 ```
@@ -212,6 +40,53 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:CAT$
+
+```
+ ; LQN:CAT$
+ ;   [symbol]
+ ; 
+ ; CAT$ names a compiled function:
+ ;   Lambda-list: (&REST REST &AUX
+ ;                 (RES (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
+ ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
+ ;   Documentation:
+ ;     add all keys from all hash tables in rest. left to right.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:CAT\*
+
+```
+ ; LQN:CAT*
+ ;   [symbol]
+ ; 
+ ; CAT* names a compiled function:
+ ;   Lambda-list: (&REST REST)
+ ;   Derived type: (FUNCTION *
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     concatenate sequences in rest to vector
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:COMPCT
+
+```
+ ; LQN:COMPCT
+ ;   [symbol]
+ ; 
+ ; COMPCT names a compiled function:
+ ;   Lambda-list: (O)
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
 #### LQN:D?
 
 ```
@@ -224,6 +99,20 @@
  ;   Documentation:
  ;     describe symbol.
  ;   Source file: /data/x/lqn/src/init.lisp
+```
+
+#### LQN:FLATN\*
+
+```
+ ; LQN:FLATN*
+ ;   [symbol]
+ ; 
+ ; FLATN* names a compiled function:
+ ;   Lambda-list: (A &OPTIONAL (N 1))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     flatten n times
+ ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:FLT!?
@@ -264,6 +153,39 @@
  ;   Lambda-list: (S &REST REST)
  ;   Documentation:
  ;     format to string.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:HEAD\*
+
+```
+ ; LQN:HEAD*
+ ;   [symbol]
+ ; 
+ ; HEAD* names a compiled function:
+ ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     first ±n elements
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:IND\*
+
+```
+ ; LQN:IND*
+ ;   [symbol]
+ ; 
+ ; IND* names a compiled function:
+ ;   Lambda-list: (V &OPTIONAL (I 0))
+ ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM)
+ ;                  (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     get index.
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -331,7 +253,8 @@
  ; 
  ; ISUB? names a compiled function:
  ;   Lambda-list: (S SUB &OPTIONAL D)
- ;   Derived type: (FUNCTION (T T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     ignore case sub?
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -345,7 +268,7 @@
  ; 
  ; ISUBX? names a compiled function:
  ;   Lambda-list: (S SUB)
- ;   Derived type: (FUNCTION (T T) *)
+ ;   Derived type: (FUNCTION (STRING STRING) *)
  ;   Documentation:
  ;     ignore case subx?
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -492,20 +415,6 @@
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
-#### LQN:MKSTR
-
-```
- ; LQN:MKSTR
- ;   [symbol]
- ; 
- ; MKSTR names a compiled function:
- ;   Lambda-list: (&REST ARGS)
- ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
- ;   Documentation:
- ;     coerce all arguments to a string.
- ;   Source file: /data/x/lqn/src/init.lisp
-```
-
 #### LQN:MSYM?
 
 ```
@@ -518,6 +427,32 @@
  ;     compare symbol a to b. if b is a keword or symbol
  ;     a perfect match is required. if b is a string it performs a substring
  ;     match. If b is an expression, a is compared to the evaluated value of b.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:NEW$
+
+```
+ ; LQN:NEW$
+ ;   [symbol]
+ ; 
+ ; NEW$ names a macro:
+ ;   Lambda-list: (&REST D)
+ ;   Documentation:
+ ;     new kv/hash-table from these (k v) pairs
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:NEW\*
+
+```
+ ; LQN:NEW*
+ ;   [symbol]
+ ; 
+ ; NEW* names a macro:
+ ;   Lambda-list: (&REST D)
+ ;   Documentation:
+ ;     new vector with these elements
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -676,6 +611,25 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:SEL\*
+
+```
+ ; LQN:SEL*
+ ;   [symbol]
+ ; 
+ ; SEL* names a compiled function:
+ ;   Lambda-list: (V &REST SEQS)
+ ;   Derived type: (FUNCTION (VECTOR &REST T)
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     new vector with indices or ranges from v.
+ ;     ranges are lists that behave like arguments to seq*.
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
 #### LQN:SEQ!?
 
 ```
@@ -688,6 +642,21 @@
  ;   Documentation:
  ;     s as seq if it can be parsed; or d
  ;   Source file: /data/x/lqn/src/init.lisp
+```
+
+#### LQN:SEQ\*
+
+```
+ ; LQN:SEQ*
+ ;   [symbol]
+ ; 
+ ; SEQ* names a compiled function:
+ ;   Lambda-list: (V I &OPTIONAL J)
+ ;   Derived type: (FUNCTION (VECTOR FIXNUM &OPTIONAL T)
+ ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
+ ;   Documentation:
+ ;     (subseq v ,@rest)
+ ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:SEQ?
@@ -810,7 +779,8 @@
  ; 
  ; SUB? names a compiled function:
  ;   Lambda-list: (S SUB &OPTIONAL D)
- ;   Derived type: (FUNCTION (T T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if sub is substring of s; or d
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -900,6 +870,24 @@
  ;   Documentation:
  ;     mkstr, make symbol.
  ;   Source file: /data/x/lqn/src/init.lisp
+```
+
+#### LQN:TAIL\*
+
+```
+ ; LQN:TAIL*
+ ;   [symbol]
+ ; 
+ ; TAIL* names a compiled function:
+ ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     last ±n elements
+ ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:TRIM
