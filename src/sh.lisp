@@ -33,6 +33,8 @@
               (etypecase res (vector (loop for s across res if s do (prln s)))
                              (list (loop for s in res if s do (prln s)))
                              (hash-table (prln res)) ; coerce to jsn line?
-                             (string (prln res)) (number (prln res))))
+                             (symbol (prln (sdwn (str! res))))
+                             (number (prln (str! res)))
+                             (string (prln res))))
             (error (e) (exit-with-msg 70 "failed to serialize TXT.~%~a" (mkstr e)))))))
 

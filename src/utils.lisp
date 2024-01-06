@@ -14,13 +14,9 @@
     (typecase o (symbol (unpack- o)) (string (unpack- o)) (cons (unpack-cons o))
       (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
-; (defmacro ?? (fx arg &rest args)
-;   (declare (symbol fx)) "run (fx arg ..) only if arg is not nil."
-;   (awg (arg*) `(let ((,arg* ,arg)) (when ,arg* (,fx ,arg* ,@args)))))
-
-(defmacro ?? (a &rest expr)
-   "run (fx arg ..) only if arg is not nil."
-  (awg (arg*) `(let ((,a ,a)) (when ,a (progn ,@expr)))))
+(defmacro ?? (a expr &optional res) (declare (symbol a)) ; todo: dont require sym?
+  "evaluate expr only iff a is not nil. returns the result of expr or res; or nil."
+  `(and ,a ,expr ,@(if res `(,res))))
 
 (defun gk (conf k &optional silent &aux (hit (cdr (assoc k conf))))
   (declare (list conf) (keyword k)) "get k from config"
@@ -89,15 +85,13 @@
   "compare symbol a to b. if b is a keword or symbol
 a perfect match is required. if b is a string it performs a substring
 match. If b is an expression, a is compared to the evaluated value of b."
-  (awg (s* res)
-   `(let* ((,s* ,a) ; TODO: this is weird
-           (,res (and (symbolp ,s*)
-                      ,(etypecase b
-                          (keyword `(eq ,s* ,b))
-                          (symbol `(eq ,s* ',b)) ; direct match
-                          (string `(isub? (mkstr ,s*) ,b)) ; sdwn mkstr
-                          (cons `(eq ,s* ,b)))))) ; sdwn mkstr??
-      (if ,res ,s* ,d))))
+  (awg (a* res)
+  `(let* ((,a* ,a)
+          (,res (and (symbolp ,a*) ,(etypecase b
+                                      (keyword `(eq ,a* ,b)) (symbol `(eq ,a* ',b)) ; direct match
+                                      (string `(isub? (mkstr ,a*) ,b))
+                                      (cons `(eq ,a* ,b))))))
+     (if ,res ,a* ,d))))
 
 (defun str-split (s x &key prune &aux (lx (length x)))
   (declare (optimize speed) (string s x) (boolean prune))
@@ -198,10 +192,10 @@ ranges are lists that behave like arguments to *seq."
 
 (defun >< (o) ; TODO: recursive?
   "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
-  (typecase o (sequence (remove-if-not (lambda (o*) (something? o* t)) o))
+  (typecase o (sequence (remove-if-not (lambda (o*) (smth? o* t)) o))
               (hash-table (loop with keys = (list)
                                 for k being the hash-keys of o using (hash-value v)
-                                do (unless (something? v t) (push k keys))
+                                do (unless (smth? v t) (push k keys))
                                 finally (loop for k in keys do (remhash k o)))
                           o)
               (otherwise o)))
@@ -221,4 +215,18 @@ ranges are lists that behave like arguments to *seq."
             ((consp ,f*) (cons (,rec (car ,f*)) (,rec (cdr ,f*))))
             (t ,f*))))
       (,rec ,d)))))
+
+(defmacro make-ind-getters (n)
+  `(progn ,@(loop for i from 0 to n collect
+              `(defun ,(symb :* i) (v &optional (k 0))
+                 (declare (sequence v) (fixnum k))
+                 (*n v (+ k ,i))))))
+(make-ind-getters 9)
+
+(defmacro *new (&rest d) "new vector with these elements" `(vector ,@d))
+(defmacro $new (&rest d) "new kv/hash-table from these (k v) pairs"
+  (awg (kv) `(let ((,kv ($make)))
+               ,@(loop for (kk expr) in (group 2 d)
+                       collect `(setf (gethash ,(ct/kv/str kk) ,kv) ,expr))
+               ,kv)))
 

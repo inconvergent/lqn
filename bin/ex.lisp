@@ -60,7 +60,8 @@
 
   (print (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
                   (splt _ :x) trim
-                  (?txpr :a :-@b sup))))
+                  (?txpr :a :-@b sup)))
+  )
 
 (main)
 

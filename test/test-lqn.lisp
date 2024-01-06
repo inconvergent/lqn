@@ -122,10 +122,7 @@
                      (>< #{(:%@things
                              (>< #{(:%@extra (?? _ (sup _)))}))})))
 "[{\"things\":[{\"extra\":\"EXTRA99\"}]},{\"things\":[{\"extra\":\"EXTRA1\"},{\"extra\":\"EXTRA2\"}]}]")
-  (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
-                     #{(:%@things
-                            (>< #{(:%@extra (?? _ (sup _)))}))}))
-"[{\"things\":[{\"extra\":\"EXTRA99\"}]},{\"things\":[{\"extra\":\"EXTRA1\"},{\"extra\":\"EXTRA2\"}]},null]")
+  (is (lqn:jsnqryf *test-data-fn* #[(:%@index (?? _ (= _ 0) _))]) #(0) :test #'equalp)
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| #[:things] (*flatn _) #[:id])))
           "[0,10,11,12,31,32]")
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| #(#[:things]) (*flatn _ 2) #[:id])))
@@ -213,6 +210,7 @@
       #(((:ID . 0) (:EXTRA . "extra99")) ((:ID . 10) (:EXTRA . "extra1"))
         ((:ID . 11) (:EXTRA . "extra2")) ((:ID . 12) (:EXTRA))
         ((:ID . 31) (:EXTRA)) ((:ID . 32) (:EXTRA))) :test #'equalp)
+
   (is (lqn:lqnout (lqn:jsnqryf *test-data-fn*
                     (|| #[:things] (*flatn _) #(($cat {:id} {:?@extra})))))
       #(((:ID . 0) (:EXTRA . "extra99")) ((:ID . 10) (:EXTRA . "extra1"))
@@ -229,9 +227,15 @@
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 3 acc (- _ acc))) 96)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (*head _ 7) (*tail _ 3)) #(5 6 7) :test #'equalp)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (*head _ -6) (*tail _ -6)) #(1 2 3 4) :test #'equalp)
-  (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) (*? (isubx? _ :k) (*new _ (trim (par)))))
+  (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x)
+               (*? (isubx? _ :k) (*new _ (trim (itr))))
+              ; [(isubx? _ :k) (%@*new _ (trim (itr)))]
+               )
       #(#(2 "abk c") #(2 "dkef") #(1 "kkkk1")) :test #'equalp)
-  (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim (*? (isubx? _ :k) (*new _ (par))))
+  (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim
+               (*? (isubx? _ :k) (*new _ (itr)))
+              ; [(isubx? _ :k) (%@*new _ (par))]
+               )
       #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
   )
 

@@ -23,7 +23,7 @@
  ;   Lambda-list: (&REST D)
  ;   Documentation:
  ;     new kv/hash-table from these (k v) pairs
- ;   Source file: /data/x/lqn/src/qry.lisp
+ ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:\*CAT
@@ -101,7 +101,7 @@
  ;   Lambda-list: (&REST D)
  ;   Documentation:
  ;     new vector with these elements
- ;   Source file: /data/x/lqn/src/qry.lisp
+ ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:\*SEL
@@ -177,9 +177,9 @@
  ;   [symbol]
  ; 
  ; ?? names a macro:
- ;   Lambda-list: (FX ARG &REST ARGS)
+ ;   Lambda-list: (A EXPR &OPTIONAL RES)
  ;   Documentation:
- ;     run (fx arg ..) only if arg is not nil.
+ ;     evaluate expr only iff a is not nil. returns the result of expr or res; or nil.
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 

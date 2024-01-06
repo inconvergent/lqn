@@ -42,7 +42,7 @@ Examples:
         do (sh/out :ldn opts
              (lqn/execute-query opts (lqn/load-with-err f) (lqn/parse-query q)
                :conf `((:mode . :lqn) (:fn . ,f)
-                       (:fi . ,i) (:ctx . :file))
+                       (:fi . ,i) (:entry . :file))
                :db (verbose? opts)))))
 
 ; (defun lqn/run-pipe (opts q)
@@ -51,7 +51,7 @@ Examples:
 ;   (labels ((one-line (v) (if (> (length v) 1) v (aref v 0))))
 ;    (sh/out :txt opts
 ;     (lqn/execute-query opts (one-line (read-stream-lines-as-vector)) (lqn/parse-query q)
-;       :conf `((:mode . :lqn) (:ctx . :pipe))
+;       :conf `((:mode . :lqn) (:entry . :pipe))
 ;       :db (verbose? opts)))))
 
 (defun lqn/run-from-shell (args)

@@ -2,7 +2,7 @@
 
 (defvar *qmodes* '(:+ :? :- :%))
 (defvar *fxns* '(:fmt :out :jsnstr :hld :ghv
-                 :fn :fi :ctx :num :cnt :par :>< :?? :@@ :@*
+                 :fn :fi :ctx :num :cnt :par :itr :>< :?? :@@ :@* :smth?
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :*ind :*sel :*seq
                  :*new :$new :*cat :$cat :*head :*tail :size :size? :*flatn
                  :sup :sdwn :mkstr :repl :strcat :splt
@@ -95,7 +95,7 @@
   "coerce v to vector. if v is not a vector, list, string it returns d"
   (etypecase v (vector v) (list (coerce v 'vector)) (t d)))
 
-(defmacro something? (v &body body)
+(defmacro smth? (v &body body)
   (declare (symbol v))  ; TODO: recursive strip with ext function
   "do body if v is not nil, empty sequence, or empty hash-table"
   (awg (v*)
@@ -105,5 +105,5 @@
                   (otherwise (when ,v (progn ,@body)))))))
 (defun is? (k &optional d)
   "k if k is not nil, empty sequence, or empty hash-table; or d"
-  (if (something? k t) k d))
+  (if (smth? k t) k d))
 

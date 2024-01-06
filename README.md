@@ -74,7 +74,7 @@ internal Lisp data structure.
 
 The following operators have special behaviour. You can also write generic CL
 code, anywhere you can use an operator. Including the functions further down.
-Note that you can use `_`/`(dat)` to refer to the current data object.
+Note that you can use `_` to refer to the current data object.
 
 ### Strings and :keywords
 In operators, and many functions, `:keywords` can be used to represent
@@ -216,22 +216,25 @@ represents a default value if key/index is missing, or if a functon fails.
 
 ### Global Query Context Fxs
 Defined in the query scope:
- - `(ctx)`: returns `:pipe` if input is from `*standard-input*`; otherwise `:file`.
- - `(fi [k=0])`: index of the current file; start at `k`.
- - `(fn)`: name of the current file; or `nil`.
+ - `(entry)`: returns `:pipe` if input is from `*standard-input*`; otherwise `:file`.
+ - `(fi [k=0])`: counts files from `k`.
+ - `(fn)`: name of the current file.
  - `(hld k v)`: hold this value at this key in a global key value store.
  - `(ghv k [d])`: get the value of this key; or `d`.
 
 ### Operator Context Fxs
 Defined in all operators.
- - `_` or `(dat)`: the current data object.
- - `(par)`: the parent data object.
- - `(num)`: length of the `vector` being iterated.
- - `(cnt [k=0])`: counts from `k` over the `vector` being iterated.
+ - `_`: the current data object.
+ - `(itr)`: the object currently being iterated in enclosing selector.
+ - `(par)`: the object containing `(itr)`.
+ - `(psize)`: number of items in `(par)`.
+ - `(isize)`: number of items in `(itr)`.
+ - `(cnt [k=0])`: counts from `k` in the enclosing selector.
 
 ### Generic Fxs
 General utilities:
- - `(?? fx a ..)`: execute `(fx a ..)` only if `a` is not `nil`; otherwise `nil`.
+ - `(?? a expr [res=expr])`: execute `expr` only if `a` is not `nil`. if expr
+   is not nil it returns `expr` or `res`; otherwise `nil`.
  - `(fmt f ..)`: format `f` as `string` with these (`format`) args.
  - `(fmt s)`: get printed representation of `s`.
  - `(out f ..)`: format `f` to `*standard-output*` with these (`format`) args. returns `nil`.
@@ -243,29 +246,30 @@ General utilities:
 
 ### KV / Strings / Vectors / Sequences Fxs
 Access values in objects:
- - `(@* a d i ..)`: pick these indices/keys from `sequence`/`kv` into new `vector`.
+ - `(@* o d i ..)`: pick these indices/keys from `sequence`/`kv` into new `vector`.
 
 Size of objects:
  - `(size? o [d])`: length of `sequence` or number of keys in `kv`
 
 Condense objects:
- - `(>< a)`: Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
+ - `(>< o)`: Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
 
 Access values in `kvs`:
  - `($cat ..)`: add all keys from these `kvs` to a new `kv`. left to right.
  - `($new :k1 expr1 ..)`: new `kv` with these keys and expressions.
 
 Primarily for sequences (`string`, `vector`, `list`):
- - `(*cat a ..)`: concatenate these sequences to a `vector`.
- - `(*ind v i)`: get this index from `sequence`. TOOD: rename this
  - `(*new ..)`: new `vector` with these elements.
+ - `(*ind s i)`: get this index from `sequence`.
  - `(*sel ..)`: get new `vector` with these `*inds` or `*seq`s from `sequence`.
  - `(*seq v i [j])`: get range `i ..` or `i .. (1- j)` from `sequence`.
  - `(*head s [n=10])`: first `n` items of `sequence`.
  - `(*tail s [n=10])`: last `n` items of `sequence`.
- - `(*flatn a n)`: flatten sequence n times into a vector.
+ - `(*cat s ..)`: concatenate these `sequences` to a `vector`.
+ - `(*flatn s n)`: flatten `sequence` `n` times into a `vector`.
 
-Primarlily for string searching. `[i]` means case insensitive: TOOD: stringify kv args?
+TOOD: stringify kv args?
+Primarily for `string` searching. `[i]` means case insensitive:
  - `([i]pref? s pref [d])`: `s` if `pref` is a prefix of `s`; or `d`.
  - `([i]sub? s sub [d])`: `s` if `sub` is a substring of `s`; or `d`.
  - `([i]subx? s sub)`: index where `sub` starts in `s`.
@@ -293,8 +297,8 @@ possible; otherwise they return the optional second argument: `int!?`, `flt!?`,
 
 ### Type Coercion Fxs
  - `(str! s ..)`: coerce everything to a `string`.
- - `(vec! v)`: coerce `sequence` to `vector`; or return `(*new v)`
- - `(sym! s ..)`: stringify, make `symbol`
+ - `(vec! a)`: coerce `sequence` to `vector`; or return `(*new a)`
+ - `(sym! a ..)`: stringify, make `symbol`
 
 ## Install
 

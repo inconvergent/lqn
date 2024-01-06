@@ -47,14 +47,14 @@ Examples:
         do (sh/out :json opts
              (jqn/execute-query opts (jqn/loadf-with-err f) (jqn/parse-query q)
                :conf `((:mode . :jqn) (:fn . ,f)
-                       (:fi . ,i) (:ctx . :file))
+                       (:fi . ,i) (:entry . :file))
                :db (verbose? opts)))))
 
 (defun jqn/run-pipe (opts q)
   (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
   (sh/out :json opts
     (jqn/execute-query opts (jqn/parse-pipe-json) (jqn/parse-query q)
-      :conf `((:mode . :jqn) (:ctx . :pipe))
+      :conf `((:mode . :jqn) (:entry . :pipe))
       :db (verbose? opts))))
 
 (defun jqn/run-from-shell (args)

@@ -52,7 +52,7 @@ Examples:
         do (sh/out :txt opts
              (tqn/execute-query opts (tqn/load-with-err f) (tqn/parse-query q)
                :conf `((:mode . :tqn) (:fn . ,f)
-                       (:fi . ,i) (:ctx . :file))
+                       (:fi . ,i) (:entry . :file))
                :db (verbose? opts)))))
 
 (defun tqn/run-pipe (opts q)
@@ -61,7 +61,7 @@ Examples:
   (labels ((one-line (v) (if (> (length v) 1) v (aref v 0))))
    (sh/out :txt opts
     (tqn/execute-query opts (one-line (tqn/read-from-pipe)) (tqn/parse-query q)
-      :conf `((:mode . :tqn) (:ctx . :pipe))
+      :conf `((:mode . :tqn) (:entry . :pipe))
       :db (verbose? opts)))))
 
 (defun tqn/run-from-shell (args)
