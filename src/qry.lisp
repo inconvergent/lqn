@@ -17,20 +17,24 @@
 (defun ct/path/key (pp) (first (last (str-split pp "/"))))
 (defmacro $add+ (lft k v &optional d) (declare (symbol lft)) "do (setf lft (or v default))"
   `(setf (gethash ,(ct/path/key k) ,lft) (or ,v ,d)))
+
 (defmacro $add? (lft k v) (declare (symbol lft)) "do (setf lft v) if value of key is not nil"
   `(when ($rget (dat) ,k) (setf (gethash ,(ct/path/key k) ,lft) ,v)))
+
 (defmacro $add% (lft k v) (declare (symbol lft)) "do (setf lft v) if v is not nil"
   (awg (v*) `(let ((,v* ,v)) (something? ,v* (setf (gethash (ct/path/key ,k) ,lft) ,v*)))))
+
 (defmacro $del (lft k v) (declare (ignore v) (symbol lft)) "delete key" `(remhash ,k ,lft))
 
 (defmacro *add+ (lft k v &optional d) (declare (ignore k) (symbol lft)) "do (vex lft (or v d))"
   `(vex ,lft (or ,v ,d)))
+
 (defmacro *add? (lft k v) (declare (symbol lft)) "do (vex lft v) if (gethash k dat) is not nil"
   `(when ($rget (dat) ,k) (vex ,lft ,v)))
+
 (defmacro *add% (lft k v) (declare (ignore k) (symbol lft)) "do (vex lft v) if v is not nil or empty"
   (awg (v*) `(let ((,v* ,v)) (something? ,v* (vex ,lft ,v*)))))
 
-(defun dat/key (conf kk)  `((:dat . ($rget (dat) ,kk)) ,@conf))
 (defun dat/new (conf dat) `((:dat . ,dat) ,@conf))
 (defun $add (m) (declare (keyword m)) (ecase m (:+ '$add+) (:? '$add?) (:% '$add%) (:- '$del)))
 (defun *add (m) (declare (keyword m)) (ecase m (:+ '*add+) (:? '*add?) (:% '*add%) (:- 'noop)))
@@ -44,7 +48,7 @@
 
 (defun pre/or-all (d)
   (etypecase d (boolean d) (cons d) (keyword d) (sequence d)
-    (symbol (if (all? d) :_ `(,d _)))))
+    (symbol (if (all? d) :_ `(,d :_)))))
 
 (defun when-equal (a b) (when (equal a b) a))
 (defun pre/xpr-sel (ty k) (declare (symbol k))
@@ -129,35 +133,41 @@
         (otherwise (error "*fld: bad args: ~a" d))))))
 
 (defun compile/$$ (rec conf d) ; {...} ; sel
-  (awg (kres dat)
+  (awg (kres dat dat*)
     `(let* ((,dat ,(gk conf :dat))
             (,kres ,(if (car- all? d) `($make ,dat) `($make))))
        (//fxs/op/ (,dat)
          ,@(loop for (m kk expr) in (strip-all d) collect
-             `(,($add m) ,kres ,kk ,(funcall rec (dat/key conf kk) expr))))
+             `(let ((,dat* ($rget (dat) ,kk)))
+                (declare (ignorable ,dat*))
+               (,($add m) ,kres ,kk ,(funcall rec (dat/new conf dat*) expr)))))
        ($nil ,kres))))
 
 (defun compile/$* (rec conf d) ; #[...] ; sel
-  (awg (i ires dat vv)
+  (awg (i ires dat dat* vv)
     `(loop with ,ires of-type vector = (mav)
            with ,vv of-type vector = (vec! ,(gk conf :dat))
            for ,dat across (vec! ,vv) for ,i from 0
            do (//fxs/op/ (,vv ,dat ,i)
                 ,(when (car- all? d) `(*add+ ,ires nil ,dat))
                 ,@(loop for (m kk expr) in (strip-all d) collect
-                    `(,(*add m) ,ires ,kk ,(funcall rec (dat/key conf kk) expr))))
+                    `(let ((,dat* ($rget (dat) ,kk) ))
+                      (declare (ignorable ,dat*))
+                      (,(*add m) ,ires ,kk ,(funcall rec (dat/new conf dat*) expr)))))
+
            finally (return ,ires))))
 
 (defun compile/*$ (rec conf d) ; #{...} ; sel
-  (awg (i ires kv dat vv)
+  (awg (i ires kv dat dat* vv)
     `(loop with ,ires of-type vector = (mav)
            with ,vv of-type vector = (vec! ,(gk conf :dat))
            for ,i from 0 for ,dat of-type hash-table across (vec! ,vv)
            for ,kv of-type hash-table = ,(if (car- all? d) `($make ,dat) `($make))
            do (//fxs/op/ (,vv ,dat ,i)
                 ,@(loop for (m kk expr) in (strip-all d)
-                        for comp-expr = (funcall rec (dat/key conf kk) expr)
-                        collect `(,($add m) ,kv ,kk ,comp-expr))
+                        collect `(let ((,dat* ($rget (dat) ,kk)))
+                                   (declare (ignorable ,dat*))
+                                  (,($add m) ,kv ,kk ,(funcall rec (dat/new conf dat*) expr))))
                 (vex ,ires ($nil ,kv)))
            finally (return ,ires))))
 

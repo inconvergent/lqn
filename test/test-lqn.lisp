@@ -54,29 +54,19 @@
       (lqn:sdwn (lqn::jsnstr *test-data-2-raw*))))
 
 (subtest "lqn qry identities"
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _))
-      (lqn::jsnstr (lqn:jsnqryf *test-data-fn* ($* _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _))
-      (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*$ _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _))
-      (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (** _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _))
-      (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*map _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* _))
-      (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* ($$ _)))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* ($* _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*$ _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (** _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*map _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* ($$ _)))))
 
 (subtest "lqn qry 1"
-  (is (lqn::pre/$$ '(:ccc :ddd "IIUJ" "%@UU" :?@aa :?@bb ("cc" (progn _))
-                    (:+ "ABC" (print _)) (:% "ABC" _) (:kkk "ABC" _)))
-      '((:+ "ccc" :_) (:+ "ddd" :_) (:+ "IIUJ" :_) (:% "UU" :_) (:? "aa" :_)
-       (:? "bb" :_) (:+ "cc" (PROGN _)) (:+ "ABC" (PRINT _)) (:% "ABC" _)
-       (:+ "kkk" "ABC")))
-  (is (lqn::pre/** '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _))
-                    (% "ABC" (print _)) (:% "ABC")))
-     '((:? (WHEN (CCC :_) :_)) (:? (AND (LQN:STR? :_) (LQN:ISUB? :_ "ddd")))
-       (:? (AND (LQN:STR? :_) (LQN:SUB? :_ "IIUJ")))
-       (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "UU"))) (:? (WHEN (AA :_) :_))
-       (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
+  (is (lqn::pre/$$ '(:ccc :ddd "IIUJ" "%@UU" :?@aa :?@bb ("cc" (progn _)) (:+ "ABC" (print _)) (:% "ABC" _) (:kkk "ABC" _)))
+      '((:+ "ccc" :_) (:+ "ddd" :_) (:+ "IIUJ" :_) (:% "UU" :_) (:? "aa" :_) (:? "bb" :_)
+        (:+ "cc" (PROGN _)) (:+ "ABC" (PRINT _)) (:% "ABC" _) (:+ "kkk" "ABC")))
+  (is (lqn::pre/** '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _)) (% "ABC" (print _)) (:% "ABC")))
+     '((:? (WHEN (CCC :_) :_)) (:? (AND (LQN:STR? :_) (LQN:ISUB? :_ "ddd"))) (:? (AND (LQN:STR? :_) (LQN:SUB? :_ "IIUJ")))
+       (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "UU"))) (:? (WHEN (AA :_) :_)) (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
        (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "ABC")))))
 
   (is (lqn:lqnout (lqn:jsnqryf *test-data-fn* (|| #{:_id (:things #[:name :?@extra])})))
@@ -89,9 +79,7 @@
         ((:_ID . "65679d23fe33bc4c240675c0") (:THINGS . #("extra1" "extra2")))
         ((:_ID . "65679d235b4143d2932ea17a") (:THINGS . #()))) :test #'equalp)
 
-  (is (lqn:lqnout (lqn:jsnqryf *test-data-fn*
-        (*$  :_id (:+@things (*$ :name :id))
-                  (:+@msg (sdwn _)))))
+  (is (lqn:lqnout (lqn:jsnqryf *test-data-fn* (*$  :_id (:+@things (*$ :name :id)) (:+@msg (sdwn _)))))
       #(((:_ID . "65679d23d38d711eaf999e89")
          (:THINGS . #(((:NAME . "Chris") (:ID . 0)))) (:MSG . "this is a message"))
         ((:_ID . "65679d23fe33bc4c240675c0")
@@ -100,8 +88,7 @@
          (:MSG . "hello, undefined! you have 1 unread messages."))
         ((:_ID . "65679d235b4143d2932ea17a")
          (:THINGS . #(((:NAME . "Star") (:ID . 31)) ((:NAME . "Ball") (:ID . 32))))
-         (:MSG . "hello, undefined! you have 5 unread messages.")))
-         :test #'equalp)
+         (:MSG . "hello, undefined! you have 5 unread messages."))) :test #'equalp)
 
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
                           ($*  :_id (:+@things ($* :name :id)) (:+@msg (sdwn _)))))
@@ -109,12 +96,10 @@
 
   (is (lqn:lqnout (lqn:jsnqryf *test-data-fn* (*$ :things)))
       #(((:THINGS . #(((:ID . 0) (:NAME . "Chris") (:EXTRA . "extra99")))))
-        ((:THINGS
-          . #(((:ID . 10) (:NAME . "Winters") (:EXTRA . "extra1"))
-              ((:ID . 11) (:NAME . "Haii") (:EXTRA . "extra2"))
-              ((:ID . 12) (:NAME . "Klein")))))
-        ((:THINGS . #(((:ID . 31) (:NAME . "Star")) ((:ID . 32) (:NAME . "Ball"))))))
-      :test #'equalp)
+        ((:THINGS . #(((:ID . 10) (:NAME . "Winters") (:EXTRA . "extra1"))
+                      ((:ID . 11) (:NAME . "Haii") (:EXTRA . "extra2"))
+                      ((:ID . 12) (:NAME . "Klein")))))
+        ((:THINGS . #(((:ID . 31) (:NAME . "Star")) ((:ID . 32) (:NAME . "Ball")))))) :test #'equalp)
 
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _))
           "[{\"_id\":\"65679d23d38d711eaf999e89\",\"index\":0,\"things\":[{\"id\":0,\"name\":\"Chris\",\"extra\":\"extra99\"}],\"msg\":\"this is a message\",\"fave\":\"strawberry\"},{\"_id\":\"65679d23fe33bc4c240675c0\",\"index\":1,\"things\":[{\"id\":10,\"name\":\"Winters\",\"extra\":\"extra1\"},{\"id\":11,\"name\":\"Haii\",\"extra\":\"extra2\"},{\"id\":12,\"name\":\"Klein\"}],\"msg\":\"Hello, undefined! You have 1 unread messages.\",\"fave\":\"strawberry\"},{\"_id\":\"65679d235b4143d2932ea17a\",\"things\":[{\"id\":31,\"name\":\"Star\"},{\"id\":32,\"name\":\"Ball\"}],\"msg\":\"Hello, undefined! You have 5 unread messages.\",\"fave\":\"blueberry\"}]"))
@@ -135,11 +120,11 @@
 (subtest "lqn condense, >< <> || $_"
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
                      (>< #{(:%@things
-                             (>< #{(:%@extra (?? sup _))}))})))
+                             (>< #{(:%@extra (?? _ (sup _)))}))})))
 "[{\"things\":[{\"extra\":\"EXTRA99\"}]},{\"things\":[{\"extra\":\"EXTRA1\"},{\"extra\":\"EXTRA2\"}]}]")
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
                      #{(:%@things
-                            (>< #{(:%@extra (?? sup _))}))}))
+                            (>< #{(:%@extra (?? _ (sup _)))}))}))
 "[{\"things\":[{\"extra\":\"EXTRA99\"}]},{\"things\":[{\"extra\":\"EXTRA1\"},{\"extra\":\"EXTRA2\"}]},null]")
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| #[:things] (*flatn _) #[:id])))
           "[0,10,11,12,31,32]")
@@ -236,10 +221,8 @@
 
 (subtest "lqn qry 3"
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 +)) 109)
-  (is (lqn:lqnout
-        (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*map ($new :v _ :n (cnt)))))
-      #(((:V . 1) (:N . 0)) ((:V . 1) (:N . 1))
-        ((:V . 7) (:N . 2)) ((:V . 100) (:N . 3))) :test #'equalp)
+  (is (lqn:lqnout (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*map ($new :v _ :n (cnt)))))
+      #(((:V . 1) (:N . 0)) ((:V . 1) (:N . 1)) ((:V . 7) (:N . 2)) ((:V . 100) (:N . 3))) :test #'equalp)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 (+ _))) 109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 1000 +)) 1109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- acc _))) -109)

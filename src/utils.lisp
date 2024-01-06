@@ -14,9 +14,13 @@
     (typecase o (symbol (unpack- o)) (string (unpack- o)) (cons (unpack-cons o))
       (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
-(defmacro ?? (fx arg &rest args)
-  (declare (symbol fx)) "run (fx arg ..) only if arg is not nil."
-  (awg (arg*) `(let ((,arg* ,arg)) (when ,arg* (,fx ,arg* ,@args)))))
+; (defmacro ?? (fx arg &rest args)
+;   (declare (symbol fx)) "run (fx arg ..) only if arg is not nil."
+;   (awg (arg*) `(let ((,arg* ,arg)) (when ,arg* (,fx ,arg* ,@args)))))
+
+(defmacro ?? (a &rest expr)
+   "run (fx arg ..) only if arg is not nil."
+  (awg (arg*) `(let ((,a ,a)) (when ,a (progn ,@expr)))))
 
 (defun gk (conf k &optional silent &aux (hit (cdr (assoc k conf))))
   (declare (list conf) (keyword k)) "get k from config"
