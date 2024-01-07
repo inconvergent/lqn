@@ -18,6 +18,9 @@
   (with-open-file (in fn)
     (loop for l = (read in nil nil) while l do (vex res l)))
   res)
+(defun read-stream-as-data-vector (s &aux (res (make-adjustable-vector)))
+  (loop for l = (read s nil nil) while l do (vex res l))
+  res)
 
 (defun jsnloads (&optional (s *standard-input*))
   "parse json from stream; or *standard-input*"

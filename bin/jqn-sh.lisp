@@ -46,8 +46,7 @@ Examples:
   (loop for f in files for i from 0
         do (sh/out :json opts
              (jqn/execute-query opts (jqn/loadf-with-err f) (jqn/parse-query q)
-               :conf `((:mode . :jqn) (:fn . ,f)
-                       (:fi . ,i) (:entry . :file))
+               :conf `((:mode . :jqn) (:fn . ,f) (:fi . ,i) (:entry . :file))
                :db (verbose? opts)))))
 
 (defun jqn/run-pipe (opts q)

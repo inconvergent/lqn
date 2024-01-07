@@ -51,18 +51,17 @@ Examples:
   (loop for f in files for i from 0
         do (sh/out :txt opts
              (tqn/execute-query opts (tqn/load-with-err f) (tqn/parse-query q)
-               :conf `((:mode . :tqn) (:fn . ,f)
-                       (:fi . ,i) (:entry . :file))
+               :conf `((:mode . :tqn) (:fn . ,f) (:fi . ,i) (:entry . :file))
                :db (verbose? opts)))))
 
 (defun tqn/run-pipe (opts q)
   (when (help? opts) (exit-with-msg 0 *ex*))
   (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *ex*))
-  (labels ((one-line (v) (if (> (length v) 1) v (aref v 0))))
-   (sh/out :txt opts
-    (tqn/execute-query opts (one-line (tqn/read-from-pipe)) (tqn/parse-query q)
-      :conf `((:mode . :tqn) (:entry . :pipe))
-      :db (verbose? opts)))))
+  (labels ((one? (v) (if (> (length v) 1) v (aref v 0))))
+    (sh/out :txt opts
+      (tqn/execute-query opts (one? (tqn/read-from-pipe)) (tqn/parse-query q)
+        :conf `((:mode . :tqn) (:entry . :pipe))
+        :db (verbose? opts)))))
 
 (defun tqn/run-from-shell (args)
   (multiple-value-bind (opts args) (split-opts-args args)

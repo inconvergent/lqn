@@ -26,6 +26,9 @@ Examples:
   (handler-case (qryl dat q :conf conf :db db)
     (error (e) (exit-with-msg 50 "lqn: failed to execute qry:~%~a" e))))
 
+(defun lqn/read-from-pipe ()
+  (handler-case (read-stream-as-data-vector *standard-input*)
+    (error (e) (exit-with-msg 30 "lqn: failed to read from pipe: ~a" e))))
 (defun lqn/load-with-err (f)
   (handler-case (read-file-as-data-vector f)
     (error (e) (exit-with-msg 30 "lqn: failed to read txt file: ~a~%~a" f e))))
@@ -41,26 +44,23 @@ Examples:
   (loop for f in files for i from 0
         do (sh/out :ldn opts
              (lqn/execute-query opts (lqn/load-with-err f) (lqn/parse-query q)
-               :conf `((:mode . :lqn) (:fn . ,f)
-                       (:fi . ,i) (:entry . :file))
+               :conf `((:mode . :lqn) (:fn . ,f) (:fi . ,i) (:entry . :file))
                :db (verbose? opts)))))
 
-; (defun lqn/run-pipe (opts q)
-;   (when (help? opts) (exit-with-msg 0 *ex*))
-;   (unless q (exit-with-msg 1 "lqn: missing query.~%~a~&" *ex*))
-;   (labels ((one-line (v) (if (> (length v) 1) v (aref v 0))))
-;    (sh/out :txt opts
-;     (lqn/execute-query opts (one-line (read-stream-lines-as-vector)) (lqn/parse-query q)
-;       :conf `((:mode . :lqn) (:entry . :pipe))
-;       :db (verbose? opts)))))
+(defun lqn/run-pipe (opts q)
+  (when (help? opts) (exit-with-msg 0 *ex*))
+  (unless q (exit-with-msg 1 "lqn: missing query.~%~a~&" *ex*))
+  (labels ((one? (v) (if (> (length v) 1) v (aref v 0))))
+    (sh/out :ldn opts
+      (lqn/execute-query opts (one? (lqn/read-from-pipe)) (lqn/parse-query q)
+        :conf `((:mode . :lqn) (:entry . :pipe))
+        :db (verbose? opts)))))
 
 (defun lqn/run-from-shell (args)
   (multiple-value-bind (opts args) (split-opts-args args)
     (cond ((interactive-stream-p *standard-input*)
            (lqn/run-files opts (car args) (cdr args)))
-          (t (error "lqn: pipe not implemented")
-             ; (lqn/run-pipe opts (car args))
-             ))))
+          (t (lqn/run-pipe opts (car args))))))
 
 (lqn/run-from-shell (cdr (cmd-args)))
 
