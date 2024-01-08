@@ -20,6 +20,8 @@ Options:
 
 Examples:
 
+  lqn  (msym? _ in-package) (*new (fn) _) ...
+
 " (lqn:v?)))
 
 (defun lqn/execute-query (opts dat q &key conf db)

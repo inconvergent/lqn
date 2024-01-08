@@ -90,10 +90,10 @@ a perfect match is required. if b is a string it performs a substring
 match. If b is an expression, a is compared to the evaluated value of b."
   (awg (a* res)
   `(let* ((,a* ,a)
-          (,res (and (symbolp ,a*) ,(etypecase b
-                                      (keyword `(eq ,a* ,b)) (symbol `(eq ,a* ',b)) ; direct match
-                                      (string `(isub? (mkstr ,a*) ,b))
-                                      (cons `(eq ,a* ,b))))))
+          (,res (and (symbolp ,a*)
+                     ,(etypecase b (keyword `(eq ,a* ,b)) (symbol `(eq ,a* ',b)) ; direct match
+                                   (string `(isub? (mkstr ,a*) ,b))
+                                   (cons `(eq ,a* ,b))))))
      (if ,res ,a* ,d))))
 
 (defun str-split (s x &key prune &aux (lx (length x)))
@@ -142,7 +142,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
 ranges are lists that behave like arguments to seq*."
   (apply #'concatenate 'vector
     (loop for s in seqs collect
-      (etypecase s (list (apply #'seq* v s)) (fixnum `(,(*n v s)))))))
+      (etypecase s (list (apply #'seq* v s)) (fixnum `(,(ind* v s)))))))
 
 (defun $make (&optional kv
    &aux (res (make-hash-table :test (if kv (hash-table-test kv) #'equal))))
@@ -164,6 +164,17 @@ ranges are lists that behave like arguments to seq*."
   (apply #'concatenate 'vector rest))
 (defun flatn* (a &optional (n 1)) "flatten n times" ; inefficient?
   (loop repeat n do (setf a (apply #'concatenate 'vector (coerce a 'list)))) a)
+
+(defun flatall* (x &optional (str nil))
+  (labels ((rec (x acc)
+             (cond ((null x) acc)
+                   ((and str (stringp x)) (cons x acc))
+                   ((vectorp x) (if (> (length x) 0)
+                                    (rec (aref x 0) (rec (subseq x 1) acc))
+                                    acc))
+                   ((atom x) (cons x acc))
+                   (t (rec (car x) (rec (cdr x) acc))))))
+    (coerce (rec x nil) 'vector)))
 
 (defmacro join (v &rest s) "join sequence v with s into new string."
   (awg (o n i s* v*)
@@ -223,7 +234,7 @@ ranges are lists that behave like arguments to seq*."
   `(progn ,@(loop for i from 0 to n collect
               `(defun ,(symb :* i) (v &optional (k 0))
                  (declare (sequence v) (fixnum k))
-                 (*n v (+ k ,i))))))
+                 (ind* v (+ k ,i))))))
 (make-ind-getters 9)
 
 (defmacro new* (&rest d) "new vector with these elements" `(vector ,@d))

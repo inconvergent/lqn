@@ -1,13 +1,15 @@
 (in-package :lqn)
 
 (defvar *qmodes* '(:+ :? :- :%))
-(defvar *fxns* '(:fmt :out :jsnstr :hld :ghv
-                 :fn :fi :ctx :num :cnt :par :itr :compct :?? :@@ :@* :smth?
+(defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv
+                 :fmt :out :jsnstr
+                 :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth?
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :ind* :sel* :seq*
                  :new* :new$ :cat* :cat$ :head* :tail* :size :size? :flatn*
+                 :pnum :inum :cnt
+                 :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :sup :sdwn :mkstr :repl :strcat :splt
                  :msym? :is? :kv? :sym? :sym! :trim
-                 :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :num!? :num? :flt!? :flt? :int!? :int?
                  :lst? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?))
 (defun cmd-args ()
@@ -21,8 +23,10 @@
   #+abcl (ext:quit:status status) #+allegro (excl:exit status :quiet t)
   #+gcl (common-lisp-user::bye status) #+ecl (ext:quit status))
 
+(defmacro pretty-json (v) `(lqn:out (lqn:jsnstr ,v :indent t)))
 (defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil." nil)
 (defmacro lit (a) `(progn ,a))
+(defmacro qt (a) `(progn ',a))
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s)))) syms) ,@body))
 
@@ -51,6 +55,7 @@
 (defun psymb (&optional (pkg 'lqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
+(defun lst (&rest rest) (apply #'list rest))
 
 (defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
 (defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))

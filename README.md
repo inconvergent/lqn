@@ -13,19 +13,80 @@ echo '{\"_id\": 1}' | jqn [options] <qry>
 ```
 Here is a full example:
 ```bash
-echo '[ { "_id": "65679", "msg": "HAI!",
-          "things": [ { "id": 10, "name": "Win", "extra": "ex1" },
-                      { "id": 12, "name": "Kle" } ] },
+  echo '
+       [{ "_id": "65679", "msg": "HAI!",
+          "things": [{ "id": 10, "name": "Win", "extra": "ex1" },
+                     { "id": 12, "name": "Kle" }] },
         { "_id": "6AABB", "msg": "NIH!",
-          "things": [ { "id": 32, "name": "Bal" },
-                      { "id": 31, "name": "Sta", "extra": null} ] } ]' |\
-  jqn '#{:_id (:things #[:name :?@extra]) (:msg (sup _))}'
+          "things": [{ "id": 32, "name": "Bal" },
+                     { "id": 31, "name": "Sta", "extra": null}] }]' |\
+    jqn '#{:_id (:things #[:name :?@extra]) (:msg (sup _))}'
+## which returns (something like):
+#>     [{ "_id": "65679", "msg": "HAI!",
+#>        "things": ["Win", "ex1", "Hai", "ex2", "Kle"] },
+#>      { "_id": "CAABB", "msg": "NIH!",
+#>        "things": ["Sta", "Bal"] }]
 ```
-which returns (something like):
-```json
-[ { "_id": "65679", "msg": "HAI!", "things": [ "Win", "ex1", "Hai", "ex2", "Kle" ] },
-  { "_id": "CAABB", "msg": "NIH!", "things": [ "Sta", "Bal" ] } ]
+
+## TQN Example (TXT)
+
+`tqn` is a mode for reading lines of text into a `vector` (JSON array). `tqn`
+has slightly different default behaviour to `jqn`. Notably, it ignores
+`nil` in the output. `tqn` defaults to printing the `vector` as rows, but `-j`
+will output to JSON instead. `-t` does the oposite for `jqn`.
+
+```bash
+## split string and sum as integers:
+  echo '1 x 1 x 7 x 100' |\
+   tqn '(splt _ :x) int!? (*fld 0 +)'
+#> 109
+
+## split string, trim, search and replace:
+  echo 'abk c x dkef x ttuuxx x ttxx33' | \
+   tqn '(splt _ :x) trim
+        (?txpr +@str!? :+@tt :+@uu
+               (str! _ :-hit))'
+#> abk c
+#> dkef
+#> ttuu-hit
+#> tt
+#> 33
 ```
+
+## LQN Example (LDN)
+
+```bash
+find small items, insert symbol, flatten
+  echo '#(1 2 3 4 5 6 7 8)' |\
+   lqn '#((?txpr (< _ 3) (new* :xx _))) (flatall* _ t)'
+#> #(:XX 1 :XX 2 3 4 5 6 7 8)
+```
+
+
+## Lisp Example
+Using the `lqn` compiler in lisp looks like this.
+```lisp
+(lqn:pretty-json
+  (lqn:qry #("1 x 1 x 7 x 100" "3 x 8 x 30")
+    #((splt _ :x) int!? ; for each row, split and parse as int
+      ($new :num (num)  ; new nested dict for each row
+            :items #(($new :v _ :i (cnt)))))))
+;; [{ "num": 4,
+;;    "items": [ { "v": 1, "i": 0 }, { "v": 1, "i": 1 },
+;;               { "v": 7, "i": 2 }, { "v": 100, "i": 3 } ]},
+;;  { "num": 3,
+;;    "items": [ { "v": 3, "i": 0 }, { "v": 8, "i": 1 },
+;;               { "v": 30, "i": 2 } ] }]
+```
+See [bin/ex.lisp](bin/ex.lisp) for more examples.
+
+## Terminal Options
+
+Command line options:
+  - `-v` show compiled query.
+  - `-j, -t, -l` use `json`, `txt` or `ldn` output format.
+  - `-m` minify JSON output [indented is default].
+  - `-h` show help.
 
 ## Why??
 
@@ -44,41 +105,6 @@ about similar approaches to making small DSLs in these blog posts:
 
 There are several parts of the design that i'm not entirely happy with, so
 things might change in the future.
-
-## Terminal Options
-
-Command line options:
-  - `-v` show compiled query.
-  - `-j, -t, -l` use `json`, `txt` or `ldn` output format.
-  - `-m` minify JSON output [indented is default].
-  - `-h` show help.
-
-## TQN Example (TXT)
-
-`tqn` is a mode for reading lines of text into a `vector` (JSON array). `tqn`
-has slightly different default behaviour to `jqn`. Notably, it ignores
-`nil` in the output. `tqn` defaults to printing the `vector` as rows, but `-j`
-will output to JSON instead. `-t` does the oposite for `jqn`.
-
-```bash
-# split string and sum as integers:
-echo '1 x 1 x 7 x 100' |\
-  tqn '(splt _ :x) int!? (*fld 0 +)'
-
-# split string and make a new JSON structure:
-echo '1 x 1 x 7 x 100' |\
-  tqn -j '(splt _ :x) int!? #((new$ :v _))'
-```
-
-## Lisp Example
-Using the `lqn` compiler in lisp looks like this.
-```lisp
-(lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
-          (?txpr (-@msym? _ "bbb") (+@msym? _ "xxx")
-                 (sym! _ :-HIT---)))
-; #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
-```
-See [bin/ex.lisp](bin/ex.lisp) for more examples.
 
 ## Object Representation
 
@@ -197,8 +223,8 @@ We use `{}` in the examples but all `kv selectors` have the same behaviour.
 
 #### EXPR Selectors
 `expr selectors` serve a similar purpose as `kv Selectors`, but they are used
-with `[]`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a little
-differently:
+with `[]`, `?tsrch`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a
+little differently:
   - `+`: if there are multiple selectors with `+` mode, requires ALL
     of them to be `t`.
   - `?`: if there are any clauses with `?` mode, it will select items where
@@ -232,13 +258,19 @@ Perform operation on when pattern or condition is satisfied:
     selectors`.  Evaluate `hit-expr` if not `nil`; else evaluate `miss-expr`.
     `_` is the matching item.
 
-Recursively traverse a structure of `sequences` and `kvs` and perform
-operations when patterns or conditions are satisfied:
+Recursively traverse a structure of `sequences` and `kvs` and return
+a new value for each match:
   - `(?txpr sel .. tx-expr)`: recursively traverse current data object and replace
     matches with `tx-expr`. `tx-expr` can be a function name or expression. Also
-    traverses vectors and `kv` values (not keys).
+    traverses vectors and `kv` values.
   - `(?mxpr (sel .. tx-expr) .. (sel .. tx-expr))`: one or more matches and
     transforms.  Performs the transform of the first match only.
+
+### Search Operator - `?srch`
+Iterate a datastructure (as if with `?txpr`) and collect the matches in a new
+`vector`:
+  - `(?srch sel)`: collect `_` whenever the selector matches.
+  - `(?srch sel .. expr)`: collect `expr` whenever the selector matches.
 
 ## Query Utility Functions
 
@@ -253,6 +285,9 @@ Defined in the query scope:
  - `(fn)`: name of the current file.
  - `(hld k v)`: hold this value at this key in a key value store.
  - `(ghv k [d])`: get the value of this key; or `d`.
+ - `(nope [d])`: stop execution, return `d`.
+ - `(err [msg])`: raise `error` with `msg`.
+ - `(wrn [msg])`: raise `warn` with `msg`.
 
 ### Operator Context Fxs
 Defined in all operators:
@@ -277,6 +312,7 @@ General utilities:
  - `(msym? a b)`: compare symbol `a` to `b`. if `b` is a keword or symbol
    a perfect match is required. if `b` is a string it performs a substring
    match. If `b` is an expression, `a` is compared to the evaluated value of `b`.
+ - `(noop ..)`: do nothing, return `nil`.
 
 ### KV / Strings / Vectors / Sequences
 For all `sequences` and `kvs`:

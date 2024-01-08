@@ -387,13 +387,13 @@
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
-#### LQN:LQNOUT
+#### LQN:LDNOUT
 
 ```
- ; LQN:LQNOUT
+ ; LQN:LDNOUT
  ;   [symbol]
  ; 
- ; LQNOUT names a compiled function:
+ ; LDNOUT names a compiled function:
  ;   Lambda-list: (O)
  ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
