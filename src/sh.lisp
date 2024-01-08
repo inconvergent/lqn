@@ -26,15 +26,18 @@
   (ecase (format? opts d)
     (:json (handler-case (jsnout res :indent (indent? opts))
              (error (e) (exit-with-msg 70 "failed to serialize JSON.~%~a" (mkstr e)))))
-    (:ldn (handler-case (format t "~&~s~&" (lqnout res))
-            (error (e) (exit-with-msg 70 "failed to serialize LQN.~%~a" (mkstr e)))))
+    (:ldn (handler-case (format t "~&~s~&" (ldnout res))
+            (error (e) (exit-with-msg 70 "failed to serialize LDN.~%~a" (mkstr e)))))
     (:txt (handler-case
-            (labels ((prln (s) (format t "~&~a~%" s)))
-              (etypecase res (vector (loop for s across res if s do (prln s)))
-                             (list (loop for s in res if s do (prln s)))
-                             (hash-table (prln res)) ; coerce to jsn line?
-                             (symbol (prln (sdwn (str! res))))
-                             (number (prln (str! res)))
-                             (string (prln res))))
+            (labels ((prldn (s) (format t "~&~s~&" (ldnout s)))
+                     (prln (s) (format t "~&~a~%" s))
+                     (doln (s) (typecase s (null nil) ; silent nils, use smth??
+                                           (string (prln s))
+                                           (vector (prldn s)) (hash-table (prldn s))
+                                           (list (prldn s))
+                                           (number (prln s))
+                                           (otherwise (prln s)))))
+              (typecase res (vector (loop for s across (compct res) if s do (doln s)))
+                            (otherwise (doln res))))
             (error (e) (exit-with-msg 70 "failed to serialize TXT.~%~a" (mkstr e)))))))
 

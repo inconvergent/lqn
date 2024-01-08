@@ -17,19 +17,20 @@
                 (hld (k &optional v) (declare (keyword k))
                   (if v (setf (gethash k ,meta) v) (remhash k ,meta)) v)
                 (cnt (&optional (k 0)) (+ k ,(or (gk conf :fi t) 0)))
-                (nope (a) (return-from ,nope a))
+                (nope (&optional a) (return-from ,nope a))
                 (err (&optional a) (error "qry err: ~a" a))
                 (wrn (&optional a) (warn "qry wrn: ~a" a))
-                (par () (wrn "no (par) in qry scope."))
+                (par () ,(gk conf :dat))
+                (pnum (&optional d) (size? (par) d))
                 (itr () (wrn "no (itr) in qry scope."))
-                (psize () (wrn "no (par) in qry scope."))
-                (isize () (wrn "no (itr) in qry scope.")))
+                (inum () (wrn "no (inum) in qry scope."))
+                )
          ,@body)))))
 
 (defmacro //fxs/op/ ((par &optional i itr) &body body)
   (declare (symbol par itr))
-  `(labels (,@(when par `((par () ,par) (psize () (size? ,par))))
-            ,@(when itr `((itr () ,itr) (isize () (size? ,itr))))
+  `(labels (,@(when par `((par () ,par) (pnum () (size? ,par))))
+            ,@(when itr `((itr () ,itr) (inum () (size? ,itr))))
             ,@(when i `((cnt (&optional (k 0)) (+ ,i k)))))
      ,@body))
 
@@ -199,7 +200,7 @@
   (loop for (m expr) in (strip-all cd) if (member m mm :test #'eq) collect expr))
 
 (defun compile/** (rec conf d) ; [...] ; filter
-  (awg (i ires itr par dat)
+  (awg (i ires itr par)
     `(loop with ,ires of-type vector = (mav)
            with ,par of-type vector = (vec! ,(gk conf :dat))
            for ,itr across ,par for ,i from 0
@@ -207,7 +208,7 @@
                  `(,@d (vex ,ires ,@(or (get-modes d :%) `(,itr))) nil))
            finally (return ,ires))))
 
-(defun compile/?xpr (rec conf d &aux (cd )) ; (xpr sel .. hit miss)
+(defun compile/?xpr (rec conf d) ; (xpr sel .. hit miss)
   (labels ((do-last (d n) (mapcar (lambda (d) (funcall rec conf (pre/or-all d))) (last d n)))
            (build-bool (cd &aux (ands (get-modes cd :+)) (nots (get-modes cd :-)))
              (funcall rec conf
@@ -226,6 +227,13 @@
             for d* in d nconc `(,(funcall rec conf* `(?xpr ,@(butlast d*) t nil))
                                 ,(funcall rec conf* (pre/or-all (car (last d*))))))))))
 (defun compile/?txpr (rec conf d) (funcall rec conf `(?mxpr ,d)))
+(defun compile/?tsrch (rec conf d)
+  (unless d (error "?tsrch: missing args."))
+  (awg (res) `(let ((,res (mav)))
+                ,(if (> (length d) 1) (funcall rec conf
+                                        `(?txpr ,@(butlast d) (vex ,res ,(first (last d)))))
+                                      (funcall rec conf `(?txpr ,@d (vex ,res _))))
+                ,res)))
 
 (defun proc-qry (conf* q) "compile lqn query"
   (labels
@@ -244,6 +252,7 @@
          ((optrig? :?mxpr d) (compile/?mxpr #'rec conf (cdr d)))
          ((optrig? :?txpr d) (compile/?txpr #'rec conf (cdr d)))
          ((optrig? :?xpr  d) (compile/?xpr  #'rec conf (cdr d)))
+         ((optrig? :?tsrch d) (compile/?tsrch #'rec conf (cdr d)))
          ((car- lqnfx? d) `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
          ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
          (t (error "lqn: unexpected clause: ~a" d)))))

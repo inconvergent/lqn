@@ -46,14 +46,14 @@
   (jsnout o :s s :indent indent)
   (get-output-stream-string s))
 
-(defun lqnout (o)
+(defun ldnout (o)
   "serialize internal representation to readable lisp data."
   (typecase o (string o)
-     (cons (cons (lqnout (car o)) (lqnout (cdr o))))
+     (cons (cons (ldnout (car o)) (ldnout (cdr o))))
      (hash-table (loop for k being the hash-keys of o using (hash-value v)
-                       collect `(,(kv k) . ,(lqnout v))))
+                       collect `(,(kv k) . ,(ldnout v))))
      (vector (loop with res = (make-adjustable-vector)
-                   for v across o do (vex res (lqnout v))
+                   for v across o do (vex res (ldnout v))
                    finally (return res)))
      (otherwise o)))
 

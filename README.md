@@ -1,30 +1,92 @@
 # LQN - Lisp Query Notation
 
-LQN is a terminal utility (and Common Lisp library) to query and transform
-Lisp data, JSON and TXT files. It consists of three terminal commands `lqn`,
-`jqn` and `tqn`.
+LQN is a compiler for a query language (DSL), with terminal utilities to query
+and transform LISP data (`LDN`), JSON and TXT files.  The terminal utilities
+will parse the input data to internal lisp strucutres according to the mode.
+Then the `lqn` language can be used for queries and transformations.
+
+`lqn` consists of three terminal commands `lqn`, `jqn` and `tqn`.
 
 ## JQN Example (JSON)
 
-Use in terminal like this:
+`jqn` can be used in the terminal like this:
 ```bash
-jqn [options] <qry> [files ...]
-echo '{\"_id\": 1}' | jqn [options] <qry>
+jqn -h
+
+#> Usage:
+#>   jqn [options] <qry> [files ...]
+#>   cat sample.json | jqn [options] <qry>
+#>
+#> Options:
+#>   -v prints the full compiled qry to stdout before the result
+#>   -j output as JSON [default]
+#>   -l output to readable lisp data (LDN)
+#>   -t output as TXT
+#>   -m minified json. indented is default. ignored for -l/-t
+#>   -h show this message.
+#>
+#>   options can be write as -i -v or -iv.
 ```
 Here is a full example:
 ```bash
-echo '[ { "_id": "65679", "msg": "HAI!",
-          "things": [ { "id": 10, "name": "Win", "extra": "ex1" },
-                      { "id": 12, "name": "Kle" } ] },
+  echo '
+       [{ "_id": "65679", "msg": "HAI!",
+          "things": [{ "id": 10, "name": "Win", "extra": "ex1" },
+                     { "id": 12, "name": "Kle" }] },
         { "_id": "6AABB", "msg": "NIH!",
-          "things": [ { "id": 32, "name": "Bal" },
-                      { "id": 31, "name": "Sta", "extra": null} ] } ]' |\
-  jqn '#{:_id (:things #[:name :?@extra]) (:msg (sup _))}'
+          "things": [{ "id": 32, "name": "Bal" },
+                     { "id": 31, "name": "Sta", "extra": null}] }]' |\
+  jqn '#{ :_id
+         (:things #[:name :?@extra])
+         (:msg (sup _))}'
+## which returns (something like):
+#>     [{ "_id": "65679", "msg": "HAI!",
+#>        "things": ["Win", "ex1", "Hai", "ex2", "Kle"] },
+#>      { "_id": "CAABB", "msg": "NIH!",
+#>        "things": ["Sta", "Bal"] }]
 ```
-which returns (something like):
-```json
-[ { "_id": "65679", "msg": "HAI!", "things": [ "Win", "ex1", "Hai", "ex2", "Kle" ] },
-  { "_id": "CAABB", "msg": "NIH!", "things": [ "Sta", "Bal" ] } ]
+
+## TQN Example (TXT)
+
+the `tqn` mode is for reading lines of text into a `vector` (i.e. JSON array).
+`tqn` has slightly different default behaviour to `jqn`. Notably, it ignores
+`nil` in the output. `tqn` defaults to printing the `vector` as rows, but `-j`
+will output to JSON instead. `-t` does the oposite for `jqn`.
+
+```bash
+## split string and sum as integers:
+   echo '1 x 1 x 7 x 100' |\
+     tqn '(splt _ :x) int!? (*fld 0 +)'
+#> 109
+
+## split string, trim, search and replace:
+   echo 'abk c x dkef x ttuuxx x ttxx33' | \
+     tqn '(splt _ :x) trim
+          (?txpr +@str!? :+@tt :+@uu
+                 (str! _ :-hit))'
+#> abk c
+#> dkef
+#> ttuu-hit
+#> tt
+#> 33
+```
+
+## LQN Example (LDN)
+You can also read CL code from pipe or file:
+```bash
+## find small items, insert symbol, flatten
+   echo '#(1 2 3 4 5 6 7 8)' |\
+     lqn '#((?txpr (< _ 3) (new* :xx _))) (flatall* _ t)'
+#> #(:XX 1 :XX 2 3 4 5 6 7 8)
+
+## or search for defmacro symbol in several source code files:
+   lqn -t '#((?tsrch (msym? _ defmacro)
+                     (new$ :fn (fn) :hit (head* (itr) 3))))
+           [is?] (flatall* _)' src/*lisp
+#>    ((:FN . "src/docs.lisp") (:HIT DEFMACRO PCKGS (PKG)))
+#>    ((:FN . "src/init.lisp") (:HIT DEFMACRO PRETTY-JSON (V)))
+#>    ((:FN . "src/qry.lisp") (:HIT DEFMACRO JSNQRYF (FN Q &KEY DB)))
+#>    ...
 ```
 
 ## Why??
@@ -45,48 +107,29 @@ about similar approaches to making small DSLs in these blog posts:
 There are several parts of the design that i'm not entirely happy with, so
 things might change in the future.
 
-## Terminal Options
-
-Command line options:
-  - `-v` show compiled query.
-  - `-j, -t, -l` use `json`, `txt` or `ldn` output format.
-  - `-m` minify JSON output [indented is default].
-  - `-h` show help.
-
-## TQN Example (TXT)
-
-`tqn` is a mode for reading lines of text into a `vector` (JSON array). `tqn`
-has slightly different default behaviour to `jqn`. Notably, it ignores
-`nil` in the output. `tqn` defaults to printing the `vector` as rows, but `-j`
-will output to JSON instead. `-t` does the oposite for `jqn`.
-
-```bash
-# split string and sum as integers:
-echo '1 x 1 x 7 x 100' |\
-  tqn '(splt _ :x) int!? (*fld 0 +)'
-
-# split string and make a new JSON structure:
-echo '1 x 1 x 7 x 100' |\
-  tqn -j '(splt _ :x) int!? #((new$ :v _))'
-```
-
 ## Lisp Example
 Using the `lqn` compiler in lisp looks like this.
 ```lisp
-(lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
-          (?txpr (-@msym? _ "bbb") (+@msym? _ "xxx")
-                 (sym! _ :-HIT---)))
-; #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
+(pretty-json
+  (qry #("1 x 1 x 7 x 100" "3 x 8 x 30")
+       #((splt _ :x) int!? ; for each row, split and parse as int
+         ($new :num (num)  ; new nested dict for each row
+               :items #(($new :v _ :i (cnt)))))))
+;; [{ "num": 4,
+;;    "items": [ { "v": 1, "i": 0 }, { "v": 1, "i": 1 },
+;;               { "v": 7, "i": 2 }, { "v": 100, "i": 3 } ]},
+;;  { "num": 3,
+;;    "items": [ { "v": 3, "i": 0 }, { "v": 8, "i": 1 },
+;;               { "v": 30, "i": 2 } ] }]
 ```
 See [bin/ex.lisp](bin/ex.lisp) for more examples.
 
 ## Object Representation
 
-Internally JSON arrays are represented as `vector`. JSON objects/dicts are
-represented as `hash-table`. The terms `vector` and `kv` (key/value)
-respectively is used in the documentation. If the context makes it clear
-whether it is a reference to a JSON data structure or the corresponding
-internal Lisp data structure.
+Internally JSON arrays are represented as `vector`.  and JSON objects are
+represented as `hash-table`; `kv` (key/value) is used in the docs for short.
+In `tqn` lines of text are `vectors` of `strings`.  In `lqn` Lisp files are
+read as a `vector` of lisp data.
 
 ## Operators
 
@@ -96,8 +139,8 @@ Note that you can use `_` to refer to the current data object.
 
 In the following sections `[d]` represents an optional default value.  E.g. if
 key/index is missing, or if a functon returns `nil`. `k` is an initial counter
-value. Whereas `..` menans that there can be arbitrary arguments, selectors or
-expressions; depending on the context. `expr` denotes any expression or
+value. Whereas `..` menans that there can be arbitrary arguments, `Selectors` or
+`exprs`; depending on the context. `expr` denotes any expression or
 operator, like `(+ 1 _)` or `#[:id]`.
 
 ### Strings and :keywords
@@ -138,16 +181,15 @@ Filter and map operations over `vector`:
     for all items where `test-expr` is not `nil`
 
 ### Selector Operators - `{}`/`$$`, `[]`/`**`, `#{}`/`*$`, `#[]`/`$*`, `@`
-Select from on structure into a new data structure. `selectors` are explained
+Select from on structure into a new data structure. `Selectors` are explained
 below:
   - `#{s1 sel ..}` or `(*$ sel ..)`: from `vector` of `kvs` into new `vector`
-    of `kvs` using `kv selectors`.
+    of `kvs` using `KV Selectors`.
   - `#[s1 sel ..]` or `($* sel ..)`: from `vector` of `kvs` into new `vector`
-    using `kv selectors`.
-  - ` {s1 sel ..}` or `($$ sel ..)`: from `kv` into new `kv` using `kv
-    selectors`.
+    using `KV Selectors`.
+  - ` {s1 sel ..}` or `($$ sel ..)`: from `kv` into new `kv` using `KV Selectors`.
   - ` [s1 sel ..]` or `(** sel ..)`: from `vector` into new `vector` using
-    `expr selectors`.
+    `EXPR Selectors`.
 
 select keys or indexes:
  - `(@ k)`: get this key/index from current data object.
@@ -155,21 +197,21 @@ select keys or indexes:
  - `(@ o k [d])`: get this key/index from `o`.
 
 #### KV Selectors
-A `kv` Selector is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
+A `KV Selector` is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
 `#{}`.  Only the key is required. If `expr` is not provided the `expr` is `_`,
 that is: the value of the `key`.
 
 The modes are:
   - `+`: always include this `expr`. [default]
   - `?`: include `expr` if the key is present and not `nil`.
-  - `%`: include selector if `expr` is not `nil`.
-  - `-`: drop this key in `#{}` and `{}` operators; ignore selector entirely in `#[]`
+  - `%`: include Selector if `expr` is not `nil`.
+  - `-`: drop this key in `#{}` and `{}` operators; ignore Selector entirely in `#[]`
     E.g. `{_ -@key3}` to select all keys except `key3`. `expr` is ignored.
 
-`kv selectors` can either be written out in full, or they can be be written in
+`KV Selectors` can either be written out in full, or they can be be written in
 short form depending on what you want to achieve. Note that the `@` in the
 following examples is used to append a mode to a key without having to wrap the
-selector in parenthesis. If you need eg. case or spaces you can use
+Selector in parenthesis. If you need eg. case or spaces you can use
 `"strings"`:
 ```lisp
 {_}               ; select all keys.
@@ -193,13 +235,13 @@ selector in parenthesis. If you need eg. case or spaces you can use
  (:key2 (sdwn _)) ; lowercase the value of "key2"
   :-@key3}        ; drop "key3"
 ```
-We use `{}` in the examples but all `kv selectors` have the same behaviour.
+We use `{}` in the examples but all `KV Selectors` have the same behaviour.
 
 #### EXPR Selectors
-`expr selectors` serve a similar purpose as `kv Selectors`, but they are used
-with `[]`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a little
-differently:
-  - `+`: if there are multiple selectors with `+` mode, requires ALL
+`EXPR Selectors` serve a similar purpose as `KV Selectors`, but they are used
+with `[]`, `?tsrch`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a
+little differently:
+  - `+`: if there are multiple `Selectors` with `+` mode, requires ALL
     of them to be `t`.
   - `?`: if there are any clauses with `?` mode, it will select items where
     either of these clauses is `t`
@@ -224,21 +266,27 @@ CL boolen operators. Here are some examples:
 
 ### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
 Perform operation on when pattern or condition is satisfied:
-  - `(?xpr sel)`: match current data object agains `expr selector`. Return the
+  - `(?xpr sel)`: match current data object agains `EXPR Selector`. Return the
     result if not `nil`.
-  - `(?xpr sel hit-expr)`: match current data object agains `expr selector`. Evaluates
+  - `(?xpr sel hit-expr)`: match current data object agains `EXPR Selector`. Evaluates
     `hit-expr` if not nil. `_` is the matching item.
   - `(?xpr sel .. hit-expr miss-expr)`: match current data object agains `expr
     selectors`.  Evaluate `hit-expr` if not `nil`; else evaluate `miss-expr`.
     `_` is the matching item.
 
-Recursively traverse a structure of `sequences` and `kvs` and perform
-operations when patterns or conditions are satisfied:
+Recursively traverse a structure of `sequences` and `kvs` and return
+a new value for each match:
   - `(?txpr sel .. tx-expr)`: recursively traverse current data object and replace
     matches with `tx-expr`. `tx-expr` can be a function name or expression. Also
-    traverses vectors and `kv` values (not keys).
+    traverses vectors and `kv` values.
   - `(?mxpr (sel .. tx-expr) .. (sel .. tx-expr))`: one or more matches and
     transforms.  Performs the transform of the first match only.
+
+### Search Operator - `?srch`
+Iterate a datastructure (as if with `?txpr`) and collect the matches in a new
+`vector`:
+  - `(?srch sel)`: collect `_` whenever the `Selector` matches.
+  - `(?srch sel .. expr)`: collect `expr` whenever the `Selector` matches.
 
 ## Query Utility Functions
 
@@ -253,16 +301,19 @@ Defined in the query scope:
  - `(fn)`: name of the current file.
  - `(hld k v)`: hold this value at this key in a key value store.
  - `(ghv k [d])`: get the value of this key; or `d`.
+ - `(nope [d])`: stop execution, return `d`.
+ - `(err [msg])`: raise `error` with `msg`.
+ - `(wrn [msg])`: raise `warn` with `msg`.
 
 ### Operator Context Fxs
 Defined in all operators:
  - `_`: the current data object.
- - `(itr)`: the current object in the iteration of the enclosing selector.
+ - `(itr)`: the current object in the iteration of the enclosing `Selector`.
  - `(par)`: the object containing `(itr)`.
  - `(psize)`: number of items in `(par)`.
  - `(isize)`: number of items in `(itr)`.
- - `(cnt [k=0])`: counts from `k` in the enclosing selector.
-`(itr)` and `_` can be the same thing, but in e.g. `kv selectors`, `(itr)` is
+ - `(cnt [k=0])`: counts from `k` in the enclosing `Selector`.
+`(itr)` and `_` can be the same thing, but in e.g. `KV Selectors`, `(itr)` is
 the current object, but `_` is the value of the selected key n the current
 object.
 
@@ -277,6 +328,7 @@ General utilities:
  - `(msym? a b)`: compare symbol `a` to `b`. if `b` is a keword or symbol
    a perfect match is required. if `b` is a string it performs a substring
    match. If `b` is an expression, `a` is compared to the evaluated value of `b`.
+ - `(noop ..)`: do nothing, return `nil`.
 
 ### KV / Strings / Vectors / Sequences
 For all `sequences` and `kvs`:

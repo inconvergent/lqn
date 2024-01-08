@@ -73,6 +73,15 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:CNT
+
+```
+:missing:todo:
+
+ ; LQN:CNT
+ ;   [symbol]
+```
+
 #### LQN:COMPCT
 
 ```
@@ -99,6 +108,21 @@
  ;   Documentation:
  ;     describe symbol.
  ;   Source file: /data/x/lqn/src/init.lisp
+```
+
+#### LQN:FLATALL\*
+
+```
+ ; LQN:FLATALL*
+ ;   [symbol]
+ ; 
+ ; FLATALL* names a compiled function:
+ ;   Lambda-list: (X &OPTIONAL (STR NIL))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES VECTOR &OPTIONAL))
+ ;   Documentation:
+ ;     flatten all sequences into new vector. if str is t strings will become
+ ;       individual chars.
+ ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
 #### LQN:FLATN\*
@@ -215,6 +239,15 @@
  ;   Documentation:
  ;     i if int; or d
  ;   Source file: /data/x/lqn/src/init.lisp
+```
+
+#### LQN:INUM
+
+```
+:missing:todo:
+
+ ; LQN:INUM
+ ;   [symbol]
 ```
 
 #### LQN:IPREF?
@@ -387,13 +420,13 @@
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
-#### LQN:LQNOUT
+#### LQN:LDNOUT
 
 ```
- ; LQN:LQNOUT
+ ; LQN:LDNOUT
  ;   [symbol]
  ; 
- ; LQNOUT names a compiled function:
+ ; LDNOUT names a compiled function:
  ;   Lambda-list: (O)
  ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
@@ -508,6 +541,15 @@
  ;   Documentation:
  ;     print to standard out
  ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:PNUM
+
+```
+:missing:todo:
+
+ ; LQN:PNUM
+ ;   [symbol]
 ```
 
 #### LQN:PREF?

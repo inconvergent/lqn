@@ -3,8 +3,9 @@
   (:nicknames #:cl-lqn)
   (:export #:d? #:v?
     #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
-    #:jsnloads #:jsnloadf #:jsnout #:lqnout #:fmt #:out #:jsnstr #:@* #:@@ #:??
-    #:new* #:new$ #:cat$ #:cat* #:size #:size? #:head* #:tail* #:flatn* #:compct
+    #:jsnloads #:jsnloadf #:jsnout #:ldnout #:fmt #:out #:jsnstr #:@* #:@@ #:??
+    #:new* #:new$ #:cat$ #:cat* #:size #:size? #:head* #:tail* #:flatn* #:compct #:flatall*
+    #:pnum #:inum #:cnt
     #:noop #:is? #:kv? #:sym? #:msym? #:trim #:sym!
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
     #:lst? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!? #:ind* #:sel* #:seq*

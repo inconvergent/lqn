@@ -2,66 +2,51 @@
 
 (load "~/quicklisp/setup.lisp")
 
-; (ql:quickload :auxin :silent t)
 (ql:quickload :lqn :silent t)
+(in-package :lqn)
 
-(defmacro pretty-json (v) `(lqn:out (lqn:jsnstr ,v :indent t)))
+(print (qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 (+ _))))         ;; 109
+(print (qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 +)))             ;; 109
+(print (qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- _ acc)))) ;; 93
 
-(defun main ()
+(pretty-json
+  (qry "abc x def x gehiil x iiii"
+       (splt _ :x) str!? trim                     ; split and trim
+       (new$ :in (par)                            ; new kv with input
+             :len (pnum)                          ; input length
+             :items #((new$ :s _ :len (inum)))))) ; and substr lengths
+;; { "in": "abc x def x gehiil x iiii",
+;;   "len": 25,
+;;   "items": [ { "s": "abc", "len": 3 },    { "s": "def", "len": 3 },
+;;              { "s": "gehiil", "len": 6 }, { "s": "iiii", "len": 4 } ] }
 
-  (pretty-json (lqn:jsnqryf (lqn::internal-path-string "data/sample.json")
-                            (|| #{_id (things #[name])})))
-  (print (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 (+ _))))
-  (print (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 +)))
-  (print (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- _ acc))))
+(print (ldnout (qry #("1 x 1 x 7 x 100" "3 x 8 x 30")
+                    #((splt _ :x) int!? ; for each row, split and parse as int
+                      (*fld 0 +)))))    ; sum each row
+;; #(109 41)
 
-  (pretty-json (lqn:qry "1 x 1 x 7 x 100"
-                        (splt _ :x) int!? ; split and parse as int
-                        ($new :num (num)  ; new nested dict
-                              :items #(($new :v _ :i (cnt))))))
-  ; { "num": 4,
-  ;   "items": [ { "v": 1, "i": 0 }, { "v": 1, "i": 1 },
-  ;              { "v": 7, "i": 2 }, { "v": 100, "i": 3 } ] }
+(print (qry "aaayyy x abc x def x auiuu x aaaaa"
+            (splt _ :x) trim                       ; split
+           #((?xpr :a :-@b sup (str! _ :-miss))))) ; search & replace
+;; #("AAAYYY" "abc-miss" "def-miss" "AUIUU" "AAAAA")
 
-  (pretty-json (lqn:qry #("1 x 1 x 7 x 100" "3 x 8 x 30")
-                        #((splt _ :x) int!? ; for each row, split and parse as int
-                          ($new :num (num)  ; new nested dict for each row
-                                :items #(($new :v _ :i (cnt)))))))
-  ; [ { "num": 4,
-  ;     "items": [ { "v": 1, "i": 0 }, { "v": 1, "i": 1 },
-  ;                { "v": 7, "i": 2 }, { "v": 100, "i": 3 } ] },
-  ;   { "num": 3,
-  ;     "items": [ { "v": 3, "i": 0 }, { "v": 8, "i": 1 },
-  ;                { "v": 30, "i": 2 } ] } ]
+(print (qry #((a b xxx) (a b c) (a b (c xxx)))
+            #((?txpr (msym? _ xxx)         ; recursive search & replace
+                     (symb _ :-HIT---))))) ; with new symbol
+;; #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
 
-  (pretty-json (lqn:qry "1 x 1 x 7 x 100 $ 3 x 8 x 30"
-                        (splt _ :$)
-                        #((splt _ :x) int!? ; for each row, split and parse as int
-                          ($new :num (num)  ; new nested dict for each row
-                                :items #(($new :v _ :i (cnt)))))))
-  ; same output as above
+(print (qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
+             ; symbols with "xxx", but not "bbb"
+             (?txpr (-@msym? _ "bbb") (+@msym? _ "xxx")
+                    (sym! _ :-HIT---))))
+;; #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
 
-  ; (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim (*? (isubx? _ :k) (*new _ (par))))
-
-  (print (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-                  (splt _ :x) trim
-                  #((?xpr :a :-@b sup nil))))
-
-
-  (print (lqn:qry #((a b xxx) (a b c) (a b (c xxx)))
-                  #((?txpr (msym? _ xxx)
-                           (lqn:symb _ :-HIT---)))))
-  ; #((A B XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
-
-  (print (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx)))
-                  (?txpr (-@msym? _ "bbb") (+@msym? _ "xxx")
-                         (sym! _ :-HIT---))))
-  ; #((A BBBXXX XXX-HIT---) (A B C) (A B (C XXX-HIT---)))
-
-  (print (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-                  (splt _ :x) trim
-                  (?txpr :a :-@b sup)))
-  )
-
-(main)
+(pretty-json (jsnqryf (internal-path-string "data/sample.json")
+                      (|| #{:_id (:things #[:name])})))
+;;  [ { "_id": "65679d23d38d711eaf999e89",
+;;      "things": [ "Chris" ] },
+;;    { "_id": "65679d23fe33bc4c240675c0",
+;;      "things": [ "Winters", "Haii", "Klein" ] },
+;;    { "_id": "65679d235b4143d2932ea17a",
+;;      "things": [ "Star", "Ball" ] } ]
 
