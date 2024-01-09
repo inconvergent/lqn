@@ -38,8 +38,7 @@
   (is (lqn::unpack-mode '(fxfx :ss)) '(:+ (fxfx :ss)))
   (is (lqn::unpack-mode "fxfx")      '(:+ "fxfx"))
   (is (lqn::unpack-mode 'fxfx :y)    '(:y fxfx))
-  (is (lqn::unpack-mode 'fxfx :y)    '(:y fxfx))
-  )
+  (is (lqn::unpack-mode 'fxfx :y)    '(:y fxfx)))
 
 (subtest "io"
   (is (lqn:ldnout *test-data-raw*) *test-data-raw* :test #'equalp)
@@ -135,6 +134,8 @@
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ :b))) 3)
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ "b"))) 3)
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ :b))) 3)
+  (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ _ :b nil))) 3)
+  (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ _ :x :c))) :c)
 
   (is (lqn:qryd (lqn:jsnloads "{\"c\": 4, \"a\": {\"b\": 3, \"c\": 7}}") (|| (@* _ nil "c"))) #(4) :test #'equalp)
   (is (lqn:qryd (lqn:jsnloads "{\"c\": 4, \"a\": {\"b\": 3, \"c\": 7}}") (|| (@* _ :miss "a/b" "c" "a/u"))) #(3 4 :miss) :test #'equalp)
@@ -174,6 +175,9 @@
 
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
         (splt _ :x) trim (*map (?xpr :a :-@b sup sdwn)))
+      #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) (*map trim _ (?xpr :a :-@b sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
         (splt _ :x) trim (*map (?xpr "a" "-@b" sup sdwn)))
@@ -231,14 +235,10 @@
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head* _ 7) (tail* _ 3)) #(5 6 7) :test #'equalp)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head* _ -6) (tail* _ -6)) #(1 2 3 4) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x)
-               (*? (isubx? _ "k") (new* _ (trim (itr))))
-              ; [(isubx? _ :k) (%@new* _ (trim (itr)))]
-               )
+               (*? (isubx? _ "k") (new* _ (trim (itr)))))
       #(#(2 "abk c") #(2 "dkef") #(1 "kkkk1")) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim
-               (*? (isubx? _ "k") (new* _ (itr)))
-              ; [(isubx? _ :k) (%@new* _ (par))]
-               )
+               (*? (isubx? _ "k") (new* _ (itr))))
       #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
   )
 

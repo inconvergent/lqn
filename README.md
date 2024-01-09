@@ -80,7 +80,7 @@ You can also read CL code from pipe or file:
 #> #(:XX 1 :XX 2 3 4 5 6 7 8)
 
 ## or search for defmacro symbol in several source code files:
-   lqn -t '#((?tsrch (msym? _ defmacro)
+   lqn -t '#((?srch (msym? _ defmacro)
                      (new$ :fn (fn) :hit (head* (itr) 3))))
            [is?] (flatall* _)' src/*lisp
 #>    ((:FN . "src/docs.lisp") (:HIT DEFMACRO PCKGS (PKG)))
@@ -239,7 +239,7 @@ We use `{}` in the examples but all `KV Selectors` have the same behaviour.
 
 #### EXPR Selectors
 `EXPR Selectors` serve a similar purpose as `KV Selectors`, but they are used
-with `[]`, `?tsrch`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a
+with `[]`, `?srch`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a
 little differently:
   - `+`: if there are multiple `Selectors` with `+` mode, requires ALL
     of them to be `t`.

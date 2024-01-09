@@ -11,7 +11,8 @@
                                      (if (or merciful (valid-mode m)) (list m (repack- s s*))
                                        (error "lqn: invalid mode in: ~a" s)))
                                    (list default s))))
-    (typecase o (symbol (unpack- o)) (string (unpack- o)) (cons (unpack-cons o))
+    (typecase o (symbol (unpack- o)) (string (unpack- o))
+                (cons (unpack-cons o)) (vector `(,default ,o))
       (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
 (defmacro ?? (a expr &optional res) (declare (symbol a)) ; todo: dont require sym?
@@ -38,9 +39,11 @@
             rest)))
 (defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
 (defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
-(defun trim (s &optional (chars '(#\Space #\Newline #\Backspace #\Tab #\Linefeed
-                                  #\Page #\Return #\Rubout)))
-  (declare (string s)) "trim string" (string-trim chars s))
+(defun trim (s &optional default (chars '(#\Space #\Newline #\Backspace #\Tab
+                                          #\Linefeed #\Page #\Return #\Rubout)))
+  "trim string"
+  (typecase s (string (string-trim chars s)) (otherwise (or s default))))
+
 
 (defmacro out (s &rest rest) "print to standard out"
   (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
@@ -165,8 +168,8 @@ ranges are lists that behave like arguments to seq*."
 
 (defun flatn* (a &optional (n 1) (str nil))
   (declare (sequence a) (fixnum n)) "flatten n times" ; inefficient?
-  (loop repeat n do 
-    (setf a (apply #'concatenate 'vector ; 
+  (loop repeat n do
+    (setf a (apply #'concatenate 'vector ;
               (map 'list (lambda (x) (typecase x (string (if str x `#(,x)))
                                                  (sequence x) (atom `#(,x))))
                    a))))
