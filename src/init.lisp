@@ -1,6 +1,7 @@
 (in-package :lqn)
 
 (defvar *qmodes* '(:+ :? :- :%))
+(defvar *operators* `(:*map :@ :|| :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?tsrch))
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv
                  :fmt :out :jsnstr
                  :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth?

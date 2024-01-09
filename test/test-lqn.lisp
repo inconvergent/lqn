@@ -135,6 +135,8 @@
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ :b))) 3)
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ "b"))) 3)
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ :b))) 3)
+  (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ _ :b nil))) 3)
+  (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ _ :x :c))) :c)
 
   (is (lqn:qryd (lqn:jsnloads "{\"c\": 4, \"a\": {\"b\": 3, \"c\": 7}}") (|| (@* _ nil "c"))) #(4) :test #'equalp)
   (is (lqn:qryd (lqn:jsnloads "{\"c\": 4, \"a\": {\"b\": 3, \"c\": 7}}") (|| (@* _ :miss "a/b" "c" "a/u"))) #(3 4 :miss) :test #'equalp)
@@ -174,6 +176,9 @@
 
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
         (splt _ :x) trim (*map (?xpr :a :-@b sup sdwn)))
+      #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
+  (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) (*map trim _ (?xpr :a :-@b sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
         (splt _ :x) trim (*map (?xpr "a" "-@b" sup sdwn)))

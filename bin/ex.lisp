@@ -49,4 +49,5 @@
 ;;      "things": [ "Winters", "Haii", "Klein" ] },
 ;;    { "_id": "65679d235b4143d2932ea17a",
 ;;      "things": [ "Star", "Ball" ] } ]
-
+(lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
+        (splt _ :x) @ trim (*map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))

@@ -23,8 +23,7 @@
                 (par () ,(gk conf :dat))
                 (pnum (&optional d) (size? (par) d))
                 (itr () (wrn "no (itr) in qry scope."))
-                (inum () (wrn "no (inum) in qry scope."))
-                )
+                (inum () (wrn "no (inum) in qry scope.")))
          ,@body)))))
 
 (defmacro //fxs/op/ ((par &optional i itr) &body body)
@@ -66,8 +65,10 @@
                 (symbol `(when (,ty ,k) ,k))
                 (cons ty) (boolean `(when-equal ,ty ,k))))
 
-(defun prescan (qq)
-  (loop for q in qq do (when (equal :@ (kv (sym-not-kv q))) (warn "unexpected @ in: ~a" qq)))
+(defun prescan (qq) ; TODO: prescan for other plain operator symbols too
+  (let ((isect (intersection (mapcar (lambda (k) (kv (sym-not-kv k))) qq)
+                             *operators* :test #'equal)))
+    (when isect (error "unexpected operator ~a~%in: ~a" isect qq)))
   qq)
 (defun pre/|| (qq) (unless qq (warn "||: missing args."))
   (loop for q in (prescan qq) collect
@@ -88,12 +89,8 @@
        (apply #'str- (etypecase (second k)
                        (symbol (repack- k)) (string (repack- k))
                        (cons (repack-cons ck k))))))
-    (let* ((q* (remove-if #'all? q)) (res (mapcar #'unpack- q*)))
-      (if (= (length q) (length q*)) res (cons :_ res)))))
-
-(defun pre/** (q &optional (mm :?)) (unless q (warn "**: missing args."))
-  (labels ((unpack- (o) (dsb (m sk) (unpack-mode o mm) `(,m ,(pre/xpr-sel sk :_)))))
-    (let* ((q* (remove-if #'all? q)) (res (mapcar #'unpack- q*)))
+    (let* ((q* (remove-if #'all? (prescan q)))
+           (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 
 ; OPERATOR COMPILERS
@@ -109,7 +106,17 @@
                    (2 `(@@ ,(gk conf :dat) ,@(funcall rec conf d)))
                    (3 `(@@ ,@(funcall rec conf d)))))
 
+(defun pre/*map (q &optional (mm :+)) (unless q (warn "*map: missing args."))
+  (labels ((unpack- (o) ; TODO: mode test, err if not :+
+             (dsb (m sk) (unpack-mode o mm)
+               (etypecase sk (sequence sk) (keyword sk) (symbol `(,sk :_))))))
+    (let* ((q* (remove-if #'all? (prescan q)))
+           (res (mapcar #'unpack- q*))
+           (allres (if (= (length q) (length q*)) res (cons `(lit :_) res))))
+      (if (< (length allres) 2) allres `((|| ,@allres))))))
+
 (defun compile/*map (rec conf d) ; (*map ...)
+  (unless (= (length d)) (error "*map: unexpected args: ~a" d))
   (awg (i ires itr par)
     (labels ((do-map (expr)
                `(loop with ,ires = (mav)
@@ -118,13 +125,8 @@
                   do (//fxs/op/ (,par ,i ,itr)
                        (vex ,ires ,(funcall rec (dat/new conf itr) expr)))
                   finally (return ,ires))))
-      (case (length d) (0 (warn "*map: missing args."))
-        (1 (let ((cd (car d)))
-             (etypecase cd (string cd) (number cd) (keyword cd) (boolean cd)
-                           (vector (funcall rec conf cd))
-                           (symbol (do-map (if (all? cd) :_ `(,cd ,itr))))
-                           (cons (do-map cd)))))
-        (otherwise (compile/*map rec conf `((|| ,@d))))))))
+      (let ((cd (car d)))
+        (etypecase cd (cons (do-map cd)) (vector (do-map cd)))))))
 
 (defun compile/*fld (rec conf d) ; (*fld ...)
   (awg (i res itr par) ; 0 + ; 0 acc (+ acc _)
@@ -196,6 +198,12 @@
                                     (funcall rec (dat/new conf dat) (pre/or-all sd)))))
        finally (return ,ires))))
 
+(defun pre/** (q &optional (mm :?)) (unless q (warn "**: missing args."))
+  (labels ((unpack- (o) (dsb (m sk) (unpack-mode o mm) `(,m ,(pre/xpr-sel sk :_)))))
+    (let* ((q* (remove-if #'all? (prescan q)))
+           (res (mapcar #'unpack- q*)))
+      (if (= (length q) (length q*)) res (cons :_ res)))))
+
 (defun get-modes (cd &rest mm)
   (loop for (m expr) in (strip-all cd) if (member m mm :test #'eq) collect expr))
 
@@ -238,8 +246,10 @@
 (defun proc-qry (conf* q) "compile lqn query"
   (labels
     ((rec (conf d)
-       (cond ((all? d) (gk conf :dat)) ((stringp d) d)
-         ((vectorp d) (compile/*map #'rec conf (coerce d 'list))) ((atom d) d)
+       (cond
+         ((all? d) (gk conf :dat)) ((stringp d) d)
+         ((vectorp d) (compile/*map #'rec conf (pre/*map (coerce d 'list))))
+         ((atom d) d)
          ((optrig? :$$    d) (compile/$$    #'rec conf (pre/$$ (cdr d))))
          ((optrig? :$*    d) (compile/$*    #'rec conf (pre/$$ (cdr d))))
          ((optrig? :*$    d) (compile/*$    #'rec conf (pre/$$ (cdr d))))
@@ -248,7 +258,7 @@
          ((optrig? :@     d) (compile/@     #'rec conf (cdr d)))
          ((optrig? :*?    d) (compile/*?    #'rec conf (cdr d)))
          ((optrig? :*fld  d) (compile/*fld  #'rec conf (cdr d)))
-         ((optrig? :*map  d) (compile/*map  #'rec conf (cdr d)))
+         ((optrig? :*map  d) (compile/*map  #'rec conf (pre/*map (cdr d))))
          ((optrig? :?mxpr d) (compile/?mxpr #'rec conf (cdr d)))
          ((optrig? :?txpr d) (compile/?txpr #'rec conf (cdr d)))
          ((optrig? :?xpr  d) (compile/?xpr  #'rec conf (cdr d)))
@@ -271,6 +281,8 @@
                 `(let ((,dat* ,dat)) ,compiled))))
 (defmacro qry (dat &rest rest) "query data. rest is wrapped in the pipe operator."
   `(qryd ,dat (|| ,@rest)))
+(defmacro qrydb (dat &rest rest) "query data. rest is wrapped in the pipe operator."
+  `(qryd ,dat (|| ,@rest) :db t))
 (defun qryl (dat q &key conf db) "compile lqn query and run on dat"
   (eval `(qryd ,dat ,q :db ,db :conf ,conf)))
 (defmacro jsnqryf (fn q &key db) "run lqn query on json file, fn"
