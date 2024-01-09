@@ -5,7 +5,8 @@
                  :fmt :out :jsnstr
                  :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth?
                  :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :ind* :sel* :seq*
-                 :new* :new$ :cat* :cat$ :head* :tail* :size :size? :flatn* :flatall*
+                 :new* :new$ :cat* :cat$ :head* :tail* :size :size?
+                 :flatn* :flatall* :flatn$
                  :pnum :inum :cnt
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :sup :sdwn :mkstr :repl :strcat :splt

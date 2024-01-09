@@ -4,7 +4,8 @@
   (:export #:d? #:v?
     #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
     #:jsnloads #:jsnloadf #:jsnout #:ldnout #:fmt #:out #:jsnstr #:@* #:@@ #:??
-    #:new* #:new$ #:cat$ #:cat* #:size #:size? #:head* #:tail* #:flatn* #:compct #:flatall*
+    #:new* #:new$ #:cat$ #:cat* #:size #:size? #:head* #:tail*
+    #:flatn* #:compct #:flatall* #:flatn$
     #:pnum #:inum #:cnt
     #:noop #:is? #:kv? #:sym? #:msym? #:trim #:sym!
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?

@@ -348,7 +348,12 @@ Primarily for sequences (`string`, `vector`, `list`):
  - `(head* s [n=10])`: first `n` items of `sequence`.
  - `(tail* s [n=10])`: last `n` items of `sequence`.
  - `(cat* s ..)`: concatenate these `sequences` to a `vector`.
- - `(flatn* s n)`: flatten `sequence` `n` times into a `vector`.
+ - `(flatn* s [n=1] [str])`: flatten `sequence` `n` times into a `vector`. if
+   `str=t` strings are flattened into individual chars as well.
+ - `(flatall* s [str])`: flatten all sequences (except strings) into new
+   `vector`.  use `t` as the second argument to flatten strings to individual
+   chars as well.
+ - `(flatn$ s n)`: flatten `kv` into vector `(new* k0 v0 k1 v1 ..)`
 
 Primarily for `string` searching. `[i]` means case insensitive
 (TOOD: stringify kv args?):

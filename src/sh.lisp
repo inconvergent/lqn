@@ -1,6 +1,7 @@
 (in-package :lqn)
 
 (defun verbose? (opts) (not (null (member :-v opts :test #'equal))))
+(defun compile? (opts) (not (null (member :-c opts :test #'equal))))
 (defun help? (opts)    (member :-h opts :test #'equal))
 (defun indent? (opts)  (null (member :-m opts :test #'equal)))
 (defun format? (opts &optional (d :json))

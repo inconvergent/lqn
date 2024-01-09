@@ -125,6 +125,21 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:FLATN$
+
+```
+ ; LQN:FLATN$
+ ;   [symbol]
+ ; 
+ ; FLATN$ names a compiled function:
+ ;   Lambda-list: (A)
+ ;   Derived type: (FUNCTION (HASH-TABLE)
+ ;                  (VALUES (SIMPLE-ARRAY T) &OPTIONAL))
+ ;   Documentation:
+ ;     flatten ht to vector: k0 v0 k1 v1 ...
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
 #### LQN:FLATN\*
 
 ```
@@ -133,7 +148,8 @@
  ; 
  ; FLATN* names a compiled function:
  ;   Lambda-list: (A &OPTIONAL (N 1))
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
+ ;                  (VALUES SEQUENCE &OPTIONAL))
  ;   Documentation:
  ;     flatten n times
  ;   Source file: /data/x/lqn/src/utils.lisp

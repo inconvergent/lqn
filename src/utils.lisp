@@ -162,8 +162,22 @@ ranges are lists that behave like arguments to seq*."
   res)
 (defun cat* (&rest rest) "concatenate sequences in rest to vector"
   (apply #'concatenate 'vector rest))
-(defun flatn* (a &optional (n 1)) "flatten n times" ; inefficient?
-  (loop repeat n do (setf a (apply #'concatenate 'vector (coerce a 'list)))) a)
+
+(defun flatn* (a &optional (n 1) (str nil))
+  (declare (sequence a) (fixnum n)) "flatten n times" ; inefficient?
+  (loop repeat n do 
+    (setf a (apply #'concatenate 'vector ; 
+              (map 'list (lambda (x) (typecase x (string (if str x `#(,x)))
+                                                 (sequence x) (atom `#(,x))))
+                   a))))
+  a)
+
+(defun flatn$ (a) "flatten ht to vector: k0 v0 k1 v1 ..."
+  (declare (hash-table a))
+  (let ((res (make-array (size? a) :adjustable nil)))
+    (loop for k being the hash-keys of a using (hash-value v)
+          for i from 0 by 2 do (setf (aref res i) k (aref res (1+ i)) v))
+    res))
 
 (defun flatall* (x &optional (str nil))
   "flatten all sequences into new vector. if str is t strings will become
