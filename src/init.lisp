@@ -1,6 +1,7 @@
 (in-package :lqn)
 
 (defvar *qmodes* '(:+ :? :- :%))
+(defvar *operators* `(:*map :@ :|| :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?srch))
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv
                  :fmt :out :jsnstr
                  :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth?
@@ -62,7 +63,7 @@
 (defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))
 (defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
   (if mode-sym (values-list (unpack-mode mode-sym d :?)) (values nil d)))
-(defun optrig? (s d &aux (d (and (listp d) (car d)))) (and d (sym-not-kv d) (eq s (kv d))))
+(defun qop? (s d &aux (d (and (listp d) (car d)))) (and d (sym-not-kv d) (eq s (kv d))))
 (defun all?    (d) (and (symbolp d)    (eq (kv d) :_)))
 (defun lqnfx?  (d) (and (sym-not-kv d) (member (kv d) *fxns* :test #'eq)))
 

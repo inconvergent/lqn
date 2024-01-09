@@ -147,8 +147,8 @@
  ;   [symbol]
  ; 
  ; FLATN* names a compiled function:
- ;   Lambda-list: (A &OPTIONAL (N 1))
- ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
+ ;   Lambda-list: (A &OPTIONAL (N 1) (STR NIL))
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM T)
  ;                  (VALUES SEQUENCE &OPTIONAL))
  ;   Documentation:
  ;     flatten n times
@@ -955,7 +955,7 @@
  ;   [symbol]
  ; 
  ; TRIM names a compiled function:
- ;   Lambda-list: (S &OPTIONAL
+ ;   Lambda-list: (S &OPTIONAL DEFAULT
  ;                 (CHARS
  ;                  (QUOTE
  ;                   (  
@@ -963,8 +963,7 @@
  ;                     	 
  ; 
  ;                      ))))
- ;   Derived type: (FUNCTION (STRING &OPTIONAL T)
- ;                  (VALUES STRING &OPTIONAL))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     trim string
  ;   Source file: /data/x/lqn/src/utils.lisp
