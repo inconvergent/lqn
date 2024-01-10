@@ -147,7 +147,7 @@ ranges are lists that behave like arguments to seq*."
     (loop for s in seqs collect
       (etypecase s (list (apply #'seq* v s)) (fixnum `(,(ind* v s)))))))
 
-(defun $make (&optional kv
+(defun make$ (&optional kv
    &aux (res (make-hash-table :test (if kv (hash-table-test kv) #'equal))))
   "new/soft copy kv."
   (when kv (loop for k being the hash-keys of kv using (hash-value v)
@@ -160,7 +160,7 @@ ranges are lists that behave like arguments to seq*."
 (defun cat$ (&rest rest &aux (res (make-hash-table :test #'equal)))
   "add all keys from all hash tables in rest. left to right."
   (loop for kv of-type hash-table in rest
-    do (loop for k being the hash-keys of ($make kv)
+    do (loop for k being the hash-keys of (make$ kv)
          using (hash-value v) do (setf (gethash k res) (gethash k kv))))
   res)
 (defun cat* (&rest rest) "concatenate sequences in rest to vector"
@@ -202,19 +202,36 @@ ranges are lists that behave like arguments to seq*."
          (loop for ,o across ,v* for ,i from 0
            do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
 
-(defun $rget (o pp &optional d) "recursively get p from some/path/thing."
+(defun $rget (o pp &optional d) (declare (optimize speed))
+  "recursively get p from some/path/thing."
   (labels ((lookup (o pp) (loop for p in pp if (and (hash-table-p o) (gethash p o))
                             do (setf o (gethash p o))
                             else do (return-from lookup d))
                           (or o d)))
    (lookup o (str-split (ct/kv/str pp) "/"))))
 
-(defun @@ (a i &optional d) "get ind/key from sequence/hash-table."
-  (typecase a (vector (if (< i (length a)) (aref a i) d))
-              (hash-table ($rget a i d))
-              (list (or (nth i a) d))))
+(defun @@ (a path &optional d) (declare (optimize speed))
+  "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
+  (labels ((gkv (a* k) (and (kv? a*) (gethash k a*)))
+           (gv (a* k) (when (and (vec? a*) (< k (length a*))) (aref a* k)))
 
-(defun @* (a d &rest rest &aux l)
+           (good-key (k) (or (int? k) (and (str? k) (> (length k) 0))))
+           (not-empty (a*) (remove-if-not #'good-key a*))
+           (int-or-str (k) (cond ((int!? k)) (t k)))
+           (pre (kk) (not-empty (mapcar #'int-or-str (str-split kk "/"))))
+           (rec (a* kk) (unless kk (return-from rec a*))
+             (let* ((k (pop kk))
+                    (v (cond ((equal k "*")
+                                (return-from rec
+                                  (and (vec? a*) (compct (map 'vector (lambda (b) (rec b kk)) a*)))))
+                             ((str? k) (gkv a* k))
+                             ((int? k) (gv a* k)))))
+               (if (is? v) (rec v kk) (return-from rec d)))))
+    (compct
+      (rec a (etypecase path
+             (string (pre path)) (keyword (pre (str! path))) (fixnum (list path)))))))
+
+(defun @* (a d &rest rest &aux l) (declare (optimize speed))
   "pick these indices/keys from sequence/hash-table into new vector."
   (labels ((lt (l) (or (nth l a) d))
            (kv (k) ($rget a k d))
@@ -223,15 +240,17 @@ ranges are lists that behave like arguments to seq*."
                 (hash-table (map 'vector #'kv rest))
                 (list (map 'vector #'lt rest)))))
 
-(defun compct (o) ; TODO: recursive?
+(defun compct (o) (declare (optimize speed))
   "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
-  (typecase o (sequence (remove-if-not (lambda (o*) (smth? o* t)) o))
-              (hash-table (loop with keys = (list)
-                                for k being the hash-keys of o using (hash-value v)
-                                do (unless (smth? v t) (push k keys))
-                                finally (loop for k in keys do (remhash k o)))
-                          o)
-              (otherwise o)))
+  (labels
+    ((do-ht (o* &aux (ht (make$)))
+       (loop for k being the hash-keys of o* using (hash-value v)
+             for vv = (rec v) if (is? vv) do (setf (gethash k ht) vv))
+       ht)
+     (rec (o*) (typecase o* (string o*) (hash-table (do-ht o*))
+                 (sequence (remove-if-not (lambda (o*) (smth? o* t)) o*))
+                 (otherwise o*))))
+    (rec o)))
 
 (defmacro m/replfx ((d &optional (f* (gensym "F")) (safe t)) &body body)
   (unless d (error "m/replfx: missing args."))
@@ -258,7 +277,7 @@ ranges are lists that behave like arguments to seq*."
 
 (defmacro new* (&rest d) "new vector with these elements" `(vector ,@d))
 (defmacro new$ (&rest d) "new kv/hash-table from these (k v) pairs"
-  (awg (kv) `(let ((,kv ($make)))
+  (awg (kv) `(let ((,kv (make$)))
                ,@(loop for (kk expr) in (group 2 d)
                        collect `(setf (gethash ,(ct/kv/str kk) ,kv) ,expr))
                ,kv)))

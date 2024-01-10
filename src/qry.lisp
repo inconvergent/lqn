@@ -72,10 +72,10 @@
 (defun pre/|| (qq) (unless qq (warn "||: missing args."))
   (loop for q in (prescan qq) collect
     (if (all? q) (kv q)
-        (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
-                    (string `(** ,q)) (number `(** ,(ct/kv/str q)))
-                    (vector `(*map ,@(coerce q 'list)))
-                    (otherwise (error "||: expected cons/symbol/vector/number. got: ~a" q))))))
+      (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
+                  (string `(** ,q)) (number `(** ,(ct/kv/str q)))
+                  (vector `(*map ,@(coerce q 'list)))
+                  (otherwise (error "||: expected cons/symbol/vector/number. got: ~a" q))))))
 
 (defun pre/$$ (q &optional (m :+)) (unless q (warn "$$: missing args."))
   (labels
@@ -150,7 +150,7 @@
 (defun compile/$$ (rec conf d) ; {...} ; sel
   (awg (kres par dat)
     `(let* ((,par ,(gk conf :dat))
-            (,kres ,(if (car- all? d) `($make ,par) `($make))))
+            (,kres ,(if (car- all? d) `(make$ ,par) `(make$))))
        (//fxs/op/ (,par) ; MOVE??
          ,@(loop for (m kk expr) in (strip-all d) collect
              `(let ((,dat ($rget ,par ,kk)))
@@ -176,7 +176,7 @@
     `(loop with ,ires of-type vector = (mav)
            with ,par of-type vector = (vec! ,(gk conf :dat))
            for ,itr of-type hash-table across ,par for ,i from 0
-           for ,kvres of-type hash-table = ,(if (car- all? d) `($make ,itr) `($make))
+           for ,kvres of-type hash-table = ,(if (car- all? d) `(make$ ,itr) `(make$))
            do (//fxs/op/ (,par ,i ,itr)
                 ,@(loop for (m kk expr) in (strip-all d)
                     collect `(let ((,dat ($rget ,itr ,kk)))

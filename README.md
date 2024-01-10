@@ -314,12 +314,12 @@ Defined in all operators:
  - `(isize)`: number of items in `(itr)`.
  - `(cnt [k=0])`: counts from `k` in the enclosing `Selector`.
 `(itr)` and `_` can be the same thing, but in e.g. `KV Selectors`, `(itr)` is
-the current object, but `_` is the value of the selected key n the current
+the current object, but `_` is the value of the selected key in the current
 object.
 
 ### Generic Utilities
 General utilities:
- - `(?? a expr [res=expr])`: execute `expr` only if `a` is not `nil`. if expr
+ - `(?? a expr [res=expr])`: execute `expr` only if `a` is not `nil`. if `expr`
    is not nil it returns `expr` or `res`; otherwise `nil`.
  - `(fmt f ..)`: format `f` as `string` with these (`format`) args.
  - `(fmt s)`: get printed representation of `s`.

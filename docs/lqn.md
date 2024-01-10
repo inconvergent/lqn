@@ -33,10 +33,10 @@
  ;   [symbol]
  ; 
  ; @@ names a compiled function:
- ;   Lambda-list: (A I &OPTIONAL D)
+ ;   Lambda-list: (A PATH &OPTIONAL D)
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
- ;     get ind/key from sequence/hash-table.
+ ;     get nested key (e.g. aa/2/bb) from nested structure of kv/vec
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
