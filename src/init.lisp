@@ -2,13 +2,11 @@
 
 (defvar *qmodes* '(:+ :? :- :%))
 (defvar *operators* `(:*map :@ :|| :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?srch))
-(defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv
+(defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt
                  :fmt :out :jsnstr
-                 :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth?
-                 :*0 :*1 :*2 :*3 :*4 :*5 :*6 :*7 :*8 :*9 :ind* :sel* :seq*
-                 :new* :new$ :cat* :cat$ :head* :tail* :size :size?
+                 :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth? :ind* :sel* :seq*
+                 :new* :new$ :cat* :cat$ :head* :tail* :size?
                  :flatn* :flatall* :flatn$
-                 :pnum :inum :cnt
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :sup :sdwn :mkstr :repl :strcat :splt
                  :msym? :is? :kv? :sym? :sym! :trim
@@ -46,6 +44,18 @@
            &aux (v (slot-value (asdf:find-system 'lqn) 'asdf:version)))
   "return/print lqn version." (unless silent (format t "~&LQN version: ~a~%." v)) v)
 
+(defun make-adjustable-vector (&key init (type t) (size 128))
+  (if init (make-array (length init) :fill-pointer t :initial-contents init
+                                     :element-type type :adjustable t)
+           (make-array size :fill-pointer 0 :element-type type :adjustable t)))
+
+(defun group (n l) (declare (list l) (fixnum n)) "group l into lists of n elements."
+  (if (< n 1) (error "group: group size is smaller than 1"))
+  (labels ((rec (l acc)
+             (let ((rest (nthcdr n l)))
+               (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
+                                (nreverse (cons l acc))))))
+    (if l (rec l nil) nil)))
 (defun mkstr (&rest args) "coerce all arguments to a string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
 (defun kv (s) "mkstr, upcase, keyword."
@@ -99,6 +109,10 @@
 (defun vec! (v &optional (d `#(,v))) "coerce v to vector. if v is not a vector, list, string it returns d"
   (etypecase v (vector v) (list (coerce v 'vector)) (t d)))
 
+(defun size? (l &optional d) "length of sequence/number of keys in kv."
+  (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
+(defun empty? (l &optional d &aux (n (size? l))) (if (int? n) (< n 1) d))
+
 (defmacro smth? (v &body body) ; TODO: recursive strip with ext function
   (declare (symbol v)) "do body if v is not nil, empty sequence, or empty hash-table"
   (awg (v*)
@@ -108,4 +122,8 @@
                    (otherwise (when ,v (progn ,@body)))))))
 (defun is? (k &optional d) "k if k is not nil, empty sequence, or empty hash-table; or d"
   (if (smth? k t) k d))
+
+(defun gk (conf k &optional silent &aux (hit (cdr (assoc k conf))))
+  (declare (list conf) (keyword k)) "get k from config"
+  (if (or silent hit) hit (warn "LQN: missing conf key: ~a~%conf: ~s" k conf)))
 

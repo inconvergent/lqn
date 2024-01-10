@@ -153,7 +153,7 @@
             (,kres ,(if (car- all? d) `(make$ ,par) `(make$))))
        (//fxs/op/ (,par) ; MOVE??
          ,@(loop for (m kk expr) in (strip-all d) collect
-             `(let ((,dat ($rget ,par ,kk)))
+             `(let ((,dat (@@ ,par ,kk)))
                  (declare (ignorable ,dat))
                 ,(compile/$add rec (dat/new conf dat) m kres kk expr))))
        ($nil ,kres))))
@@ -166,7 +166,7 @@
            do (//fxs/op/ (,par ,i ,itr)
                 ,(when (car- all? d) (compile/*add rec conf :+ ires itr))
                 ,@(loop for (m kk expr) in (strip-all d) collect
-                    `(let ((,dat ($rget ,itr ,kk)))
+                    `(let ((,dat (@@ ,itr ,kk)))
                         (declare (ignorable ,dat))
                        ,(compile/*add rec (dat/new conf dat) m ires expr))))
            finally (return ,ires))))
@@ -179,7 +179,7 @@
            for ,kvres of-type hash-table = ,(if (car- all? d) `(make$ ,itr) `(make$))
            do (//fxs/op/ (,par ,i ,itr)
                 ,@(loop for (m kk expr) in (strip-all d)
-                    collect `(let ((,dat ($rget ,itr ,kk)))
+                    collect `(let ((,dat (@@ ,itr ,kk)))
                                 (declare (ignorable ,dat))
                                ,(compile/$add rec (dat/new conf dat) m kvres kk expr)))
                 (vex ,ires ($nil ,kvres)))

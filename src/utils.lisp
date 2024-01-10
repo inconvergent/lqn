@@ -15,21 +15,77 @@
                 (cons (unpack-cons o)) (vector `(,default ,o))
       (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
+(defmacro msym? (a b &optional d)
+  "compare symbol a to b. if b is a keword or symbol
+a perfect match is required. if b is a string it performs a substring
+match. If b is an expression, a is compared to the evaluated value of b."
+  (awg (a* res)
+  `(let* ((,a* ,a)
+          (,res (and (symbolp ,a*)
+                     ,(etypecase b (keyword `(eq ,a* ,b)) (symbol `(eq ,a* ',b)) ; direct match
+                                   (string `(isub? (mkstr ,a*) ,b))
+                                   (cons `(eq ,a* ,b))))))
+     (if ,res ,a* ,d))))
+
+(defun make$ (&optional kv
+   &aux (res (make-hash-table :test (if kv (hash-table-test kv) #'equal))))
+  "new/soft copy kv."
+  (when kv (loop for k being the hash-keys of kv using (hash-value v)
+             do (setf (gethash k res) (gethash k kv))))
+  res)
+(defun $nil (kv) "return nil for emtpy hash-tables. otherwise return kv." ; TODO: use kv?
+  (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
+               (otherwise kv)))
+(defmacro new* (&rest d) "new vector with these elements" `(vector ,@d))
+(defmacro new$ (&rest d) "new kv/hash-table from these (k v) pairs"
+  (awg (kv) `(let ((,kv (make$)))
+               ,@(loop for (kk expr) in (group 2 d)
+                       collect `(setf (gethash ,(ct/kv/str kk) ,kv) ,expr))
+               ,kv)))
+
 (defmacro ?? (a expr &optional res) (declare (symbol a)) ; todo: dont require sym?
   "evaluate expr only iff a is not nil. returns the result of expr or res; or nil."
   `(and ,a ,expr ,@(if res `(,res))))
 
-(defun gk (conf k &optional silent &aux (hit (cdr (assoc k conf))))
-  (declare (list conf) (keyword k)) "get k from config"
-  (if (or silent hit) hit (warn "LQN: missing conf key: ~a~%conf: ~s" k conf)))
+(defun @@ (a path &optional d) (declare (optimize speed))
+  "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
+  (labels ((gkv (a* k) (and (kv? a*) (gethash k a*)))
+           (gv (a* k) (when (and (vec? a*) (< k (length a*))) (aref a* k)))
+           (good-key (k) (or (int? k) (and (str? k) (> (length k) 0))))
+           (not-empty (a*) (remove-if-not #'good-key a*))
+           (int-or-str (k) (cond ((int!? k)) (t k)))
+           (pre (kk) (not-empty (mapcar #'int-or-str (str-split kk "/"))))
+           (rec (a* kk) (unless kk (return-from rec a*))
+             (let* ((k (pop kk))
+                    (v (cond ((equal k "*")
+                                (return-from rec
+                                  (and (vec? a*) (compct (map 'vector (lambda (b) (rec b kk)) a*)))))
+                             ((str? k) (gkv a* k))
+                             ((int? k) (gv a* k)))))
+               (if (is? v) (rec v kk) (return-from rec d)))))
+    (compct
+      (rec a (etypecase path
+             (string (pre path)) (keyword (pre (str! path))) (fixnum (list path)))))))
+(defun compct (o) (declare (optimize speed))
+  "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
+  (labels
+    ((do-ht (o* &aux (ht (make$)))
+       (loop for k being the hash-keys of o* using (hash-value v)
+             for vv = (rec v) if (is? vv) do (setf (gethash k ht) vv))
+       ht)
+     (rec (o*) (typecase o* (string o*) (hash-table (do-ht o*))
+                 (sequence (remove-if-not (lambda (o*) (smth? o* t)) o*))
+                 (otherwise o*))))
+    (rec o)))
 
-(defun group (n l) (declare (list l) (fixnum n)) "group l into lists of n elements."
-  (if (< n 1) (error "group: group size is smaller than 1"))
-  (labels ((rec (l acc)
-             (let ((rest (nthcdr n l)))
-               (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
-                                (nreverse (cons l acc))))))
-    (if l (rec l nil) nil)))
+(defun @* (a d &rest rest &aux l) (declare (optimize speed))
+  "pick these indices/keys from sequence/hash-table into new vector."
+  (labels ((lt (l) (or (nth l a) d))
+           (kv (k) (@@ a k d))
+           (gt (i) (if (< i l) (aref a i) d)))
+    (typecase a (vector (setf l (length a)) (map 'vector #'gt rest))
+                (hash-table (map 'vector #'kv rest))
+                (list (map 'vector #'lt rest)))))
 
 (defun strcat (&rest rest) "concatenate all strings in sequences"
   (apply #'mkstr
@@ -43,15 +99,6 @@
                                           #\Linefeed #\Page #\Return #\Rubout)))
   "trim string"
   (typecase s (string (string-trim chars s)) (otherwise (or s default))))
-
-
-(defmacro out (s &rest rest) "print to standard out"
-  (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
-                     `(let ((,s* ,s))
-                        (when (and ,s* (or (not (stringp ,s*)) (> (length ,s*) 0)))
-                          (format *standard-output* "~&~a~&" ,s*))))))
-(defmacro fmt (s &rest rest) "format to string."
-  (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
 
 (defun pref? (s pref &optional d)
   (declare (optimize speed (safety 2)) (string s pref))
@@ -86,18 +133,12 @@
   (declare (string s sub)) (if (subx? s sub) s d))
 (defun isub? (s sub &optional d) "ignore case sub?"
   (declare (string s sub)) (if (isubx? s sub) s d))
-
-(defmacro msym? (a b &optional d)
-  "compare symbol a to b. if b is a keword or symbol
-a perfect match is required. if b is a string it performs a substring
-match. If b is an expression, a is compared to the evaluated value of b."
-  (awg (a* res)
-  `(let* ((,a* ,a)
-          (,res (and (symbolp ,a*)
-                     ,(etypecase b (keyword `(eq ,a* ,b)) (symbol `(eq ,a* ',b)) ; direct match
-                                   (string `(isub? (mkstr ,a*) ,b))
-                                   (cons `(eq ,a* ,b))))))
-     (if ,res ,a* ,d))))
+(defmacro join (v &rest s) "join sequence v with s into new string."
+  (awg (o n i s* v*)
+    `(let* ((,v* ,v) (,n (1- (length ,v))) (,s* ,(if s `(str! ,@s) "")))
+       (with-output-to-string (*standard-output*)
+         (loop for ,o across ,v* for ,i from 0
+           do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
 
 (defun str-split (s x &key prune &aux (lx (length x)))
   (declare (optimize speed) (string s x) (boolean prune))
@@ -115,10 +156,13 @@ match. If b is an expression, a is compared to the evaluated value of b."
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to)) (str-split s from)))))
     (subseq s 0 (- (length s) (length to)))))
 
-(defun make-adjustable-vector (&key init (type t) (size 128))
-  (if init (make-array (length init) :fill-pointer t :initial-contents init
-                                     :element-type type :adjustable t)
-           (make-array size :fill-pointer 0 :element-type type :adjustable t)))
+(defmacro out (s &rest rest) "print to standard out"
+  (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
+                     `(let ((,s* ,s))
+                        (when (and ,s* (or (not (stringp ,s*)) (> (length ,s*) 0)))
+                          (format *standard-output* "~&~a~&" ,s*))))))
+(defmacro fmt (s &rest rest) "format to string."
+  (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
 
 (defun seq* (v i &optional j) ; TODO: negative indices, tests
   (declare (vector v) (fixnum i)) "(subseq v ,@rest)"
@@ -135,27 +179,12 @@ match. If b is an expression, a is compared to the evaluated value of b."
   (cond ((zerop n) #()) ((plusp n) (subseq s (max 0 (- l n)) l))
                         (t         (subseq s (max 0 (+ l n)) l) )))
 
-(defun size (l) "length of sequence l or number of keys in kv l."
-  (etypecase l (sequence (length l)) (hash-table (hash-table-count l))))
-(defun size? (l &optional d) "length of sequence/number of keys in kv."
-  (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
-
 (defun sel* (v &rest seqs) (declare (vector v))
   "new vector with indices or ranges from v.
 ranges are lists that behave like arguments to seq*."
   (apply #'concatenate 'vector
     (loop for s in seqs collect
       (etypecase s (list (apply #'seq* v s)) (fixnum `(,(ind* v s)))))))
-
-(defun make$ (&optional kv
-   &aux (res (make-hash-table :test (if kv (hash-table-test kv) #'equal))))
-  "new/soft copy kv."
-  (when kv (loop for k being the hash-keys of kv using (hash-value v)
-             do (setf (gethash k res) (gethash k kv))))
-  res)
-(defun $nil (kv) "return nil for emtpy hash-tables. otherwise return kv." ; TODO: use kv?
-  (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
-               (otherwise kv)))
 
 (defun cat$ (&rest rest &aux (res (make-hash-table :test #'equal)))
   "add all keys from all hash tables in rest. left to right."
@@ -165,22 +194,6 @@ ranges are lists that behave like arguments to seq*."
   res)
 (defun cat* (&rest rest) "concatenate sequences in rest to vector"
   (apply #'concatenate 'vector rest))
-
-(defun flatn* (a &optional (n 1) (str nil))
-  (declare (sequence a) (fixnum n)) "flatten n times" ; inefficient?
-  (loop repeat n do
-    (setf a (apply #'concatenate 'vector ;
-              (map 'list (lambda (x) (typecase x (string (if str x `#(,x)))
-                                                 (sequence x) (atom `#(,x))))
-                   a))))
-  a)
-
-(defun flatn$ (a) "flatten ht to vector: k0 v0 k1 v1 ..."
-  (declare (hash-table a))
-  (let ((res (make-array (size? a) :adjustable nil)))
-    (loop for k being the hash-keys of a using (hash-value v)
-          for i from 0 by 2 do (setf (aref res i) k (aref res (1+ i)) v))
-    res))
 
 (defun flatall* (x &optional (str nil))
   "flatten all sequences into new vector. if str is t strings will become
@@ -194,63 +207,20 @@ ranges are lists that behave like arguments to seq*."
                    ((atom x) (cons x acc))
                    (t (rec (car x) (rec (cdr x) acc))))))
     (coerce (rec x nil) 'vector)))
-
-(defmacro join (v &rest s) "join sequence v with s into new string."
-  (awg (o n i s* v*)
-    `(let* ((,v* ,v) (,n (1- (length ,v))) (,s* ,(if s `(str! ,@s) "")))
-       (with-output-to-string (*standard-output*)
-         (loop for ,o across ,v* for ,i from 0
-           do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
-
-(defun $rget (o pp &optional d) (declare (optimize speed))
-  "recursively get p from some/path/thing."
-  (labels ((lookup (o pp) (loop for p in pp if (and (hash-table-p o) (gethash p o))
-                            do (setf o (gethash p o))
-                            else do (return-from lookup d))
-                          (or o d)))
-   (lookup o (str-split (ct/kv/str pp) "/"))))
-
-(defun @@ (a path &optional d) (declare (optimize speed))
-  "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
-  (labels ((gkv (a* k) (and (kv? a*) (gethash k a*)))
-           (gv (a* k) (when (and (vec? a*) (< k (length a*))) (aref a* k)))
-
-           (good-key (k) (or (int? k) (and (str? k) (> (length k) 0))))
-           (not-empty (a*) (remove-if-not #'good-key a*))
-           (int-or-str (k) (cond ((int!? k)) (t k)))
-           (pre (kk) (not-empty (mapcar #'int-or-str (str-split kk "/"))))
-           (rec (a* kk) (unless kk (return-from rec a*))
-             (let* ((k (pop kk))
-                    (v (cond ((equal k "*")
-                                (return-from rec
-                                  (and (vec? a*) (compct (map 'vector (lambda (b) (rec b kk)) a*)))))
-                             ((str? k) (gkv a* k))
-                             ((int? k) (gv a* k)))))
-               (if (is? v) (rec v kk) (return-from rec d)))))
-    (compct
-      (rec a (etypecase path
-             (string (pre path)) (keyword (pre (str! path))) (fixnum (list path)))))))
-
-(defun @* (a d &rest rest &aux l) (declare (optimize speed))
-  "pick these indices/keys from sequence/hash-table into new vector."
-  (labels ((lt (l) (or (nth l a) d))
-           (kv (k) ($rget a k d))
-           (gt (i) (if (< i l) (aref a i) d)))
-    (typecase a (vector (setf l (length a)) (map 'vector #'gt rest))
-                (hash-table (map 'vector #'kv rest))
-                (list (map 'vector #'lt rest)))))
-
-(defun compct (o) (declare (optimize speed))
-  "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
-  (labels
-    ((do-ht (o* &aux (ht (make$)))
-       (loop for k being the hash-keys of o* using (hash-value v)
-             for vv = (rec v) if (is? vv) do (setf (gethash k ht) vv))
-       ht)
-     (rec (o*) (typecase o* (string o*) (hash-table (do-ht o*))
-                 (sequence (remove-if-not (lambda (o*) (smth? o* t)) o*))
-                 (otherwise o*))))
-    (rec o)))
+(defun flatn* (a &optional (n 1) (str nil))
+  (declare (sequence a) (fixnum n)) "flatten n times" ; inefficient?
+  (loop repeat n do
+    (setf a (apply #'concatenate 'vector ;
+              (map 'list (lambda (x) (typecase x (string (if str x `#(,x)))
+                                                 (sequence x) (atom `#(,x))))
+                   a))))
+  a)
+(defun flatn$ (a) "flatten ht to vector: k0 v0 k1 v1 ..."
+  (declare (hash-table a))
+  (let ((res (make-array (size? a) :adjustable nil)))
+    (loop for k being the hash-keys of a using (hash-value v)
+          for i from 0 by 2 do (setf (aref res i) k (aref res (1+ i)) v))
+    res))
 
 (defmacro m/replfx ((d &optional (f* (gensym "F")) (safe t)) &body body)
   (unless d (error "m/replfx: missing args."))
@@ -267,18 +237,4 @@ ranges are lists that behave like arguments to seq*."
             ((consp ,f*) (cons (,rec (car ,f*)) (,rec (cdr ,f*))))
             (t ,f*))))
       (,rec ,d)))))
-
-(defmacro make-ind-getters (n)
-  `(progn ,@(loop for i from 0 to n collect
-              `(defun ,(symb :* i) (v &optional (k 0))
-                 (declare (sequence v) (fixnum k))
-                 (ind* v (+ k ,i))))))
-(make-ind-getters 9)
-
-(defmacro new* (&rest d) "new vector with these elements" `(vector ,@d))
-(defmacro new$ (&rest d) "new kv/hash-table from these (k v) pairs"
-  (awg (kv) `(let ((,kv (make$)))
-               ,@(loop for (kk expr) in (group 2 d)
-                       collect `(setf (gethash ,(ct/kv/str kk) ,kv) ,expr))
-               ,kv)))
 

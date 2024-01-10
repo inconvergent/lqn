@@ -731,21 +731,6 @@
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
-#### LQN:SIZE
-
-```
- ; LQN:SIZE
- ;   [symbol]
- ; 
- ; SIZE names a compiled function:
- ;   Lambda-list: (L)
- ;   Derived type: (FUNCTION (T)
- ;                  (VALUES (MOD 4611686018427387901) &OPTIONAL))
- ;   Documentation:
- ;     length of sequence l or number of keys in kv l.
- ;   Source file: /data/x/lqn/src/utils.lisp
-```
-
 #### LQN:SIZE?
 
 ```
@@ -757,7 +742,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     length of sequence/number of keys in kv.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
 #### LQN:SPLT
