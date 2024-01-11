@@ -1,5 +1,10 @@
 (in-package :lqn)
 
+(declaim (inline sup sdwn isubx? isub? subx? sub? pref? suf? empty? num!?
+                 num? flt!? flt? int!? int? lst? seq? seq!? str!
+                 ; str? str!? vec! vec? vec!?
+                 ))
+
 (defvar *qmodes* '(:+ :? :- :%))
 (defvar *operators* `(:*map :@ :|| :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?srch))
 (defvar *opt* '(optimize (speed 3) (safety 1)))
@@ -60,10 +65,10 @@
 (defun mkstr (&rest args) "coerce all arguments to a string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
 (defun kv (s) "mkstr, upcase, keyword."
-  (intern (sup (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
+  (intern (string-upcase (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
           :keyword))
 (defun ct/kv/str (a)
-  (typecase a (string a) (keyword (sdwn (mkstr a))) (otherwise a)))
+  (typecase a (string a) (keyword (string-downcase (mkstr a))) (otherwise a)))
 (defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
 (defun psymb (&optional (pkg 'lqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
   "mkstr, make symbol in pkg."
@@ -106,7 +111,7 @@
 ; COERCE TO TYPE
 (defun sym! (&rest rest) "stringify, make symbol" (apply #'symb rest))
 (defun str! (&rest rest) "coerce to string"
-  (apply #'mkstr (loop for s in rest collect (typecase s (string s) (symbol (sdwn s)) (t (mkstr s))))))
+  (apply #'mkstr (loop for s in rest collect (typecase s (string s) (symbol (string-downcase s)) (t (mkstr s))))))
 (defun vec! (v &optional (d `#(,v))) "coerce v to vector. if v is not a vector, list, string it returns d"
   (etypecase v (vector v) (list (coerce v 'vector)) (t d)))
 

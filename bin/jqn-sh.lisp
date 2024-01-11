@@ -3,10 +3,10 @@
 
 (defun jqn/read-from-file (f) (declare #.*opt*)
   (handler-case (jsnloadf f)
-    (error (e) (exit-with-msg 55 "jqn: failed to READ JSON file: ~a~%msg: ~a" f e))))
+    (error (e) (exit-with-msg 55 "JSON: failed to READ file: ~a~%msg: ~a" f e))))
 (defun jqn/read-from-pipe () (declare #.*opt*)
-  (handler-case (jsnloads *standard-input*)
-    (error (e) (exit-with-msg 55 "jqn: failed to PARSE JSON from pipe:~%~a" e))))
+  (handler-case (jsnloads *standard-input* t)
+    (error (e) (exit-with-msg 55 "JSON: failed to PARSE from pipe:~%~a" e))))
 
 (defun jqn/run-files (opts fx files)
   (declare (optimize speed) (function fx))
@@ -14,10 +14,10 @@
     (sh/out :json opts (sh/execute-qry fx (jqn/read-from-file fn) fn fi))))
 (defun jqn/run-pipe (opts fx)
   (declare (optimize speed) (function fx))
-  (sh/out :json opts (sh/execute-qry fx (jqn/read-from-pipe) ":pipe:" 0)))
+  (sh/out :json opts (sh/execute-qry fx (sh/one? (jqn/read-from-pipe)) ":pipe:" 0)))
 
-(sh/run-from-shell (format nil "
-JQN - JSON QUERY NOTATION (~a)
+(sh/run-from-shell (format nil
+"~%██ JQN - JSON - LISP QUERY NOTATION (~a)
 
 Usage:
   jqn [options] <qry> [files ...]
@@ -28,10 +28,17 @@ Options:
   -j output as JSON [default]
   -l output to readable lisp data (LDN)
   -t output as TXT
-  -m minified json. indented is default. ignored for -l/-t
+  -m minified JSON. indented is default.
+  -z preserve empty lines in TXT. [compct is default]
   -h show this message.
 
-  options can be write as -i -v or -iv.
+██ options can be write as -i -v or -iv.
+██
+██ when outputing in TXT, internal vectors or kvs are printed in LDN
+██ mode. use -tj and -tl to output to JSON or LDN respectively. use -tjm
+██ to print a resulting vector as (minified) lines of json.
+██
+██ see docs at: https://github.com/inconvergent/lqn
 
 Examples:
   jqn _ sample.json                  # get everything in the file

@@ -27,10 +27,14 @@
   (loop for l = (read s nil nil) while l do (vex res l))
   res)
 
-(defun jsnloads (&optional (s *standard-input*))
+(defun jsnloads (&optional (s *standard-input*) all)
   (declare #.*opt*) "parse json from stream; or *standard-input*"
   (let ((yason:*parse-json-arrays-as-vectors* t))
-    (yason:parse s)))
+    (if all (let ((res (mav)))
+              (handler-case
+                (loop for j = (yason:parse s) while j do (vex res j) finally (return res))
+                (end-of-file () res)))
+            (yason:parse s))))
 (defun jsnloadf (fn)
   (declare #.*opt* (string fn)) "parse json from file, fn"
   (with-open-file (f fn :direction :input)
@@ -61,4 +65,12 @@
                    for v across o do (vex res (ldnout v))
                    finally (return res)))
      (otherwise o)))
+
+(defmacro out (s &rest rest) "print to standard out"
+  (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
+                     `(let ((,s* ,s))
+                        (when (and ,s* (or (not (stringp ,s*)) (> (length ,s*) 0)))
+                          (format *standard-output* "~&~a~&" ,s*))))))
+(defmacro fmt (s &rest rest) "format to string."
+  (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
 

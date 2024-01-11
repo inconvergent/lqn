@@ -22,7 +22,7 @@ jqn -h
 #>   -j output as JSON [default]
 #>   -l output to readable lisp data (LDN)
 #>   -t output as TXT
-#>   -m minified json. indented is default. ignored for -l/-t
+#>   -m minified json. indented is default.
 #>   -h show this message.
 #>
 #>   options can be write as -i -v or -iv.
@@ -297,7 +297,7 @@ convenience there are some utility functions/macros in defined in `lqn`.
 ### Global Query Context Fxs
 Defined in the query scope:
  - `(fi [k=0])`: counts files from `k`.
- - `(fn)`: name of the current file, or `":internal:"`.
+ - `(fn)`: name of the current file; or `":internal:"`, `"pipe"`.
  - `(hld k v)`: hold this value at this key in a key value store.
  - `(ghv k [d])`: get the value of this key; or `d`.
  - `(nope [d])`: stop execution, return `d`.
@@ -312,9 +312,9 @@ Defined in all operators:
  - `(psize)`: number of items in `(par)`.
  - `(isize)`: number of items in `(itr)`.
  - `(cnt [k=0])`: counts from `k` in the enclosing `Selector`.
-`(itr)` and `_` can be the same thing, but in e.g. `KV Selectors`, `(itr)` is
-the current object, but `_` is the value of the selected key in the current
-object.
+   `(itr)` and `_` can be the same thing, but in e.g. `KV Selectors`, `(itr)` is
+   the current object, but `_` is the value of the selected key in the current
+   object.
 
 ### Generic Utilities
 General utilities:

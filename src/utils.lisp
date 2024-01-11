@@ -1,5 +1,30 @@
 (in-package :lqn)
 
+(defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
+(defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
+(defun trim (s &optional default (chars '(#\Space #\Newline #\Backspace #\Tab
+                                          #\Linefeed #\Page #\Return #\Rubout)))
+  "trim string"
+  (typecase s (string (string-trim chars s)) (otherwise (or s default))))
+
+(defun subx? (s sub)
+  (declare #.*opt* (string s sub))
+  "returns index where substring matches s from left to right. otherwise nil"
+  (loop with sub0 of-type character = (char sub 0)
+        with lc = (length sub)
+        for i from 0 repeat (1+ (- (length s) lc))
+        if (and (eq sub0 (char s i)) ; this is more efficient
+                (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
+        do (return-from subx? i)))
+
+(defun isubx? (s sub) "ignore case subx?"
+  (declare (string s sub)) (subx? (sup s) (sup sub)))
+(defun sub? (s sub &optional d) "s if sub is substring of s; or d"
+  (declare (string s sub)) (if (subx? s sub) s d))
+(defun isub? (s sub &optional d) "ignore case sub?"
+  (declare (string s sub)) (if (isubx? s sub) s d))
+
+
 (defun unpack-mode (o &optional (default :+) merciful)
   (labels ((valid-mode (m) (member m *qmodes* :test #'eq))
            (repack- (s s*) (etypecase s (symbol (psymb (symbol-package s) (subseq s* 2)))
@@ -73,7 +98,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
        (loop for k being the hash-keys of o* using (hash-value v)
              for vv = (rec v) if (is? vv) do (setf (gethash k ht) vv))
        ht)
-     (rec (o*) (typecase o* (string o*) (hash-table (do-ht o*))
+     (rec (o*) (typecase o* (string (if (empty? o*) nil o*)) (hash-table (do-ht o*))
                  (sequence (remove-if-not (lambda (o*) (smth? o* t)) o*))
                  (otherwise o*))))
     (rec o)))
@@ -93,12 +118,6 @@ match. If b is an expression, a is compared to the evaluated value of b."
                           (list (apply #'concatenate 'string s))
                           (vector (apply #'concatenate 'string (coerce s 'list)))))
             rest)))
-(defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
-(defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
-(defun trim (s &optional default (chars '(#\Space #\Newline #\Backspace #\Tab
-                                          #\Linefeed #\Page #\Return #\Rubout)))
-  "trim string"
-  (typecase s (string (string-trim chars s)) (otherwise (or s default))))
 
 (defun pref? (s pref &optional d)
   (declare #.*opt* (string s pref))
@@ -117,22 +136,6 @@ match. If b is an expression, a is compared to the evaluated value of b."
   (declare #.*opt* (string s suf)) "ignore case suf?"
   (if (pref? (sup (reverse s)) (sup (reverse suf))) s d))
 
-(defun subx? (s sub)
-  (declare #.*opt* (string s sub))
-  "returns index where substring matches s from left to right. otherwise nil"
-  (loop with sub0 of-type character = (char sub 0)
-        with lc = (length sub)
-        for i from 0 repeat (1+ (- (length s) lc))
-        if (and (eq sub0 (char s i)) ; this is more efficient
-                (string= sub s :start2 (1+ i) :end2 (+ i lc) :start1 1))
-        do (return-from subx? i)))
-
-(defun isubx? (s sub) "ignore case subx?"
-  (declare (string s sub)) (subx? (sup s) (sup sub)))
-(defun sub? (s sub &optional d) "s if sub is substring of s; or d"
-  (declare (string s sub)) (if (subx? s sub) s d))
-(defun isub? (s sub &optional d) "ignore case sub?"
-  (declare (string s sub)) (if (isubx? s sub) s d))
 (defmacro join (v &rest s) "join sequence v with s into new string."
   (awg (o n i s* v*)
     `(let* ((,v* ,v) (,n (1- (length ,v))) (,s* ,(if s `(str! ,@s) "")))
@@ -155,14 +158,6 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun repl (s from to) (declare (string s from to)) "replace from with to in s"
   (let ((s (strcat (mapcar (lambda (s) (mkstr s to)) (str-split s from)))))
     (subseq s 0 (- (length s) (length to)))))
-
-(defmacro out (s &rest rest) "print to standard out"
-  (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
-                     `(let ((,s* ,s))
-                        (when (and ,s* (or (not (stringp ,s*)) (> (length ,s*) 0)))
-                          (format *standard-output* "~&~a~&" ,s*))))))
-(defmacro fmt (s &rest rest) "format to string."
-  (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
 
 (defun seq* (v i &optional j) ; TODO: negative indices, tests
   (declare (vector v) (fixnum i)) "(subseq v ,@rest)"

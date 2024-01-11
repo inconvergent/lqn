@@ -166,6 +166,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     f as float if it can be parsed; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -180,6 +181,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     f if float; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -193,7 +195,7 @@
  ;   Lambda-list: (S &REST REST)
  ;   Documentation:
  ;     format to string.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
 #### LQN:HEAD\*
@@ -240,6 +242,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     i as int if it can be parsed; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -254,6 +257,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     i if int; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -274,7 +278,8 @@
  ; 
  ; IPREF? names a compiled function:
  ;   Lambda-list: (S SUF &OPTIONAL D)
- ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T) *)
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     ignore case pref?
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -306,6 +311,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     ignore case sub?
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -317,9 +323,11 @@
  ; 
  ; ISUBX? names a compiled function:
  ;   Lambda-list: (S SUB)
- ;   Derived type: (FUNCTION (STRING STRING) *)
+ ;   Derived type: (FUNCTION (STRING STRING)
+ ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
  ;   Documentation:
  ;     ignore case subx?
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -372,8 +380,8 @@
  ;   [symbol]
  ; 
  ; JSNLOADS names a compiled function:
- ;   Lambda-list: (&OPTIONAL (S *STANDARD-INPUT*))
- ;   Derived type: (FUNCTION (&OPTIONAL T) *)
+ ;   Lambda-list: (&OPTIONAL (S *STANDARD-INPUT*) ALL)
+ ;   Derived type: (FUNCTION (&OPTIONAL T T) *)
  ;   Documentation:
  ;     parse json from stream; or *standard-input*
  ;   Source file: /data/x/lqn/src/io.lisp
@@ -461,6 +469,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     l if list; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -529,6 +538,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     n as number if it can be parsed; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -543,6 +553,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     n if number; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -556,7 +567,7 @@
  ;   Lambda-list: (S &REST REST)
  ;   Documentation:
  ;     print to standard out
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
 #### LQN:PNUM
@@ -580,6 +591,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if s starts with pref; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -590,8 +602,8 @@
  ;   [symbol]
  ; 
  ; PROC-QRY names a compiled function:
- ;   Lambda-list: (CONF* Q)
- ;   Derived type: (FUNCTION (T T) (VALUES CONS &OPTIONAL))
+ ;   Lambda-list: (Q &OPTIONAL CONF*)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES CONS &OPTIONAL))
  ;   Documentation:
  ;     compile lqn query
  ;   Source file: /data/x/lqn/src/qry.lisp
@@ -617,7 +629,7 @@
  ;   [symbol]
  ; 
  ; QRYD names a macro:
- ;   Lambda-list: (DAT Q &KEY CONF DB)
+ ;   Lambda-list: (DAT Q &KEY DB)
  ;   Documentation:
  ;     run lqn query on dat
  ;   Source file: /data/x/lqn/src/qry.lisp
@@ -630,8 +642,8 @@
  ;   [symbol]
  ; 
  ; QRYL names a compiled function:
- ;   Lambda-list: (DAT Q &KEY CONF DB)
- ;   Derived type: (FUNCTION (T T &KEY (:CONF T) (:DB T)) *)
+ ;   Lambda-list: (DAT Q &KEY DB)
+ ;   Derived type: (FUNCTION (T T &KEY (:DB T)) *)
  ;   Documentation:
  ;     compile lqn query and run on dat
  ;   Source file: /data/x/lqn/src/qry.lisp
@@ -666,6 +678,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and downcase
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -699,6 +712,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s as seq if it can be parsed; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -728,6 +742,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if sequence; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -769,6 +784,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     coerce to string
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -826,6 +842,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if sub is substring of s; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -841,6 +858,7 @@
  ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
  ;   Documentation:
  ;     returns index where substring matches s from left to right. otherwise nil
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -856,6 +874,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if s ends with suf; or d
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -870,6 +889,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and upcase
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
