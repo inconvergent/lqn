@@ -47,7 +47,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
   "evaluate expr only iff a is not nil. returns the result of expr or res; or nil."
   `(and ,a ,expr ,@(if res `(,res))))
 
-(defun @@ (a path &optional d) (declare (optimize speed))
+(defun @@ (a path &optional d) (declare #.*opt*)
   "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
   (labels ((gkv (a* k) (and (kv? a*) (gethash k a*)))
            (gv (a* k) (when (and (vec? a*) (< k (length a*))) (aref a* k)))
@@ -66,7 +66,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
     (compct
       (rec a (etypecase path
              (string (pre path)) (keyword (pre (str! path))) (fixnum (list path)))))))
-(defun compct (o) (declare (optimize speed))
+(defun compct (o) (declare #.*opt*)
   "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
   (labels
     ((do-ht (o* &aux (ht (make$)))
@@ -78,7 +78,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
                  (otherwise o*))))
     (rec o)))
 
-(defun @* (a d &rest rest &aux l) (declare (optimize speed))
+(defun @* (a d &rest rest &aux l) (declare #.*opt*)
   "pick these indices/keys from sequence/hash-table into new vector."
   (labels ((lt (l) (or (nth l a) d))
            (kv (k) (@@ a k d))
@@ -101,24 +101,24 @@ match. If b is an expression, a is compared to the evaluated value of b."
   (typecase s (string (string-trim chars s)) (otherwise (or s default))))
 
 (defun pref? (s pref &optional d)
-  (declare (optimize speed (safety 2)) (string s pref))
+  (declare #.*opt* (string s pref))
   "s if s starts with pref; or d"
   (if (and (<= (length pref) (length s))
            (string= pref s :end2 (length pref)))
        s d))
 (defun ipref? (s suf &optional d)
-  (declare (optimize speed (safety 2)) (string s suf)) "ignore case pref?"
+  (declare #.*opt* (string s suf)) "ignore case pref?"
   (pref? (sup s) (sup suf) d))
 
 (defun suf? (s suf &optional d)
-  (declare (optimize speed (safety 2)) (string s suf)) "s if s ends with suf; or d"
+  (declare #.*opt* (string s suf)) "s if s ends with suf; or d"
   (if (pref? (reverse s) (reverse suf)) s d))
 (defun isuf? (s suf &optional d)
-  (declare (optimize speed (safety 2)) (string s suf)) "ignore case suf?"
+  (declare #.*opt* (string s suf)) "ignore case suf?"
   (if (pref? (sup (reverse s)) (sup (reverse suf))) s d))
 
 (defun subx? (s sub)
-  (declare (optimize speed (safety 2)) (string s sub))
+  (declare #.*opt* (string s sub))
   "returns index where substring matches s from left to right. otherwise nil"
   (loop with sub0 of-type character = (char sub 0)
         with lc = (length sub)
@@ -141,7 +141,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
            do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
 
 (defun str-split (s x &key prune &aux (lx (length x)))
-  (declare (optimize speed) (string s x) (boolean prune))
+  (declare #.*opt* (string s x) (boolean prune))
   "split string at substring. prune removes empty strings"
   (labels ((lst (s) (typecase s (list s) (t (list s))))
            (splt (s &aux (i (subx? s x)))
@@ -224,7 +224,7 @@ ranges are lists that behave like arguments to seq*."
 
 (defmacro m/replfx ((d &optional (f* (gensym "F")) (safe t)) &body body)
   (unless d (error "m/replfx: missing args."))
-  (awg (rec) `(locally (declare (optimize speed))
+  (awg (rec) `(locally (declare #.*opt*)
     (labels ((,rec (,f*)
       (cond ,@(loop for (fx tx) in (group 2 body) collect `(,fx ,(if safe tx `(,rec ,tx))))
             ((hash-table-p ,f*)

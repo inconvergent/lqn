@@ -2,37 +2,42 @@
 ; YASON DOCS https://phmarek.github.io/yason/
 
 (defun read-all-str (s &aux (n (length s)) (pos 0))
+  (declare #.*opt*)
   (loop for (l new-pos) = (mvl (read-from-string s nil nil :start pos))
         while (and l (<= new-pos n)) do (setf pos new-pos) collect l))
 
 (defun read-stream-lines-as-vector (&optional (s *standard-input*)
                                     &aux (res (make-adjustable-vector)))
+  (declare #.*opt*)
   (loop for l = (read-line s nil nil) while l do (vex res l))
   res)
 (defun read-file-as-vector (fn &aux (res (make-adjustable-vector)))
+  (declare #.*opt*)
   (with-open-file (in fn)
     (loop for l = (read-line in nil nil) while l do (vex res l)))
   res)
 ; (setf (readtable-case *readtable*) :preserve)
 (defun read-file-as-data-vector (fn &aux (res (make-adjustable-vector)))
+  (declare #.*opt*)
   (with-open-file (in fn)
     (loop for l = (read in nil nil) while l do (vex res l)))
   res)
 (defun read-stream-as-data-vector (s &aux (res (make-adjustable-vector)))
+  (declare #.*opt*)
   (loop for l = (read s nil nil) while l do (vex res l))
   res)
 
 (defun jsnloads (&optional (s *standard-input*))
-  "parse json from stream; or *standard-input*"
+  (declare #.*opt*) "parse json from stream; or *standard-input*"
   (let ((yason:*parse-json-arrays-as-vectors* t))
     (yason:parse s)))
 (defun jsnloadf (fn)
-  (declare (string fn)) "parse json from file, fn"
+  (declare #.*opt* (string fn)) "parse json from file, fn"
   (with-open-file (f fn :direction :input)
     (handler-case (jsnloads f) (end-of-file () (warn "empty file: ~a" fn)))))
 
 (defun jsnout (o &key (s *standard-output*) indent)
-  (declare (stream s) (boolean indent))
+  (declare #.*opt* (stream s) (boolean indent))
   "stream serialized json from o to s; or *standard-output*"
   (let ((yason:*symbol-key-encoder* 'yason:encode-symbol-as-lowercase)
         (yason:*symbol-encoder* 'yason:encode-symbol-as-lowercase)

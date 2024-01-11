@@ -6,33 +6,6 @@
 
 ; CONTEXTS
 
-(defmacro //fxs/qry (conf &body body &aux (meta (gensym "META")))
-  (awg (nope)
-    `(let ((,meta (make-hash-table :test #'eq)))
-     (block ,nope
-       (labels ((entry () ,(gk conf :entry t))
-                (fn () ,(gk conf :fn t))
-                (fi (&optional (k 0)) (+ k ,(or (gk conf :fi t) 0)))
-                (ghv (k &optional d) (declare (keyword k)) (gethash k ,meta d))
-                (hld (k &optional v) (declare (keyword k))
-                  (if v (setf (gethash k ,meta) v) (remhash k ,meta)) v)
-                (cnt (&optional (k 0)) (+ k ,(or (gk conf :fi t) 0)))
-                (nope (&optional a) (return-from ,nope a))
-                (err (&optional a) (error "qry err: ~a" a))
-                (wrn (&optional a) (warn "qry wrn: ~a" a))
-                (par () ,(gk conf :dat))
-                (pnum (&optional d) (size? (par) d))
-                (itr () (wrn "no (itr) in qry scope."))
-                (inum () (wrn "no (inum) in qry scope.")))
-         ,@body)))))
-
-(defmacro //fxs/op/ ((par &optional i itr) &body body)
-  (declare (symbol par itr))
-  `(labels (,@(when par `((par () ,par) (pnum () (size? ,par))))
-            ,@(when itr `((itr () ,itr) (inum () (size? ,itr))))
-            ,@(when i `((cnt (&optional (k 0)) (+ ,i k)))))
-     ,@body))
-
 (defun compile/$add (rec conf mode lft k v)
   (labels ((rec (x) (funcall rec conf x)))
     (case mode
@@ -243,7 +216,36 @@
                                       (funcall rec conf `(?txpr ,@d (vex ,res _))))
                 ,res)))
 
-(defun proc-qry (conf* q) "compile lqn query"
+(defmacro //fxs/qry ((dat fn fi) &body body &aux (meta (gensym "META")))
+  (declare (symbol dat fn fi))
+  (awg (nope)
+    `(let ((,meta (make-hash-table :test #'eq)))
+     (block ,nope
+       (labels ((fn () ,fn)
+                (fi (&optional (k 0)) (+ k ,fi))
+                (ghv (k &optional d) (declare (keyword k)) (gethash k ,meta d))
+                (hld (k &optional v) (declare (keyword k))
+                  (if v (setf (gethash k ,meta) v) (remhash k ,meta)) v)
+                (cnt (&optional (k 0)) (+ k ,fi))
+                (nope (&optional a) (return-from ,nope a))
+                (err (&optional a) (error "qry err: ~a" a))
+                (wrn (&optional a) (warn "qry wrn: ~a" a))
+                (par () ,dat)
+                (pnum (&optional d) (size? (par) d))
+                (itr () (wrn "no (itr) in qry scope."))
+                (inum () (wrn "no (inum) in qry scope.")))
+         ,@body)))))
+
+(defmacro //fxs/op/ ((par &optional i itr) &body body)
+  (declare (symbol par itr))
+  `(labels (,@(when par `((par () ,par) (pnum () (size? ,par))))
+            ,@(when itr `((itr () ,itr) (inum () (size? ,itr))))
+            ,@(when i `((cnt (&optional (k 0)) (+ ,i k)))))
+     ,@body))
+
+
+(defun proc-qry (q &optional conf*) "compile lqn query"
+  (awg (dat fn fi)
   (labels
     ((rec (conf d)
        (cond
@@ -267,7 +269,8 @@
          ((car- lqnfx? d)    `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
          ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
          (t (error "lqn: unexpected clause: ~a~%in: ~a" d q)))))
-    `(//fxs/qry ,conf* ,(rec conf* q))))
+      `(lambda (,dat ,fn ,fi) (//fxs/qry (,dat ,fn ,fi)
+                               ,(rec `((:dat . ,dat) ,@conf*) q))))))
 
 (defun qry/show (q compiled)
   (format t "
@@ -276,16 +279,16 @@
 ██ ---------~%   ~s
 ██ END      ██████████████████████████~%" q compiled))
 
-(defmacro qryd (dat q &key conf db) "run lqn query on dat"
-  (awg (dat*) (let ((compiled (proc-qry `((:dat . ,dat*) ,@conf) q)))
-                (when db (qry/show q compiled))
-                `(let ((,dat* ,dat)) ,compiled))))
+(defmacro qryd (dat q &key db) "run lqn query on dat"
+  (let ((compiled (proc-qry q)))
+    (when db (qry/show q compiled))
+    `(funcall ,compiled ,dat ":internal:" 0)))
 (defmacro qry (dat &rest rest) "query data. rest is wrapped in the pipe operator."
   `(qryd ,dat (|| ,@rest)))
 (defmacro qrydb (dat &rest rest) "query data. rest is wrapped in the pipe operator."
   `(qryd ,dat (|| ,@rest) :db t))
-(defun qryl (dat q &key conf db) "compile lqn query and run on dat"
-  (eval `(qryd ,dat ,q :db ,db :conf ,conf)))
+(defun qryl (dat q &key db) "compile lqn query and run on dat"
+  (eval `(qryd ,dat ,q :db ,db)))
 (defmacro jsnqryf (fn q &key db) "run lqn query on json file, fn"
   `(qryd (jsnloadf ,fn) ,q :db ,db))
 

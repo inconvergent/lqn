@@ -1,7 +1,22 @@
 (ql:quickload :lqn :silent t)
 (in-package :lqn)
 
-(defvar *ex* (format nil "
+(defun jqn/read-from-file (f) (declare #.*opt*)
+  (handler-case (jsnloadf f)
+    (error (e) (exit-with-msg 55 "jqn: failed to READ JSON file: ~a~%msg: ~a" f e))))
+(defun jqn/read-from-pipe () (declare #.*opt*)
+  (handler-case (jsnloads *standard-input*)
+    (error (e) (exit-with-msg 55 "jqn: failed to PARSE JSON from pipe:~%~a" e))))
+
+(defun jqn/run-files (opts fx files)
+  (declare (optimize speed) (function fx))
+  (loop for fn in files for fi from 0 do
+    (sh/out :json opts (sh/execute-qry fx (jqn/read-from-file fn) fn fi))))
+(defun jqn/run-pipe (opts fx)
+  (declare (optimize speed) (function fx))
+  (sh/out :json opts (sh/execute-qry fx (jqn/read-from-pipe) ":pipe:" 0)))
+
+(sh/run-from-shell (format nil "
 JQN - JSON QUERY NOTATION (~a)
 
 Usage:
@@ -23,45 +38,5 @@ Examples:
   jqn '#{k1 k2}' sample.json         # get k1, k2 from list of objects
   jqn '{k1 k2}' sample.json          # get k1, k2 from object
   echo '{\"_id\": 1}' | jqn '{_id}'    # query data from pipe
-" (lqn:v?)))
-
-(defun jqn/execute-query (opts dat q &key conf db)
-  (handler-case (qryl dat q :conf conf :db db)
-    (error (e) (exit-with-msg 50 "jqn: failed to execute qry:~%~a" e))))
-
-(defun jqn/parse-pipe-json ()
-  (handler-case (jsnloads *standard-input*)
-    (error (e) (exit-with-msg 30 "jqn: failed to parse json from pipe:~%~a" e))))
-(defun jqn/loadf-with-err (f)
-  (handler-case (jsnloadf f)
-    (error (e) (exit-with-msg 30 "jqn: failed to read json file: ~a~%~a" f e))))
-
-(defun jqn/parse-query (args)
-  (handler-case `(|| ,@(read-all-str args))
-    (error (e) (exit-with-msg 10 "jqn: failed to parse qry:~%~a" (mkstr e)))))
-
-(defun jqn/run-files (opts q files)
-  (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
-  (unless (< 0 (length files)) (exit-with-msg 2 "jqn: missing files.~%~a~&" *ex*))
-  (loop for f in files for i from 0
-        do (sh/out :json opts
-             (jqn/execute-query opts (jqn/loadf-with-err f) (jqn/parse-query q)
-               :conf `((:mode . :jqn) (:fn . ,f) (:fi . ,i) (:entry . :file))
-               :db (verbose? opts)))))
-
-(defun jqn/run-pipe (opts q)
-  (unless q (exit-with-msg 1 "jqn: missing query.~%~a~&" *ex*))
-  (sh/out :json opts
-    (jqn/execute-query opts (jqn/parse-pipe-json) (jqn/parse-query q)
-      :conf `((:mode . :jqn) (:entry . :pipe))
-      :db (verbose? opts))))
-
-(defun jqn/run-from-shell (args)
-  (multiple-value-bind (opts args) (split-opts-args args)
-    (when (help? opts) (exit-with-msg 0 *ex*))
-    (cond ((interactive-stream-p *standard-input*)
-           (jqn/run-files opts (car args) (cdr args)))
-          (t (jqn/run-pipe opts (car args))))))
-
-(jqn/run-from-shell (cdr (cmd-args)))
+" (lqn:v?)) (cdr (cmd-args)) #'jqn/run-files #'jqn/run-pipe)
 

@@ -1,7 +1,22 @@
 (ql:quickload :lqn :silent t)
 (in-package :lqn)
 
-(defvar *ex* (format nil "
+(defun tqn/read-from-file (f) (declare #.*opt*)
+  (handler-case (read-file-as-vector f)
+    (error (e) (exit-with-msg 55 "tqn: failed to READ TXT file: ~a~%msg: ~a" f e))))
+(defun tqn/read-from-pipe () (declare #.*opt*)
+  (handler-case (read-stream-lines-as-vector)
+    (error (e) (exit-with-msg 55 "tqn: failed to READ TXT from pipe:~%~a" e))))
+
+(defun tqn/run-files (opts fx files)
+  (declare (optimize speed) (function fx))
+  (loop for fn in files for fi from 0 do
+    (sh/out :txt opts (sh/execute-qry fx (tqn/read-from-file fn) fn fi))))
+(defun tqn/run-pipe (opts fx)
+  (declare (optimize speed) (function fx))
+  (sh/out :txt opts (sh/execute-qry fx (sh/one? (tqn/read-from-pipe)) ":pipe:" 0)))
+
+(sh/run-from-shell (format nil "
 TQN - TXT QUERY NOTATION (~a)
 
 Usage:
@@ -27,47 +42,8 @@ Examples:
   # split string and make a new JSON structure:
   echo '1 x 1 x 7 x 100' | \
      tqn -j '(splt _ :x) int!? #(($new :v _))'
-" (lqn:v?)))
+" (lqn:v?)) (cdr (cmd-args)) #'tqn/run-files #'tqn/run-pipe)
 
-(defun tqn/execute-query (opts dat q &key conf db)
-  (handler-case (qryl dat q :conf conf :db db)
-    (error (e) (exit-with-msg 50 "tqn: failed to execute qry:~%~a" e))))
-
-(defun tqn/load-with-err (f)
-  (handler-case (read-file-as-vector f)
-    (error (e) (exit-with-msg 30 "tqn: failed to read txt file: ~a~%~a" f e))))
-(defun tqn/read-from-pipe ()
-  (handler-case (read-stream-lines-as-vector)
-    (error (e) (exit-with-msg 30 "tqn: failed to read from pipe:~%~a" e))))
-
-(defun tqn/parse-query (args)
-  (handler-case `(|| ,@(read-all-str args))
-    (error (e) (exit-with-msg 10 "tqn: failed to parse qry:~%~a" (mkstr e)))))
-
-(defun tqn/run-files (opts q files)
-  (when (help? opts) (exit-with-msg 0 *ex*))
-  (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *ex*))
-  (unless (< 0 (length files)) (exit-with-msg 2 "tqn: missing files.~%~a~&" *ex*))
-  (loop for f in files for i from 0
-        do (sh/out :txt opts
-             (tqn/execute-query opts (tqn/load-with-err f) (tqn/parse-query q)
-               :conf `((:mode . :tqn) (:fn . ,f) (:fi . ,i) (:entry . :file))
-               :db (verbose? opts)))))
-
-(defun tqn/run-pipe (opts q)
-  (when (help? opts) (exit-with-msg 0 *ex*))
-  (unless q (exit-with-msg 1 "tqn: missing query.~%~a~&" *ex*))
-  (labels ((one? (v) (if (> (length v) 1) v (aref v 0))))
-    (sh/out :txt opts
-      (tqn/execute-query opts (one? (tqn/read-from-pipe)) (tqn/parse-query q)
-        :conf `((:mode . :tqn) (:entry . :pipe))
-        :db (verbose? opts)))))
-
-(defun tqn/run-from-shell (args)
-  (multiple-value-bind (opts args) (split-opts-args args)
-    (cond ((interactive-stream-p *standard-input*)
-           (tqn/run-files opts (car args) (cdr args)))
-          (t (tqn/run-pipe opts (car args))))))
-
-(tqn/run-from-shell (cdr (cmd-args)))
-
+; (require :sb-sprof)
+; (sb-sprof:with-profiling (:max-samples 50000 :mode :cpu :time :report :graph)
+;   (tqn/run-from-shell (cdr (cmd-args))))

@@ -296,9 +296,8 @@ convenience there are some utility functions/macros in defined in `lqn`.
 
 ### Global Query Context Fxs
 Defined in the query scope:
- - `(entry)`: returns `:pipe` if input is from `*standard-input*`; otherwise `:file`.
  - `(fi [k=0])`: counts files from `k`.
- - `(fn)`: name of the current file.
+ - `(fn)`: name of the current file, or `":internal:"`.
  - `(hld k v)`: hold this value at this key in a key value store.
  - `(ghv k [d])`: get the value of this key; or `d`.
  - `(nope [d])`: stop execution, return `d`.
