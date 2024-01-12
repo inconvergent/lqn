@@ -3,10 +3,10 @@
 
 (defun tqn/read-from-file (f) (declare #.*opt*)
   (handler-case (read-file-as-vector f)
-    (error (e) (exit-with-msg 55 "TXT: failed to READ file: ~a~%~a" f e))))
+    (error (e) (sh/exit-msg 55 "TXT: failed to READ file: ~a~%~%~a" f e))))
 (defun tqn/read-from-pipe () (declare #.*opt*)
   (handler-case (read-stream-lines-as-vector)
-    (error (e) (exit-with-msg 55 "TXT: failed to READ from pipe:~%~a" e))))
+    (error (e) (sh/exit-msg 55 "TXT: failed to READ from pipe:~%~%~a" e))))
 
 (defun tqn/run-files (opts fx files)
   (declare (optimize speed) (function fx))
@@ -19,7 +19,7 @@
 ; (require :sb-sprof)
 ; (sb-sprof:with-profiling (:max-samples 50000 :mode :cpu #|:time|# :report :graph)
 (sh/run-from-shell (format nil
-"~%██ TQN - TXT - LISP QUERY NOTATION (~a)
+"██ TQN - TXT - LISP QUERY NOTATION (~a)
 
 Usage:
   tqn [options] <qry> [files ...]
@@ -37,12 +37,16 @@ Options:
 ██ options can be write as -i -v or -iv.
 ██
 ██ when outputing in TXT, internal vectors or kvs are printed in LDN
-██ mode. use -tj and -tl to output to JSON or LDN respectively. use -tjm
-██ to print a resulting vector as (minified) lines of json.
+██ mode. use -tj and -tl to output to JSON or LDN respectively.
+██ use -tjm to print a resulting vector as (minified) lines of json.
 ██
 ██ see docs at: https://github.com/inconvergent/lqn
 
 Examples:
+
+  # substring search/grep for (hi OR hello) or (hi AND hello)
+  tqn '[  :hi   :hello]' file.txt
+  tqn '[:+@hi :+@hello]' file.txt
 
   # split string and sum as integers:
   echo '1 x 1 x 7 x 100' | \

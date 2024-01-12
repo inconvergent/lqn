@@ -107,6 +107,11 @@ about similar approaches to making small DSLs in these blog posts:
 There are several parts of the design that i'm not entirely happy with, so
 things might change in the future.
 
+You can find some more termianl documentation and examples in
+[bin/lqn-sh.lisp](lqn), [bin/jqn-sh.lisp](jqn), and [bin/tqn-sh.lisp](tqn).
+
+See [docs/lqn.md](docs/lqn.md) for symbol documentation.
+
 ## Lisp Example
 Using the `lqn` compiler in lisp looks like this.
 ```lisp
@@ -263,6 +268,13 @@ CL boolen operators. Here are some examples:
 [(fx1 _)]              ; items where this expression is not nil.
 [(or (fx1 _) (fx2 _))] ; ...
 ```
+
+### Recursion Operator - `?rec`
+Repeat the same expression while something is true:
+ - `(?rec test-expr expr)`: repeat `expr` while `test-expr`. `_` refers to the
+   input value, then to the most recent evaluation of `expr`. Use `(cnt)` to
+   get the number of the current iteration. `(par)` always refers to the input
+   value.
 
 ### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
 Perform operation on when pattern or condition is satisfied:

@@ -1,10 +1,10 @@
 (in-package #:lqn)
 ; YASON DOCS https://phmarek.github.io/yason/
-
 (defun read-all-str (s &aux (n (length s)) (pos 0))
   (declare #.*opt*)
   (loop for (l new-pos) = (mvl (read-from-string s nil nil :start pos))
         while (and l (<= new-pos n)) do (setf pos new-pos) collect l))
+
 
 (defun read-stream-lines-as-vector (&optional (s *standard-input*)
                                     &aux (res (make-adjustable-vector)))
@@ -28,11 +28,12 @@
   res)
 
 (defun jsnloads (&optional (s *standard-input*) all)
-  (declare #.*opt*) "parse json from stream; or *standard-input*"
+  (declare #.*opt* ) "parse json from stream; or *standard-input*"
   (let ((yason:*parse-json-arrays-as-vectors* t))
     (if all (let ((res (mav)))
               (handler-case
-                (loop for j = (yason:parse s) while j do (vex res j) finally (return res))
+                (loop for j = (yason:parse s) while j
+                      do (vex res j) finally (return res))
                 (end-of-file () res)))
             (yason:parse s))))
 (defun jsnloadf (fn)

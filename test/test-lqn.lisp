@@ -145,6 +145,9 @@
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (@ :a/b :miss)) 3)
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (@ "a/b")) 3)
 
+  (is (lqn:qry (lqn:new* 1 2 3 4 5) (@ -1)) 5)
+  (is (lqn:qry (lqn:new* 1 2 3 4 5) (@ -5)) 1)
+  (is (lqn:qry (lqn:new* 1 2 3 4 5) (@ -100)) nil)
   (let ((nest (lqn:new$ :a (lqn:new* (lqn:new$ :c 77 :x (lqn:new* 1 2 3))
                                      (lqn:new$ :c 99 :x (lqn:new* 5 8)))
                         :b nil)))
@@ -156,7 +159,9 @@
     (is (lqn:qry nest (@ "0/100/2")) nil)
     (is (lqn:qry nest (@ :a/*/c)) #(77 99) :test #'equalp)
     (is (lqn:qry nest (@ "a/*/x/0")) #(1 5) :test #'equalp)
-    (is (lqn:qry nest (@ "a/*/x/*")) #(#(1 2 3) #(5 8)) :test #'equalp)))
+    (is (lqn:qry nest (@ "a/*/x/*")) #(#(1 2 3) #(5 8)) :test #'equalp))
+
+  )
 
 (subtest "lqn xpr"
   (is (lqn:qry #((a b xxx) (a b c) (a b (c xxx)))
@@ -243,7 +248,13 @@
       #(#(2 "abk c") #(2 "dkef") #(1 "kkkk1")) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim
                (*? (isubx? _ "k") (new* _ (itr))))
-      #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp))
+      #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
+
+  (is (lqn:qry #(0 1) (?rec (< (@ -1) 10000)
+                            (cat* _ (apply* + (tail* _ 2))))
+                      #((str! "- " (cnt) ": " _)) (join _ " "))
+       "- 0: 0 - 1: 1 - 2: 1 - 3: 2 - 4: 3 - 5: 5 - 6: 8 - 7: 13 - 8: 21 - 9: 34 - 10: 55 - 11: 89 - 12: 144 - 13: 233 - 14: 377 - 15: 610 - 16: 987 - 17: 1597 - 18: 2584 - 19: 4181 - 20: 6765 - 21: 10946")
+  )
 
 (unless (finalize) (error "error in lqn"))
 

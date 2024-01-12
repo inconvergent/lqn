@@ -75,7 +75,10 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun @@ (a path &optional d) (declare #.*opt*)
   "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
   (labels ((gkv (a* k) (and (kv? a*) (gethash k a*)))
-           (gv (a* k) (when (and (vec? a*) (< k (length a*))) (aref a* k)))
+           (ind (a* k) (if (< k 0) (+ (length a) k) k))
+           (gv (a* k) (when (vec? a*)
+                        (let ((kk (ind a* k)))
+                          (when (< -1 kk (length a*)) (aref a* kk)))))
            (good-key (k) (or (int? k) (and (str? k) (> (length k) 0))))
            (not-empty (a*) (remove-if-not #'good-key a*))
            (int-or-str (k) (cond ((int!? k)) (t k)))
@@ -188,7 +191,9 @@ ranges are lists that behave like arguments to seq*."
          using (hash-value v) do (setf (gethash k res) (gethash k kv))))
   res)
 (defun cat* (&rest rest) "concatenate sequences in rest to vector"
-  (apply #'concatenate 'vector rest))
+  (apply #'concatenate 'vector (mapcar #'vec! rest))) ; inefficient
+
+(defmacro apply* (fx v) `(apply #',fx (coerce ,v 'list)))
 
 (defun flatall* (x &optional (str nil))
   "flatten all sequences into new vector. if str is t strings will become
@@ -203,7 +208,7 @@ ranges are lists that behave like arguments to seq*."
                    (t (rec (car x) (rec (cdr x) acc))))))
     (coerce (rec x nil) 'vector)))
 (defun flatn* (a &optional (n 1) (str nil))
-  (declare (sequence a) (fixnum n)) "flatten n times" ; inefficient?
+  (declare (sequence a) (fixnum n)) "flatten n times" ; inefficient
   (loop repeat n do
     (setf a (apply #'concatenate 'vector ;
               (map 'list (lambda (x) (typecase x (string (if str x `#(,x)))

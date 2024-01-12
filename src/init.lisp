@@ -1,16 +1,14 @@
 (in-package :lqn)
 
-(declaim (inline sup sdwn isubx? isub? subx? sub? pref? suf? empty? num!?
-                 num? flt!? flt? int!? int? lst? seq? seq!? str!
-                 ; str? str!? vec! vec? vec!?
-                 ))
+(declaim (inline symb mkstr subx? isubx?))
 
 (defvar *qmodes* '(:+ :? :- :%))
-(defvar *operators* `(:*map :@ :|| :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?srch))
+(defvar *operators*
+  `(:*map :@ :|| ?rec :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?srch))
 (defvar *opt* '(optimize (speed 3) (safety 1)))
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt
                  :fmt :out :jsnstr
-                 :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth? :ind* :sel* :seq*
+                 :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth? :ind* :sel* :seq* :apply* :join
                  :new* :new$ :cat* :cat$ :head* :tail* :size?
                  :flatn* :flatall* :flatn$
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?

@@ -40,6 +40,19 @@
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
+#### LQN:APPLY\*
+
+```
+:missing:todo:
+
+ ; LQN:APPLY*
+ ;   [symbol]
+ ; 
+ ; APPLY* names a macro:
+ ;   Lambda-list: (FX V)
+ ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
 #### LQN:CAT$
 
 ```
@@ -166,7 +179,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     f as float if it can be parsed; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -181,7 +193,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     f if float; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -242,7 +253,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     i as int if it can be parsed; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -257,7 +267,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     i if int; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -278,8 +287,7 @@
  ; 
  ; IPREF? names a compiled function:
  ;   Lambda-list: (S SUF &OPTIONAL D)
- ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T)
- ;                  (VALUES T &OPTIONAL))
+ ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T) *)
  ;   Documentation:
  ;     ignore case pref?
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -311,7 +319,6 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     ignore case sub?
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -469,7 +476,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     l if list; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -538,7 +544,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     n as number if it can be parsed; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -553,7 +558,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     n if number; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -591,7 +595,6 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if s starts with pref; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -658,10 +661,7 @@
  ; REPL names a compiled function:
  ;   Lambda-list: (S FROM TO)
  ;   Derived type: (FUNCTION (STRING STRING STRING)
- ;                  (VALUES
- ;                   (OR LIST (SIMPLE-ARRAY * (*))
- ;                       SB-KERNEL:EXTENDED-SEQUENCE)
- ;                   &OPTIONAL))
+ ;                  (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     replace from with to in s
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -678,7 +678,6 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and downcase
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -712,7 +711,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s as seq if it can be parsed; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -742,7 +740,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if sequence; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -784,7 +781,6 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     coerce to string
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
@@ -824,7 +820,7 @@
  ; 
  ; STRCAT names a compiled function:
  ;   Lambda-list: (&REST REST)
- ;   Derived type: FUNCTION
+ ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     concatenate all strings in sequences
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -842,7 +838,6 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if sub is substring of s; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -874,7 +869,6 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if s ends with suf; or d
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -889,7 +883,6 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and upcase
- ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 
@@ -932,6 +925,7 @@
  ;   Derived type: (FUNCTION * (VALUES SYMBOL &OPTIONAL))
  ;   Documentation:
  ;     mkstr, make symbol.
+ ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 

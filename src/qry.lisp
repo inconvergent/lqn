@@ -245,6 +245,22 @@
                                       (funcall rec conf `(?txpr ,@d (vex ,res _))))
                 ,res)))
 
+(defun compile/|| (rec conf d) ; (|| ...)
+  (if (< (length d) 2) (funcall rec conf (car d))
+      `(let ((<> ,(gk conf :dat)))
+         ,@(loop for op in d collect `(setf <> ,(funcall rec (dat/new conf '<>) op)))
+         <>)))
+
+(defun compile/?rec (rec conf d) ; (?rec (< (inum) 10) (+ _ 1))
+  (unless (= (length d) 2) (error "?rec: expected two arguments. got: ~a" d))
+  (awg (i)
+    `(let ((<> ,(gk conf :dat)) (,i 0))
+       (//fxs/op/ (,(gk conf :dat) ,i)
+         (loop while ,(funcall rec (dat/new conf '<>) (car d))
+               do (progn (setf <> ,(funcall rec (dat/new conf '<>) (second d))
+                               ,i (+ ,i 1)))))
+       (values <> ,i))))
+
 (defun proc-qry (q &optional conf*) "compile lqn query"
   (awg (dat fn fi)
   (labels
@@ -267,6 +283,7 @@
          ((qop? :?mxpr d) (compile/?mxpr #'rec conf (cdr d)))
          ((qop? :?txpr d) (compile/?txpr #'rec conf (cdr d)))
          ((qop? :?srch d) (compile/?srch #'rec conf (cdr d)))
+         ((qop? :?rec  d) (compile/?rec  #'rec conf (cdr d)))
          ((car- lqnfx? d)    `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
          ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
          (t (error "lqn: unexpected clause: ~a~%in: ~a" d q)))))
