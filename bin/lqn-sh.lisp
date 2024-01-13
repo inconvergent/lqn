@@ -1,5 +1,10 @@
+#-quicklisp
+(let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname))))
+  (when (probe-file quicklisp-init) (load quicklisp-init)))
+
 (ql:quickload :lqn :silent t)
 (in-package :lqn)
+
 
 (defun lqn/read-from-file (f) (declare #.*opt*)
   (handler-case (read-file-as-data-vector f)

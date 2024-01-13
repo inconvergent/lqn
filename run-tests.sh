@@ -11,5 +11,8 @@ sbcl --quit \
                            (error (c) (format t "STAGE2FAIL: ~a" c)
                                       (uiop:quit 3)))'
 
+cd bin
+./test-sh.sh
+
 touch ./lqn.asd
 
