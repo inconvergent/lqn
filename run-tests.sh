@@ -1,8 +1,9 @@
 #!/bin/bash
 
 set -e
+echo '#### running SBCL tests:'
 touch ./lqn.asd
-sbcl --quit \
+time sbcl --quit \
      --eval '(ql:quickload :prove)'\
      --eval '(handler-case (ql:quickload :lqn :verbose nil)
                            (error (c) (format t "STAGE1FAIL: ~a" c)
@@ -11,5 +12,6 @@ sbcl --quit \
                            (error (c) (format t "STAGE2FAIL: ~a" c)
                                       (uiop:quit 3)))'
 
-touch ./lqn.asd
+cd bin ; time ./test-sh.sh
+cd .. ; touch ./lqn.asd
 

@@ -21,6 +21,7 @@ RUN apt-get -qq remove curl -y &&\
 from base AS build
 
 WORKDIR /opt
+ADD bin quicklisp/local-projects/lqn/bin
 ADD src quicklisp/local-projects/lqn/src
 ADD test quicklisp/local-projects/lqn/test
 ADD lqn.asd quicklisp/local-projects/lqn

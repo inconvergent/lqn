@@ -1,3 +1,7 @@
+#-quicklisp
+(let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname))))
+  (when (probe-file quicklisp-init) (load quicklisp-init)))
+
 (ql:quickload :lqn :silent t)
 (in-package :lqn)
 
@@ -54,6 +58,6 @@ Examples:
 
   # split string and make a new JSON structure:
   echo '1 x 1 x 7 x 100' | \
-     tqn -j '(splt _ :x) int!? #(($new :v _))'
+     tqn -j '(splt _ :x) int!? #((new$ :v _))'
 " (lqn:v?)) (cdr (cmd-args)) #'tqn/run-files #'tqn/run-pipe)
 ; )
