@@ -53,6 +53,8 @@
                                      :element-type type :adjustable t)
            (make-array size :fill-pointer 0 :element-type type :adjustable t)))
 
+(defun lpad (n lst)
+  (concatenate 'list (loop repeat (- n (length lst)) collect nil) lst))
 (defun group (n l) (declare (list l) (fixnum n)) "group l into lists of n elements."
   (if (< n 1) (error "group: group size is smaller than 1"))
   (labels ((rec (l acc)

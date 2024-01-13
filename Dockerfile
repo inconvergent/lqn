@@ -1,6 +1,6 @@
 # This image is only intended to run the tests
 
-FROM ubuntu:22.04 AS base
+FROM ubuntu:23.10 AS base
 
 RUN apt-get -qq update &&\
     apt-get -qq install -y sbcl curl gcc git

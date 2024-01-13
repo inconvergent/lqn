@@ -75,7 +75,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun @@ (a path &optional d) (declare #.*opt*)
   "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
   (labels ((gkv (a* k) (and (kv? a*) (gethash k a*)))
-           (ind (a* k) (if (< k 0) (+ (length a) k) k))
+           (ind (a* k) (if (< k 0) (+ (length a*) k) k))
            (gv (a* k) (when (vec? a*)
                         (let ((kk (ind a* k)))
                           (when (< -1 kk (length a*)) (aref a* kk)))))
