@@ -65,7 +65,7 @@
                 (symbol `(when (,ty ,k) ,k))
                 (cons ty) (boolean `(when-equal ,ty ,k))))
 
-(defun prescan (qq &aux (isect (intersection (mapcar (lambda (k) (kv (sym-not-kv k))) qq)
+(defun prescan (qq &aux (isect (intersection (mapcar (λ (k) (kv (sym-not-kv k))) qq)
                                              *operators* :test #'equal)))
   (when isect (error "unexpected operator ~a~%in: ~a" isect qq))
   qq)
@@ -96,9 +96,9 @@
 
 (defun compile/|| (rec conf d) ; (|| ...)
   (if (< (length d) 2) (funcall rec conf (car d))
-      `(let ((<> ,(gk conf :dat)))
-         ,@(loop for op in d collect `(setf <> ,(funcall rec (dat/new conf '<>) op)))
-         <>)))
+      `(let ((∇ ,(gk conf :dat)))
+         ,@(loop for op in d collect `(setf ∇ ,(funcall rec (dat/new conf '∇) op)))
+        ∇)))
 
 (defun compile/@ (rec conf d)
   (case (length d) (1 `(@@ ,(gk conf :dat) ,(funcall rec conf (car d))))
@@ -217,7 +217,7 @@
            finally (return ,ires))))
 
 (defun compile/?xpr (rec conf d) ; (xpr sel .. hit miss)
-  (labels ((do-last (d n) (mapcar (lambda (d) (funcall rec conf (pre/or-all d))) (last d n)))
+  (labels ((do-last (d n) (mapcar (λ (d) (funcall rec conf (pre/or-all d))) (last d n)))
            (build-bool (cd &aux (ands (get-modes cd :+)) (nots (get-modes cd :-)))
              (funcall rec conf
                `(and (or ,(car- all? cd) ,@(get-modes cd :?) ,@(and ands `((and ,@ands))))
@@ -249,14 +249,14 @@
   (unless (< 1 (length d) 4) (error "?rec: expected 2/3 arguments. got: ~a" d))
   (awg (i)
     (let ((d (lpad 3 d)))
-      `(let ((<> ,(gk conf :dat)) (,i 0))
+      `(let ((∇ ,(gk conf :dat)) (,i 0))
          (//fxs/op/ (,(gk conf :dat) ,i)
-           (loop while ,(funcall rec (dat/new conf '<>) (second d))
+           (loop while ,(funcall rec (dat/new conf '∇) (second d))
                  ,@(loop for (s start then) in (car d)
                          nconc `(for ,s = ,start then ,then))
-                 do (setf <> ,(funcall rec (dat/new conf '<>) (third d))
+                 do (setf ∇ ,(funcall rec (dat/new conf '∇) (third d))
                           ,i (+ ,i 1))))
-         (values <> ,i)))))
+         (values ∇ ,i)))))
 
 (defun proc-qry (q &optional conf*) "compile lqn query"
   (awg (dat fn fi)
@@ -284,7 +284,7 @@
          ((car- lqnfx? d)    `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
          ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
          (t (error "lqn: unexpected clause: ~a~%in: ~a" d q)))))
-      `(lambda (,dat ,fn ,fi) (//fxs/qry (,dat ,fn ,fi)
+      `(λ (,dat ,fn ,fi) (//fxs/qry (,dat ,fn ,fi)
                                ,(rec `((:dat . ,dat) ,@conf*) q))))))
 
 (defun qry/show (q cq)

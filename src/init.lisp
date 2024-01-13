@@ -6,7 +6,7 @@
 (defvar *operators*
   `(:*map :@ :|| ?rec :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?srch))
 (defvar *opt* '(optimize (speed 3) (safety 1)))
-(defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt
+(defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr
                  :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth? :ind* :sel* :seq* :apply* :join
                  :new* :new$ :cat* :cat$ :head* :tail* :size?
@@ -40,6 +40,7 @@
 (abbrev mvc multiple-value-call) (abbrev mvl multiple-value-list)
 (abbrev vpe vector-push-extend)  (defmacro vex (v o) `(vpe ,o ,v))
 
+(defmacro λ (&rest rest) `(lambda ,@rest))
 (defun internal-path-string (path &optional (pkg :lqn)) (declare (string path))
   (namestring (asdf:system-relative-pathname pkg path)))
 

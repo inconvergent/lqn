@@ -87,7 +87,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
              (let* ((k (pop kk))
                     (v (cond ((equal k "*")
                                 (return-from rec
-                                  (and (vec? a*) (compct (map 'vector (lambda (b) (rec b kk)) a*)))))
+                                  (and (vec? a*) (compct (map 'vector (λ (b) (rec b kk)) a*)))))
                              ((str? k) (gkv a* k))
                              ((int? k) (gv a* k)))))
                (if (is? v) (rec v kk) (return-from rec d)))))
@@ -102,7 +102,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
              for vv = (rec v) if (is? vv) do (setf (gethash k ht) vv))
        ht)
      (rec (o*) (typecase o* (string (if (empty? o*) nil o*)) (hash-table (do-ht o*))
-                 (sequence (remove-if-not (lambda (o*) (smth? o* t)) o*))
+                 (sequence (remove-if-not (λ (o*) (smth? o* t)) o*))
                  (otherwise o*))))
     (rec o)))
 
@@ -117,9 +117,9 @@ match. If b is an expression, a is compared to the evaluated value of b."
 
 (defun strcat (&rest rest) "concatenate all strings in sequences"
   (apply #'mkstr
-    (mapcar (lambda (s) (etypecase s (string s)
-                          (list (apply #'concatenate 'string s))
-                          (vector (apply #'concatenate 'string (coerce s 'list)))))
+    (mapcar (λ (s) (etypecase s (string s)
+                     (list (apply #'concatenate 'string s))
+                     (vector (apply #'concatenate 'string (coerce s 'list)))))
             rest)))
 
 (defun pref? (s pref &optional d)
@@ -153,13 +153,13 @@ match. If b is an expression, a is compared to the evaluated value of b."
            (splt (s &aux (i (subx? s x)))
              (if i (cons (subseq s 0 i) (lst (splt (subseq s (+ lx i))))) s)))
     (let ((res (lst (splt s))))
-      (if prune (remove-if (lambda (s) (zerop (length s))) res)
+      (if prune (remove-if (λ (s) (zerop (length s))) res)
                 res))))
 (defmacro splt (s x &optional prune) "split s at substrings x to vector."
   `(vec! (str-split ,(ct/kv/str s) ,(ct/kv/str x) :prune ,prune)))
 
 (defun repl (s from to) (declare (string s from to)) "replace from with to in s"
-  (let ((s (strcat (mapcar (lambda (s) (mkstr s to)) (str-split s from)))))
+  (let ((s (strcat (mapcar (λ (s) (mkstr s to)) (str-split s from)))))
     (subseq s 0 (- (length s) (length to)))))
 
 (defun seq* (v i &optional j) ; TODO: negative indices, tests
@@ -211,8 +211,8 @@ ranges are lists that behave like arguments to seq*."
   (declare (sequence a) (fixnum n)) "flatten n times" ; inefficient
   (loop repeat n do
     (setf a (apply #'concatenate 'vector ;
-              (map 'list (lambda (x) (typecase x (string (if str x `#(,x)))
-                                                 (sequence x) (atom `#(,x))))
+              (map 'list (λ (x) (typecase x (string (if str x `#(,x)))
+                                            (sequence x) (atom `#(,x))))
                    a))))
   a)
 (defun flatn$ (a) "flatten ht to vector: k0 v0 k1 v1 ..."
