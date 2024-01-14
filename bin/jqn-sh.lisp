@@ -57,10 +57,10 @@ Options:
 ██ see docs at: https://github.com/inconvergent/lqn
 
 Examples:
-  jqn _ sample.json                  # get everything in the file
-  jqn '#{:k1 :k2}' sample.json       # get k1, k2 from list of objects
-  jqn '{:k1 :k2}' sample.json        # get k1, k2 from object
-  echo '{\"_id\": 1}' | jqn '{:_id}'   # query data from pipe
+❭ jqn _ sample.json                  # get everything in the file
+❭ jqn '#{:k1 :k2}' sample.json       # get k1, k2 from list of objects
+❭ jqn '{:k1 :k2}' sample.json        # get k1, k2 from object
+❭ echo '{\"_id\": 1}' | jqn '{:_id}'   # query data from pipe
 " (lqn:v?)) (cdr (cmd-args)) #'jqn/run-files #'jqn/run-pipe)
 ; )
 

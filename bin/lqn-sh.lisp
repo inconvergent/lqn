@@ -47,12 +47,12 @@ Options:
 
 Examples:
 
-  # find small items, insert symbol, flatten
-  echo '#(1 2 3 4 5 6 7 8)' |\
-    lqn '#((?txpr (< _ 3) (new* :xx _))) (flatall* _ t)'
+# find small items, insert symbol, flatten
+❭ echo '#(1 2 3 4 5 6 7 8)'\
+  | lqn '#((?txpr (< _ 3) (new* :xx _))) (flatall* _ t)'
 
-  # or search for defmacro symbol in several source code files:
-  lqn -tl '#((?srch (msym? _ defmacro)
+# or search for defmacro symbol in several source code files:
+❭ lqn -tl '#((?srch (msym? _ defmacro)
                     (new$ :fn (fn) :hit (head* (itr) 3))))
           [is?] (flatall* _)' src/*lisp
 " (lqn:v?)) (cdr (cmd-args)) #'lqn/run-files #'lqn/run-pipe)

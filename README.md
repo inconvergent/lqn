@@ -9,42 +9,45 @@ Then the `lqn` language can be used for queries and transformations.
 
 ## JQN Example (JSON)
 
-`jqn` can be used in the terminal like this:
+Here is a full example where we select and transform some parts of a JSON
+object:
 ```bash
-jqn -h
-
-#> Usage:
-#>   jqn [options] <qry> [files ...]
-#>   cat sample.json | jqn [options] <qry>
-#>
-#> Options:
-#>   -v prints the full compiled qry to stdout before the result
-#>   -j output as JSON [default]
-#>   -l output to readable lisp data (LDN)
-#>   -t output as TXT
-#>   -m minified json. indented is default.
-#>   -h show this message.
-#>
-#>   options can be write as -i -v or -iv.
-```
-Here is a full example:
-```bash
-  echo '
+❭ echo '
        [{ "_id": "65679", "msg": "HAI!",
           "things": [{ "id": 10, "name": "Win", "extra": "ex1" },
                      { "id": 12, "name": "Kle" }] },
         { "_id": "6AABB", "msg": "NIH!",
           "things": [{ "id": 32, "name": "Bal" },
-                     { "id": 31, "name": "Sta", "extra": null}] }]' |\
-  jqn '#{ :_id
+                     { "id": 31, "name": "Sta", "extra": null}] }]'\
+  | jqn '#{ :_id
          (:things #[:name :?@extra])
          (:msg (sup _))}'
-## which returns (something like):
-#>     [{ "_id": "65679", "msg": "HAI!",
-#>        "things": ["Win", "ex1", "Hai", "ex2", "Kle"] },
-#>      { "_id": "CAABB", "msg": "NIH!",
-#>        "things": ["Sta", "Bal"] }]
+⇒ [{ "_id": "65679", "msg": "HAI!",
+     "things": ["Win", "ex1", "Hai", "ex2", "Kle"] },
+   { "_id": "CAABB", "msg": "NIH!",
+     "things": ["Sta", "Bal"] }]
 ```
+In general `jqn` can be used in the terminal like this:
+```bash
+❭ jqn -h
+⇒ Usage:
+    jqn [options] <qry> [files ...]
+    cat sample.json | jqn [options] <qry>
+
+  Options:
+    -v prints the full compiled qry to stdout before the result
+    -j output as JSON [default]
+    -l output to readable lisp data (LDN)
+    -t output as TXT
+    -m minified json. indented is default.
+    -h show this message.
+
+    options can be write as -i -v or -iv.
+```
+The other terminal commands have the same syntax and options. Below are some
+more examples of usage in the terminal.
+
+![asemic writing](/img/20180115-210522.png)
 
 ## TQN Example (TXT)
 
@@ -54,39 +57,39 @@ the `tqn` mode is for reading lines of text into a `vector` (i.e. JSON array).
 will output to JSON instead. `-t` does the oposite for `jqn`.
 
 ```bash
-## split string and sum as integers:
-   echo '1 x 1 x 7 x 100' |\
-     tqn '(splt _ :x) int!? (*fld 0 +)'
-#> 109
+# split string and sum as integers:
+❭ echo '1 x 1 x 7 x 100'\
+  | tqn '(splt _ :x) int!? (*fld 0 +)'
+⇒ 109
 
-## split string, trim, search and replace:
-   echo 'abk c x dkef x ttuuxx x ttxx33' | \
-     tqn '(splt _ :x) trim
-          (?txpr +@str!? :+@tt :+@uu
+# split string, trim, search and replace:
+❭ echo 'abk c x dkef x ttuuxx x ttxx33'\
+  | tqn '(splt _ :x) trim
+         (?txpr +@str!? :+@tt :+@uu
                  (str! _ :-hit))'
-#> abk c
-#> dkef
-#> ttuu-hit
-#> tt
-#> 33
+⇒ abk c
+  dkef
+  ttuu-hit
+  tt
+  33
 ```
 
 ## LQN Example (LDN)
 You can also read CL code from pipe or file:
 ```bash
-## find small items, insert symbol, flatten
-   echo '#(1 2 3 4 5 6 7 8)' |\
-     lqn '#((?txpr (< _ 3) (new* :xx _))) (flatall* _ t)'
-#> #(:XX 1 :XX 2 3 4 5 6 7 8)
+# find small items, insert symbol, flatten
+❭ echo '#(1 2 3 4 5 6 7 8)'\
+  | lqn '#((?txpr (< _ 3) (new* :xx _))) (flatall* _ t)'
+⇒ #(:XX 1 :XX 2 3 4 5 6 7 8)
 
-## or search for defmacro symbol in several source code files:
-   lqn -t '#((?srch (msym? _ defmacro)
-                     (new$ :fn (fn) :hit (head* (itr) 3))))
-           [is?] (flatall* _)' src/*lisp
-#>    ((:FN . "src/docs.lisp") (:HIT DEFMACRO PCKGS (PKG)))
-#>    ((:FN . "src/init.lisp") (:HIT DEFMACRO PRETTY-JSON (V)))
-#>    ((:FN . "src/qry.lisp") (:HIT DEFMACRO JSNQRYF (FN Q &KEY DB)))
-#>    ...
+# or search for defmacro symbol in several source code files:
+❭ lqn -t '#((?srch (msym? _ defmacro)
+                   (new$ :fn (fn) :hit (head* (itr) 3))))
+          [is?] (flatall* _)' src/*lisp
+⇒ ((:FN . "src/docs.lisp") (:HIT DEFMACRO PCKGS (PKG)))
+  ((:FN . "src/init.lisp") (:HIT DEFMACRO PRETTY-JSON (V)))
+  ((:FN . "src/qry.lisp") (:HIT DEFMACRO JSNQRYF (FN Q &KEY DB)))
+  ...
 ```
 
 ## Why??
@@ -120,12 +123,12 @@ Using the `lqn` compiler in lisp looks like this.
        #((splt _ :x) int!? ; for each row, split and parse as int
          ($new :num (num)  ; new nested dict for each row
                :items #(($new :v _ :i (cnt)))))))
-;; [{ "num": 4,
-;;    "items": [ { "v": 1, "i": 0 }, { "v": 1, "i": 1 },
-;;               { "v": 7, "i": 2 }, { "v": 100, "i": 3 } ]},
-;;  { "num": 3,
-;;    "items": [ { "v": 3, "i": 0 }, { "v": 8, "i": 1 },
-;;               { "v": 30, "i": 2 } ] }]
+⇒ [{ "num": 4,
+     "items": [ { "v": 1, "i": 0 }, { "v": 1, "i": 1 },
+                { "v": 7, "i": 2 }, { "v": 100, "i": 3 } ]},
+   { "num": 3,
+     "items": [ { "v": 3, "i": 0 }, { "v": 8, "i": 1 },
+                { "v": 30, "i": 2 } ] }]
 ```
 See [bin/ex.lisp](bin/ex.lisp) for more examples.
 
@@ -140,7 +143,7 @@ read as a `vector` of lisp data.
 
 The following operators have special behaviour. You can also write generic CL
 code, anywhere you can use an operator. Including the functions further down.
-Note that you can use `_` to refer to the current data object.
+Note that you can use `_` to refer to the current value.
 
 In the following sections `[d]` represents an optional default value.  E.g. if
 key/index is missing, or if a functon returns `nil`. `k` is an initial counter
@@ -197,8 +200,8 @@ below:
     `EXPR Selectors`.
 
 select keys or indexes:
- - `(@ k)`: get this key/index from current data object.
- - `(@ k [d])`: get this key/index from current data object.
+ - `(@ k)`: get this key/index from current value.
+ - `(@ k [d])`: get this key/index from current value.
  - `(@ o k [d])`: get this key/index from `o`.
 
 #### KV Selectors
@@ -278,17 +281,17 @@ Repeat the same expression while something is true:
 
 ### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
 Perform operation on when pattern or condition is satisfied:
-  - `(?xpr sel)`: match current data object agains `EXPR Selector`. Return the
+  - `(?xpr sel)`: match current value against `EXPR Selector`. Return the
     result if not `nil`.
-  - `(?xpr sel hit-expr)`: match current data object agains `EXPR Selector`. Evaluates
+  - `(?xpr sel hit-expr)`: match current value against `EXPR Selector`. Evaluates
     `hit-expr` if not nil. `_` is the matching item.
-  - `(?xpr sel .. hit-expr miss-expr)`: match current data object agains `expr
+  - `(?xpr sel .. hit-expr miss-expr)`: match current value against `expr
     selectors`.  Evaluate `hit-expr` if not `nil`; else evaluate `miss-expr`.
     `_` is the matching item.
 
 Recursively traverse a structure of `sequences` and `kvs` and return
 a new value for each match:
-  - `(?txpr sel .. tx-expr)`: recursively traverse current data object and replace
+  - `(?txpr sel .. tx-expr)`: recursively traverse current value and replace
     matches with `tx-expr`. `tx-expr` can be a function name or expression. Also
     traverses vectors and `kv` values.
   - `(?mxpr (sel .. tx-expr) .. (sel .. tx-expr))`: one or more matches and
@@ -318,7 +321,7 @@ Defined in the query scope:
 
 ### Operator Context Fxs
 Defined in all operators:
- - `_`: the current data object.
+ - `_`: the value.
  - `(itr)`: the current object in the iteration of the enclosing `Selector`.
  - `(par)`: the object containing `(itr)`.
  - `(psize)`: number of items in `(par)`.
@@ -326,7 +329,7 @@ Defined in all operators:
  - `(cnt [k=0])`: counts from `k` in the enclosing `Selector`.
    `(itr)` and `_` can be the same thing, but in e.g. `KV Selectors`, `(itr)` is
    the current object, but `_` is the value of the selected key in the current
-   object.
+   value.
 
 ### Generic Utilities
 General utilities:
@@ -411,12 +414,12 @@ alias jqn="sbcl --script ~/path/to/lqn/bin/jqn-sh.lisp"
 alias tqn="sbcl --script ~/path/to/lqn/bin/tqn-sh.lisp"
 alias lqn="sbcl --script ~/path/to/lqn/bin/lqn-sh.lisp"
 ```
-Unfortunately this will tend to start quite slow. To make it run faster you can
-create an image/core that has `lqn` preloaded and dump it using
-`sb-ext:save-lisp-and-die`. Then use your core in the alias instead of SBCL.
+Unfortunately this will tend to have a high startup tim. To make it run faster
+you can create an SBCL image/core that has `lqn` preloaded and dump it using
+`sb-ext:save-lisp-and-die`. Then use the core in the alias instead of SBCL.
 
-Below is an example script for creating your own core. You can load your own
-libraries which will be available to `lqn`.
+Below is an example script for creating your own core. You can also preload
+your own libraries which will be available to `lqn`.
 ```bash
 #!/bin/bash
 sbcl --quit \
@@ -430,4 +433,3 @@ sbcl --quit \
 # Then make aliases like this:
 alias lqn="/path/to/lsp.core --script ~/path/to/lqn/bin/lqn-sh.lisp"
 ```
-
