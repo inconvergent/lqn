@@ -48,16 +48,16 @@ Options:
 
 Examples:
 
-  # substring search/grep for (hi OR hello) or (hi AND hello)
-  tqn '[  :hi   :hello]' file.txt
-  tqn '[:+@hi :+@hello]' file.txt
+# substring search/grep for (hi OR hello) or (hi AND hello)
+❭ tqn '[  :hi   :hello]' file.txt
+❭ tqn '[:+@hi :+@hello]' file.txt
 
-  # split string and sum as integers:
-  echo '1 x 1 x 7 x 100' | \
-    tqn '(splt _ :x) int!? (*fld 0 +)'
+# split string and sum as integers:
+❭ echo '1 x 1 x 7 x 100'\
+❭ | tqn '(splt _ :x) int!? (*fld 0 +)'
 
-  # split string and make a new JSON structure:
-  echo '1 x 1 x 7 x 100' | \
-     tqn -j '(splt _ :x) int!? #((new$ :v _))'
+# split string and make a new JSON structure:
+❭ echo '1 x 1 x 7 x 100'\
+  | tqn -j '(splt _ :x) int!? #((new$ :v _))'
 " (lqn:v?)) (cdr (cmd-args)) #'tqn/run-files #'tqn/run-pipe)
 ; )

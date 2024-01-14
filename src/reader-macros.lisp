@@ -7,6 +7,8 @@
 (set-macro-character #\[ '-read-left-bracket)
 (set-macro-character #\} '-read-delimiter)
 (set-macro-character #\] '-read-delimiter)
+(make-dispatch-macro-character #\§)
+(make-dispatch-macro-character #\∈)
 
 (defun -read-delimiter (stream char)
   (let ((*readtable* (copy-readtable)))
@@ -56,4 +58,3 @@ next symb: ~a" char (peek-char t stream t nil t))))
             while o collect o into objects
             finally (return `($* ,@objects))))))
 
-; (setf *readtable* (copy-readtable lqnrt))
