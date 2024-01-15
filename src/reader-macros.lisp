@@ -7,8 +7,8 @@
 (set-macro-character #\[ '-read-left-bracket)
 (set-macro-character #\} '-read-delimiter)
 (set-macro-character #\] '-read-delimiter)
-(make-dispatch-macro-character #\§)
-(make-dispatch-macro-character #\∈)
+; (make-dispatch-macro-character #\§)
+; (make-dispatch-macro-character #\∈)
 
 (defun -read-delimiter (stream char)
   (let ((*readtable* (copy-readtable)))

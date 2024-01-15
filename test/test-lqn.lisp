@@ -184,34 +184,50 @@
       #((A BBBXXX :HIT) (A B C) (A B (C :HIT))) :test #'equalp)
 
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (*map (?xpr :a :-@b sup sdwn)))
+        (splt _ :x) (*map (?xpr :a :-@b sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) (*map trim _ (?xpr :a :-@b sup sdwn)))
+        (splt _ :x) (*map _ (?xpr :a :-@b sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (*map (?xpr "a" "-@b" sup sdwn)))
+        (splt _ :x) (*map (?xpr "a" "-@b" sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (?txpr :a :-@b sup))
+        (splt _ :x) (?txpr :a :-@b sup))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (*map (?xpr :a :-@b sup nil)))
+        (splt _ :x) (*map (?xpr :a :-@b sup nil)))
       #("AAAYYY" NIL NIL NIL NIL "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) trim (*map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))
+        (splt _ :x) (*map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))
       #("AAAYYYaaayyy" "abc" "def" "uuu" "sss" "AUIUUauiuu" "AAAAAaaaaa") :test #'equalp)
 
+  (is (lqn:qry "a b c x def x 27" (splt _ :x) :-@de) #("a b c" "27") :test #'equalp)
+  (is (lqn:qry "a b c x def x 27" (splt _ :x) "-@de") #("a b c" "27") :test #'equalp)
+  (is (lqn:qry "a b c x def x 27" (splt _ :x) [:-@de] ) #("a b c" "27") :test #'equalp)
+  (is (lqn:qry "a b c x def x 27" (splt _ :x) [_ :-@de] ) #("a b c" "27") :test #'equalp)
+  (is (lqn:qry "a b c x def x 27" (splt _ :x) [-@int!?]) #("a b c" "def") :test #'equalp)
+  (is (lqn:qry "a b c x def x 27" (splt _ :x) [_ -@int!?]) #("a b c" "def") :test #'equalp)
+
+  (is (lqn:qry "1 xx x 2 3" (splt _ :x t))     #("1" "" "" "2 3") :test #'equalp)
+  (is (lqn:qry "1 xx x 2 3" (splt _ :x t t))   #("1" "2 3") :test #'equalp)
+  (is (lqn:qry "1 xx x 2 3" (splt _ :x nil))   #("1 " "" " " " 2 3") :test #'equalp)
+  (is (lqn:qry "1 xx x 2 3" (splt _ :x t nil)) #("1" "" "" "2 3") :test #'equalp)
+  (is (lqn:qry "1 xx x 2 3" (splt _ :x nil t)) #("1 " " " " 2 3") :test #'equalp)
+
+  ; this is invalid becuae int!? is a map by default: is that logical?
+  ; (is (lqn:qry "a b c x def x 27" (splt _ :x) -@int!?) #("a b c" "def") :test #'equalp)
+
   (is (lqn:qry "aaakyyy x akbc x def x ukuu x sssssk x auiuu x aaaaa"
-        (splt _ :x) trim [(hld :v (isubx? _ "k")) (-@isubx? _ "a") (%@new* _ (ghv :v))])
+        (splt _ :x) [(hld :v (isubx? _ "k")) (-@isubx? _ "a") (%@new* _ (ghv :v))])
       #(#("ukuu" 1) #("sssssk" 5)) :test #'equalp)
 
   (is (lqn:qry " aayy x abc x def x uuu x sss x auu x aa "
-               (splt _ :x) trim (?txpr :a :-@b sup) #((progn #(_))))
+               (splt _ :x) (?txpr :a :-@b sup) #((progn #(_))))
       #(#(#\A #\A #\Y #\Y) #(#\a #\b #\c) #(#\d #\e #\f) #(#\u #\u #\u)
         #(#\s #\s #\s) #(#\A #\U #\U) #(#\A #\A)) :test #'equalp)
   (is (lqn:qry " aayy x abc x def x uuu x sss x auu x aa "
-               (splt _ :x) trim (?txpr :a :-@b sup) #(#(_)))
+               (splt _ :x) (?txpr :a :-@b sup) #(#(_)))
       #(#(#\A #\A #\Y #\Y) #(#\a #\b #\c) #(#\d #\e #\f) #(#\u #\u #\u)
         #(#\s #\s #\s) #(#\A #\U #\U) #(#\A #\A)) :test #'equalp)
   (is (lqn:qry #((a bbbxxx xxx) (a b c) (a b (c xxx "ss")))
@@ -245,14 +261,16 @@
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head* _ -6) (tail* _ -6)) #(1 2 3 4) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x)
                (*? (isubx? _ "k") (new* _ (trim (itr)))))
+      #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
+  (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x nil)
+               (*? (isubx? _ "k") (new* _ (trim (itr)))))
       #(#(2 "abk c") #(2 "dkef") #(1 "kkkk1")) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim
                (*? (isubx? _ "k") (new* _ (itr))))
       #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
 
-  (is (lqn:qry #(0 1) (?rec (< (@ -1) 10000)
-                            (cat* _ (apply* + (tail* _ 2))))
-                      #((str! "- " (cnt) ": " _)) (join _ " "))
+  (is (lqn:qry #(0 1) (?rec (< (@ -1) 10000) (cat* _ (apply* + (tail* _ 2))))
+                     #((str! "- " (cnt) ": " _)) (join _ " "))
        "- 0: 0 - 1: 1 - 2: 1 - 3: 2 - 4: 3 - 5: 5 - 6: 8 - 7: 13 - 8: 21 - 9: 34 - 10: 55 - 11: 89 - 12: 144 - 13: 233 - 14: 377 - 15: 610 - 16: 987 - 17: 1597 - 18: 2584 - 19: 4181 - 20: 6765 - 21: 10946")
   )
 

@@ -42,7 +42,7 @@ In general `jqn` can be used in the terminal like this:
     -m minified json. indented is default.
     -h show this message.
 
-    options can be write as -i -v or -iv.
+    options can be written as -i -v or -iv.
 ```
 The other terminal commands have the same syntax and options. Below are some
 more examples of usage in the terminal.
@@ -62,9 +62,9 @@ will output to JSON instead. `-t` does the oposite for `jqn`.
   | tqn '(splt _ :x) int!? (*fld 0 +)'
 ⇒ 109
 
-# split string, trim, search and replace:
+# split string, search and replace:
 ❭ echo 'abk c x dkef x ttuuxx x ttxx33'\
-  | tqn '(splt _ :x) trim
+  | tqn '(splt _ :x)
          (?txpr +@str!? :+@tt :+@uu
                  (str! _ :-hit))'
 ⇒ abk c
@@ -147,8 +147,8 @@ Note that you can use `_` to refer to the current value.
 
 In the following sections `[d]` represents an optional default value.  E.g. if
 key/index is missing, or if a functon returns `nil`. `k` is an initial counter
-value. Whereas `..` menans that there can be arbitrary arguments, `Selectors` or
-`exprs`; depending on the context. `expr` denotes any expression or
+value. Whereas `..` menans that there can be arbitrary arguments, `Selectors`
+or `exprs`; depending on the context. `expr` denotes any expression or
 operator, like `(+ 1 _)` or `#[:id]`.
 
 ### Strings and :keywords
@@ -165,7 +165,8 @@ For convenience, particularly in the terminal, pipe has the following default
 translations:
   - `fx`: to `(*map (fx _))`: map `fx` across all items.
   - `:word`: to `[(isub? _ "word")]` to filter by `"word"`.
-  - `"Word"`: to `[(sub? _ "Word")]` to filter all items by this `string` with case.
+  - `"Word"`: to `[(sub? _ "Word")]` to filter all items by this `string` with
+    case.
   - `(..)`: to itself. That is, expressions are not translated.
 
 ### Map Operator - `#()`/`*map`
@@ -195,7 +196,8 @@ below:
     of `kvs` using `KV Selectors`.
   - `#[s1 sel ..]` or `($* sel ..)`: from `vector` of `kvs` into new `vector`
     using `KV Selectors`.
-  - ` {s1 sel ..}` or `($$ sel ..)`: from `kv` into new `kv` using `KV Selectors`.
+  - ` {s1 sel ..}` or `($$ sel ..)`: from `kv` into new `kv` using `KV
+    Selectors`.
   - ` [s1 sel ..]` or `(** sel ..)`: from `vector` into new `vector` using
     `EXPR Selectors`.
 
@@ -213,8 +215,9 @@ The modes are:
   - `+`: always include this `expr`. [default]
   - `?`: include `expr` if the key is present and not `nil`.
   - `%`: include Selector if `expr` is not `nil`.
-  - `-`: drop this key in `#{}` and `{}` operators; ignore Selector entirely in `#[]`
-    E.g. `{_ -@key3}` to select all keys except `key3`. `expr` is ignored.
+  - `-`: drop this key in `#{}` and `{}` operators; ignore Selector entirely in
+    `#[]` E.g. `{_ -@key3}` to select all keys except `key3`. `expr` is
+    ignored.
 
 `KV Selectors` can either be written out in full, or they can be be written in
 short form depending on what you want to achieve. Note that the `@` in the
@@ -283,8 +286,8 @@ Repeat the same expression while something is true:
 Perform operation on when pattern or condition is satisfied:
   - `(?xpr sel)`: match current value against `EXPR Selector`. Return the
     result if not `nil`.
-  - `(?xpr sel hit-expr)`: match current value against `EXPR Selector`. Evaluates
-    `hit-expr` if not nil. `_` is the matching item.
+  - `(?xpr sel hit-expr)`: match current value against `EXPR Selector`.
+    Evaluates `hit-expr` if not nil. `_` is the matching item.
   - `(?xpr sel .. hit-expr miss-expr)`: match current value against `expr
     selectors`.  Evaluate `hit-expr` if not `nil`; else evaluate `miss-expr`.
     `_` is the matching item.
@@ -292,8 +295,8 @@ Perform operation on when pattern or condition is satisfied:
 Recursively traverse a structure of `sequences` and `kvs` and return
 a new value for each match:
   - `(?txpr sel .. tx-expr)`: recursively traverse current value and replace
-    matches with `tx-expr`. `tx-expr` can be a function name or expression. Also
-    traverses vectors and `kv` values.
+    matches with `tx-expr`. `tx-expr` can be a function name or expression.
+    Also traverses vectors and `kv` values.
   - `(?mxpr (sel .. tx-expr) .. (sel .. tx-expr))`: one or more matches and
     transforms.  Performs the transform of the first match only.
 
@@ -321,15 +324,12 @@ Defined in the query scope:
 
 ### Operator Context Fxs
 Defined in all operators:
- - `_`: the value.
+ - `_`: the current value.
  - `(itr)`: the current object in the iteration of the enclosing `Selector`.
  - `(par)`: the object containing `(itr)`.
  - `(psize)`: number of items in `(par)`.
  - `(isize)`: number of items in `(itr)`.
  - `(cnt [k=0])`: counts from `k` in the enclosing `Selector`.
-   `(itr)` and `_` can be the same thing, but in e.g. `KV Selectors`, `(itr)` is
-   the current object, but `_` is the value of the selected key in the current
-   value.
 
 ### Generic Utilities
 General utilities:
@@ -337,24 +337,29 @@ General utilities:
    is not nil it returns `expr` or `res`; otherwise `nil`.
  - `(fmt f ..)`: format `f` as `string` with these (`format`) args.
  - `(fmt s)`: get printed representation of `s`.
- - `(out f ..)`: format `f` to `*standard-output*` with these (`format`) args. returns `nil`.
- - `(out s)`: output printed representation of `s` to `*standard-output*`. returns `nil`.
- - `(msym? a b)`: compare symbol `a` to `b`. if `b` is a keword or symbol
-   a perfect match is required. if `b` is a string it performs a substring
-   match. If `b` is an expression, `a` is compared to the evaluated value of `b`.
+ - `(out f ..)`: format `f` to `*standard-output*` with these (`format`) args.
+   returns `nil`.
+ - `(out s)`: output printed representation of `s` to `*standard-output*`.
+   returns `nil`.
+ - `(msym? a b)`: compare `symbol` `a` to `b`. if `b` is a `keyword` or `symbol`
+   a perfect match is required. if `b` is a `string` it performs a substring
+   match. If `b` is an expression, `a` is compared to the evaluated value of
+   `b`.
  - `(noop ..)`: do nothing, return `nil`.
 
 ### KV / Strings / Vectors / Sequences
 For all `sequences` and `kvs`:
- - `(@* o d i ..)`: pick these indices/keys from `sequence`/`kv` into new `vector`.
+ - `(@* o d i ..)`: pick these indices/keys from `sequence`/`kv` into new
+   `vector`.
  - `(size? o [d])`: length of `sequence` or number of keys in `kv`
- - `(compct o)`: Remove `nil`, empty `vectors`, empty `kvs` and keys with empty `kvs`.
+ - `(compct o)`: Remove `nil`, empty `vectors`, empty `kvs` and keys with empty
+   `kvs`.
 
 Make or join `kvs`:
  - `(cat$ ..)`: add all keys from these `kvs` to a new `kv`. left to right.
  - `(new$ :k1 expr1 ..)`: new `kv` with these keys and expressions.
 
-Primarily for sequences (`string`, `vector`, `list`):
+Primarily for `sequences` (`string`, `vector`, `list`):
  - `(new* ..)`: new `vector` with these elements.
  - `(ind* s i)`: get this index from `sequence`.
  - `(sel* ..)`: get new `vector` with these `ind*s` or `seq*s` from `sequence`.
@@ -362,15 +367,14 @@ Primarily for sequences (`string`, `vector`, `list`):
  - `(head* s [n=10])`: first `n` items of `sequence`.
  - `(tail* s [n=10])`: last `n` items of `sequence`.
  - `(cat* s ..)`: concatenate these `sequences` to a `vector`.
- - `(flatn* s [n=1] [str])`: flatten `sequence` `n` times into a `vector`. if
-   `str=t` strings are flattened into individual chars as well.
- - `(flatall* s [str])`: flatten all sequences (except strings) into new
-   `vector`.  use `t` as the second argument to flatten strings to individual
-   chars as well.
+ - `(flatn* s [n=1] [str=nil])`: flatten `sequence` `n` times into a `vector`.
+   if `str=t` strings are flattened into individual chars as well.
+ - `(flatall* s [str=nil])`: flatten all `sequences` (except `strings`) into
+   new `vector`. Use `t` as the second argument to flatten `strings` to
+   individual chars as well.
  - `(flatn$ s n)`: flatten `kv` into vector `(new* k0 v0 k1 v1 ..)`
 
-Primarily for `string` searching. `[i]` means case insensitive
-(TOOD: stringify kv args?):
+Primarily for `string` searching. `[i]` means case insensitive:
  - `([i]pref? s pref [d])`: `s` if `pref` is a prefix of `s`; or `d`.
  - `([i]sub? s sub [d])`: `s` if `sub` is a substring of `s`; or `d`.
  - `([i]subx? s sub)`: index where `sub` starts in `s`.
@@ -381,13 +385,15 @@ String maniuplation:
  - `(sup s ..)`: `str!` and upcase.
  - `(sdwn s ..)`: `str!` and downcase.
  - `(trim s)`: trim leading and trailing whitespace from `string`.
- - `(join s x ..)`: join sequence with `x` (`strings` or `chars`), returns `string`.
- - `(splt s x)`: split `s` at all `x` into `vector` with `strings`.
- - `(strcat s ..)`: concatenate these `strings`, or all strings in one or more
-   `sequences` of `strings`.
+ - `(splt s x [trim=t] [prune=nil])`: split `s` at all `x` into `vector` of
+   `strings`. `trim` removes whitespace. `prune` drops empty strings.
+ - `(join s x ..)`: join sequence with `x` (`strings` or `chars`), returns
+   `string`.
+ - `(strcat s ..)`: concatenate these `strings`, or all `strings` in one or
+   more `sequences` of `strings`.
 
 ### Type Tests
-`(is? o [d])` returns `o` if not `nil`, empty `sequence` or empty `kv`; or `d`.
+`(is? o [d])` returns `o` if not `nil`, empty `sequence`, or empty `kv`; or `d`.
 
 These functions return the argument if the argument is the corresponding type:
 `flt?`, `int?`, `kv?`, `lst?`, `num?`, `str?`, `vec?`, `seq?`.
@@ -399,7 +405,7 @@ possible; otherwise they return the optional second argument: `int!?`, `flt!?`,
 ### Type Coercion
  - `(str! s ..)`: coerce everything to a `string`.
  - `(vec! a)`: coerce `sequence` to `vector`; or return `(new* a)`.
- - `(sym! a ..)`: stringify, make `symbol`.
+ - `(sym! a ..)`: do `str!`, `sdwn`, and make new `symbol`.
 
 ## Install
 `lqn` requires [SBCL](https://www.sbcl.org/). And is pretty easy to install via

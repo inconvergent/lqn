@@ -235,8 +235,7 @@
  ; 
  ; IND* names a compiled function:
  ;   Lambda-list: (V &OPTIONAL (I 0))
- ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM)
- ;                  (VALUES T &OPTIONAL))
+ ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM) *)
  ;   Documentation:
  ;     get index.
  ;   Source file: /data/x/lqn/src/utils.lisp
@@ -764,9 +763,9 @@
  ;   [symbol]
  ; 
  ; SPLT names a macro:
- ;   Lambda-list: (S X &OPTIONAL PRUNE)
+ ;   Lambda-list: (S X &OPTIONAL (TRIM T) PRUNE)
  ;   Documentation:
- ;     split s at substrings x to vector.
+ ;     split s at substrings x to vector. trims whitespace by default. prune removes empty strings.
  ;   Source file: /data/x/lqn/src/utils.lisp
 ```
 

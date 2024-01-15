@@ -146,17 +146,23 @@ match. If b is an expression, a is compared to the evaluated value of b."
          (loop for ,o across ,v* for ,i from 0
            do (format t "~a~a" ,o (if (< ,i ,n) ,s* "")))))))
 
-(defun str-split (s x &key prune &aux (lx (length x)))
-  (declare #.*opt* (string s x) (boolean prune))
-  "split string at substring. prune removes empty strings"
-  (labels ((lst (s) (typecase s (list s) (t (list s))))
+(defun str-split (s x &key prune trim &aux (lx (length x))) ; inefficient
+  (declare #.*opt* (string s x) (boolean prune trim) (fixnum lx))
+  "split string at substring. trim removes whitespace. prune removes empty strings"
+  (labels ((lst (s) (typecase s (list s) (otherwise (list s))))
+           (trm (s) (if trim (trim s) s))
            (splt (s &aux (i (subx? s x)))
-             (if i (cons (subseq s 0 i) (lst (splt (subseq s (+ lx i))))) s)))
+             (if i (cons (trm (subseq s 0 i))
+                         (lst (splt (subseq s (+ lx i)))))
+                   (trm s))))
     (let ((res (lst (splt s))))
       (if prune (remove-if (λ (s) (zerop (length s))) res)
                 res))))
-(defmacro splt (s x &optional prune) "split s at substrings x to vector."
-  `(vec! (str-split ,(ct/kv/str s) ,(ct/kv/str x) :prune ,prune)))
+
+(defmacro splt (s x &optional (trim t) prune)
+  "split s at substrings x to vector. trims whitespace by default. prune removes empty strings."
+      `(vec! (str-split ,(ct/kv/str s) ,(ct/kv/str x)
+                :prune ,prune :trim ,trim)))
 
 (defun repl (s from to) (declare (string s from to)) "replace from with to in s"
   (let ((s (strcat (mapcar (λ (s) (mkstr s to)) (str-split s from)))))
@@ -165,7 +171,9 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun seq* (v i &optional j) ; TODO: negative indices, tests
   (declare (vector v) (fixnum i)) "(subseq v ,@rest)"
   (subseq v i j))
-(defun ind* (v &optional (i 0)) (declare (vector v) (fixnum i)) "get index." (aref v i))
+(defun ind* (v &optional (i 0))
+  (declare (vector v) (fixnum i)) "get index."
+  (@@ v i nil))
 
 (defun head* (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "first ±n elements"
