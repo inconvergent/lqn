@@ -62,9 +62,9 @@ will output to JSON instead. `-t` does the oposite for `jqn`.
   | tqn '(splt _ :x) int!? (*fld 0 +)'
 ⇒ 109
 
-# split string, trim, search and replace:
+# split string, search and replace:
 ❭ echo 'abk c x dkef x ttuuxx x ttxx33'\
-  | tqn '(splt _ :x) trim
+  | tqn '(splt _ :x)
          (?txpr +@str!? :+@tt :+@uu
                  (str! _ :-hit))'
 ⇒ abk c
@@ -382,7 +382,7 @@ String maniuplation:
  - `(sdwn s ..)`: `str!` and downcase.
  - `(trim s)`: trim leading and trailing whitespace from `string`.
  - `(join s x ..)`: join sequence with `x` (`strings` or `chars`), returns `string`.
- - `(splt s x)`: split `s` at all `x` into `vector` with `strings`.
+ - `(splt s x [trim=t] [prune=nil])`: split `s` at all `x` into `vector` with `strings`.
  - `(strcat s ..)`: concatenate these `strings`, or all strings in one or more
    `sequences` of `strings`.
 

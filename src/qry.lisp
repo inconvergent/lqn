@@ -6,9 +6,9 @@
 
 ; CONTEXTS
 
-(defmacro //fxs/qry ((dat fn fi) &body body &aux (meta (gensym "META")))
+(defmacro //fxs/qry ((dat fn fi) &body body)
   (declare (symbol dat fn fi))
-  (awg (nope)
+  (awg (nope meta)
     `(let ((,meta (make-hash-table :test #'eq)))
      (block ,nope
        (labels ((fn () ,fn)
@@ -75,10 +75,10 @@
       (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
                   (string `(** ,q)) (number `(** ,(ct/kv/str q)))
                   (vector `(*map ,@(coerce q 'list)))
-                  (otherwise (error "||: expected cons/symbol/vector/number. got: ~a" q))))))
+                  (otherwise (error "||: expected cons/symbol/vec/number. got: ~a" q))))))
 
 (defun pre/$$ (q &optional (m :+)) (unless q (warn "$$: missing args."))
-  (labels
+  (labels ; TODO: how to handle selecting only keys with -@?
     ((str- (a b c) `(,a ,(typecase b (keyword (sdwn (mkstr b))) (string b)
                            (otherwise (error "$$: expected string/:keyword. got: ~a" b)))
                         ,c))
@@ -100,10 +100,12 @@
          ,@(loop for op in d collect `(setf ∇ ,(funcall rec (dat/new conf '∇) op)))
         ∇)))
 
-(defun compile/@ (rec conf d)
-  (case (length d) (1 `(@@ ,(gk conf :dat) ,(funcall rec conf (car d))))
+(defun compile/@ (rec conf d &aux (dat (gk conf :dat)))
+  (case (length d) (0 `(@@ ,dat 0 nil))
+                   (1 `(@@ ,(gk conf :dat) ,(funcall rec conf (car d))))
                    (2 `(@@ ,(gk conf :dat) ,@(funcall rec conf d)))
-                   (3 `(@@ ,@(funcall rec conf d)))))
+                   (3 `(@@ ,@(funcall rec conf d)))
+                   (otherwise (error "@: expected 0-3 arguments. got: ~a" d))))
 
 (defun pre/*map (q &optional (mm :+)) (unless q (warn "*map: missing args."))
   (labels ((unpack- (o) ; NOTE: can we use modes here?
@@ -116,7 +118,7 @@
       (if (< (length allres) 2) allres `((|| ,@allres))))))
 
 (defun compile/*map (rec conf d) ; (*map ...)
-  (unless (= (length d)) (error "*map: unexpected args: ~a" d))
+  (when (zerop (length d)) (error "*map: missing args."))
   (awg (i ires itr par)
     (labels ((do-map (expr)
                `(loop with ,ires = (mav)
@@ -129,7 +131,7 @@
         (etypecase cd (cons (do-map cd)) (vector (do-map cd)))))))
 
 (defun compile/*fld (rec conf d) ; (*fld ...)
-  (awg (i res itr par) ; 0 + ; 0 acc (+ acc _)
+  (awg (i res itr par)           ; 0 + ; 0 acc (+ acc _)
     (labels ((do-fld (init acc itr expr)
                (unless (and (symbolp acc) (symbolp itr))
                        (error "*fld: expected symbols, got: ~a/~a" acc itr))
@@ -185,9 +187,9 @@
                 (vex ,ires ($nil ,kvres)))
            finally (return ,ires))))
 
-; REWRITE WITH XPR OR **?
+
 (defun compile/*? (rec conf d &aux (cd (car d)) (sd (second d))) ; (*? test expr) ; filter, map
-  (unless (< 0 (length d) 3) (error "*?: bad args: ~a" d))
+  (unless (< 0 (length d) 3) (error "*?: bad args: ~a" d))       ; REWRITE WITH XPR OR **?
   (awg (i ires itr dat par)
     `(loop with ,ires of-type vector = (mav)
        with ,par of-type vector = (vec! ,(gk conf :dat))
@@ -216,17 +218,20 @@
                  `(,@d (vex ,ires ,@(or (get-modes d :%) `(,itr))) nil))
            finally (return ,ires))))
 
+(defun compile/?xpr/bool (rec conf cd)
+  (labels ((rec (expr) (funcall rec conf expr)))
+    (let ((ands (get-modes cd :+)) (nots (get-modes cd :-)) (ors (get-modes cd :?)))
+      (cond ((and nots (null ands) (null ors)) (rec `(not (or ,@nots))))
+            (t (rec `(and (or ,(car- all? cd) ,@ors ,@(and ands `((and ,@ands))))
+                          ,@(when nots `((not (or ,@nots)))))))))))
 (defun compile/?xpr (rec conf d) ; (xpr sel .. hit miss)
-  (labels ((do-last (d n) (mapcar (λ (d) (funcall rec conf (pre/or-all d))) (last d n)))
-           (build-bool (cd &aux (ands (get-modes cd :+)) (nots (get-modes cd :-)))
-             (funcall rec conf
-               `(and (or ,(car- all? cd) ,@(get-modes cd :?) ,@(and ands `((and ,@ands))))
-                     ,@(when nots `((not (or ,@nots))))))))
+  (labels ((do-last (d n) (mapcar (λ (d) (funcall rec conf (pre/or-all d))) (last d n))))
     `(//fxs/op/ (,(gk conf :par t) ,(gk conf :i t) ,(gk conf :itr t))
        ,(case (length d) ((0 (error "xpr: missing args")))
-          (1 (build-bool (pre/** d)))
-          (2 `(if ,(build-bool (pre/** (butlast d 1))) ,@(do-last d 1)))
-          (otherwise `(if ,(build-bool (pre/** (butlast d 2))) ,@(do-last d 2)))))))
+          (1 (compile/?xpr/bool rec conf (pre/** d)))
+          (2 `(if ,(compile/?xpr/bool rec conf (pre/** (butlast d 1))) ,@(do-last d 1)))
+          (otherwise `(if ,(compile/?xpr/bool rec conf
+                             (pre/** (butlast d 2))) ,@(do-last d 2)))))))
 
 (defun compile/?txpr (rec conf d) (funcall rec conf `(?mxpr ,d)))
 (defun compile/?mxpr (rec conf d)
@@ -246,7 +251,7 @@
                 ,res)))
 
 (defun compile/?rec (rec conf d) ; (?rec (< (inum) 10) (+ _ 1))
-  (unless (< 1 (length d) 4) (error "?rec: expected 2/3 arguments. got: ~a" d))
+  (unless (< 1 (length d) 4) (error "?rec: expected 2-3 arguments. got: ~a" d))
   (awg (i)
     (let ((d (lpad 3 d)))
       `(let ((∇ ,(gk conf :dat)) (,i 0))
@@ -271,8 +276,8 @@
          ((qop? :**    d) (compile/**    #'rec conf (pre/** (cdr d))))
          ((qop? :$*    d) (compile/$*    #'rec conf (pre/$$ (cdr d))))
          ((qop? :*$    d) (compile/*$    #'rec conf (pre/$$ (cdr d))))
-         ((qop? :*map  d) (compile/*map  #'rec conf (pre/*map (cdr d))))
          ((qop? :$$    d) (compile/$$    #'rec conf (pre/$$ (cdr d))))
+         ((qop? :*map  d) (compile/*map  #'rec conf (pre/*map (cdr d))))
          ((qop? :?xpr  d) (compile/?xpr  #'rec conf (cdr d)))
          ((qop? :@     d) (compile/@     #'rec conf (cdr d)))
          ((qop? :*?    d) (compile/*?    #'rec conf (cdr d)))
