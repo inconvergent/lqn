@@ -5,7 +5,10 @@ and transform LISP data (`LDN`), JSON and TXT files.  The terminal utilities
 will parse the input data to internal lisp strucutres according to the mode.
 Then the `lqn` language can be used for queries and transformations.
 
-`lqn` consists of three terminal commands `lqn`, `jqn` and `tqn`.
+See this post for a small tutorial: https://inconvergent.net/2024/lisp-query-notation/
+
+`lqn` consists of three terminal commands `lqn`, `jqn` and `tqn`. Some examples
+below.
 
 ## JQN Example (JSON)
 

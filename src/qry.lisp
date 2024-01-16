@@ -79,15 +79,18 @@
 
 (defun pre/$$ (q &optional (m :+)) (unless q (warn "$$: missing args."))
   (labels ; TODO: how to handle selecting only keys with -@?
-    ((str- (a b c) `(,a ,(typecase b (keyword (sdwn (mkstr b))) (string b)
-                           (otherwise (error "$$: expected string/:keyword. got: ~a" b)))
-                        ,c))
+    ((tx- (a b c)
+      `(,a ,(typecase b (keyword (sdwn (mkstr b))) (string b)
+                        (otherwise (error "$$: expected string/:keyword. got: ~a" b)))
+           ,(typecase c (keyword c) (boolean c)
+                        (symbol (if (all? c) :_ `(,c :_)))
+                        (otherwise c))))
      (repack- (o) (subseq `(,@o :_) 0 3))
      (repack-cons (ck k) (ecase (length k) (3 k) (2 `(,ck ,(caadr k) ,(cadadr k)))))
      (unpack- (o &aux (k (unpack-mode o m)) (ck (car k)))
-       (apply #'str- (etypecase (second k)
-                       (symbol (repack- k)) (string (repack- k))
-                       (cons (repack-cons ck k))))))
+       (apply #'tx- (etypecase (second k)
+                      (symbol (repack- k)) (string (repack- k))
+                      (cons (repack-cons ck k))))))
     (let* ((q* (remove-if #'all? (prescan q)))
            (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
@@ -187,7 +190,6 @@
                 (vex ,ires ($nil ,kvres)))
            finally (return ,ires))))
 
-
 (defun compile/*? (rec conf d &aux (cd (car d)) (sd (second d))) ; (*? test expr) ; filter, map
   (unless (< 0 (length d) 3) (error "*?: bad args: ~a" d))       ; REWRITE WITH XPR OR **?
   (awg (i ires itr dat par)
@@ -256,9 +258,11 @@
     (let ((d (lpad 3 d)))
       `(let ((∇ ,(gk conf :dat)) (,i 0))
          (∈ (,(gk conf :dat) ,i)
-           (loop while ,(funcall rec (dat/new conf '∇) (second d))
-                 ,@(loop for (s start then) in (car d)
+           (loop
+             ,@(loop for (s start then) in (car d)
                          nconc `(for ,s = ,start then ,then))
+                 while ,(funcall rec (dat/new conf '∇) (second d))
+
                  do (setf ∇ ,(funcall rec (dat/new conf '∇) (third d))
                           ,i (+ ,i 1))))
          (values ∇ ,i)))))
@@ -268,6 +272,7 @@
   (labels
     ((rec (conf d)
        (cond
+         ((and (symbolp d) (eq (kv d) :∅)) nil)
          ((all? d) (gk conf :dat))
          ((stringp d) d) ; this order is important
          ((vectorp d) (rec conf `(*map ,@(coerce d 'list))))
