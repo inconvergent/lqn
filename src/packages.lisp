@@ -10,6 +10,6 @@
     #:noop #:is? #:kv? #:sym? #:msym? #:trim #:sym!
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
     #:lst? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!? #:ind* #:sel* #:seq*
-    #:sup #:sdwn #:strcat #:repl #:splt #:symb #:join
+    #:sup #:sdwn #:strcat #:repl #:splt #:symb #:join #:lpad #:rpad #:nstr
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?))
 

@@ -67,6 +67,8 @@
                    finally (return res)))
      (otherwise o)))
 
+(defun nstr (n &optional (c #\Space)) "str of length n, filled with c"
+  (make-string n :initial-element c))
 (defmacro out (s &rest rest) "print to standard out"
   (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
                      `(let ((,s* ,s))
@@ -74,4 +76,22 @@
                           (format *standard-output* "~&~a~&" ,s*))))))
 (defmacro fmt (s &rest rest) "format to string."
   (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
+(defun lpad (s n &optional (c #\Space))
+  (declare (string s) (fixnum n)) "left pad to length n. always of length n."
+  (let ((d (- n (length s))))
+    (cond ((< d 0) (subseq s (abs d))) ((> d 0) (strcat (nstr d c) s)) (t s))))
+(defun rpad (s n &optional (c #\Space) &aux (l (length s)))
+  (declare (string s) (fixnum n)) "right pad to length n. always of length n."
+  (let ((d (- n l)))
+    (cond ((< d 0) (subseq s 0 (+ l d))) ((> d 0) (strcat s (nstr d c))) (t s))))
+
+(defun bar (size i &optional (pad #\Space) (bbb " ▏▎▍▌▋▊▉█") &aux (l (length bbb)))
+  (declare (fixnum size l) (float i))
+  (labels ((pad? (res) (if pad (rpad res size pad) res)))
+    (when (<= i 0.0) (return-from bar (pad? "")))
+    (let* ((i* (* (max 0.0 (clmp i)) size))
+           (full (floor i*))
+           (part (mod (floor (* l (rem i* 1))) l))
+           (res (strcat (nstr full (char bbb (1- l))) (char bbb part))))
+      (pad? res))))
 

@@ -1,5 +1,19 @@
 (in-package :lqn)
 
+(defmacro vpr (&rest rest)
+  "print input code with resulting values, return values."
+  (awg (res) `(let ((,res (lst ,@rest)))
+                (format t "~&;; ~{~a~^ | ~}~&>> ~{~a~^ | ~}~&" ',rest ,res)
+                (apply #'values ,res))))
+(defmacro vlst (&body body)
+  "get all (values ... ) in body as a list.
+almost like multiple-value-list, except it handles multiple arguments."
+  `(mvc #'list (~ ,@body)))
+(defmacro vfrom-lst (l) "return list as values. equivalent to (values-list ...)."
+  `(values-list ,l))
+(defmacro ~ (&rest rest) "wraps rest in (mvc #'values ...)."
+  `(mvc #'values ,@rest))
+
 (defun sup (&rest rest) "mkstr and upcase" (string-upcase (apply #'mkstr rest)))
 (defun sdwn (&rest rest) "mkstr and downcase" (string-downcase (apply #'mkstr rest)))
 (defun trim (s &optional default (chars '(#\Space #\Newline #\Backspace #\Tab
@@ -23,22 +37,6 @@
   (declare (string s sub)) (if (subx? s sub) s d))
 (defun isub? (s sub &optional d) "ignore case sub?"
   (declare (string s sub)) (if (isubx? s sub) s d))
-
-
-(defun unpack-mode (o &optional (default :+) merciful)
-  (labels ((valid-mode (m) (member m *qmodes* :test #'eq))
-           (repack- (s s*) (etypecase s (symbol (psymb (symbol-package s) (subseq s* 2)))
-                                        (string (subseq s* 2))))
-           (unpack-cons (cns) (if (valid-mode (car cns)) cns
-                                  (dsb (m s) (unpack- (car cns)) `(,m (,s ,@(cdr cns))))))
-           (unpack- (s &aux (s* (mkstr s)) (sx (subx? s* "@")))
-             (if (and sx (= sx 1)) (let ((m (kv (subseq s* 0 1)))) ; nil -> :nil
-                                     (if (or merciful (valid-mode m)) (list m (repack- s s*))
-                                       (error "lqn: invalid mode in: ~a" s)))
-                                   (list default s))))
-    (typecase o (symbol (unpack- o)) (string (unpack- o))
-                (cons (unpack-cons o)) (vector `(,default ,o))
-      (otherwise (error "lqn: bad mode thing to have mode: ~a" o)))))
 
 (defmacro msym? (a b &optional d)
   "compare symbol a to b. if b is a keword or symbol
@@ -119,7 +117,9 @@ match. If b is an expression, a is compared to the evaluated value of b."
   (apply #'mkstr
     (mapcar (λ (s) (etypecase s (string s)
                      (list (apply #'concatenate 'string s))
-                     (vector (apply #'concatenate 'string (coerce s 'list)))))
+                     (vector (apply #'concatenate 'string (coerce s 'list)))
+                     (character (apply #'concatenate 'string (list (str! s))))
+                     (number (apply #'concatenate 'string (list (str! s))))))
             rest)))
 
 (defun pref? (s pref &optional d)

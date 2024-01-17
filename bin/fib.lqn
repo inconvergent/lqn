@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# echo '(0 1)' | auxin ~/x/lqn/bin/lqn-sh.lisp -t "
+#   (?rec (< (cnt) (1- 360))
+#         (cat* _ (apply* + (tail* _ 2))))
+#   #( (strcat #1=(fmt  \"~2,'0d ~80,'0d.\" (cnt) _)
+#              (seq* (reverse #1#) 1)) )
+#   (join _ #\Newline)"
+
+echo '(0 1)' | auxin ~/x/lqn/bin/lqn-sh.lisp -t "
+  (?rec (< (cnt) (1- 100))
+        (cat* _ (apply* + (tail* _ 2))))
+  #( (strcat #1=(strcat (lpad (str! (cnt)) 3 #\0) (lpad (str! _) 30))
+             ;(seq* (reverse #1#) 3)
+             (bar 20 (/ (cnt) 100.0))
+             ) )
+  "

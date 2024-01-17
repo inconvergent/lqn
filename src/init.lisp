@@ -11,7 +11,7 @@
                  :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth? :ind* :sel* :seq* :apply* :join
                  :new* :new$ :cat* :cat$ :head* :tail* :size?
                  :flatn* :flatall* :flatn$
-                 :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
+                 :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx? :lpad :rpad :nstr
                  :sup :sdwn :mkstr :repl :strcat :splt
                  :msym? :is? :kv? :sym? :sym! :trim
                  :num!? :num? :flt!? :flt? :int!? :int?
@@ -54,8 +54,11 @@
                                      :element-type type :adjustable t)
            (make-array size :fill-pointer 0 :element-type type :adjustable t)))
 
-(defun lpad (n lst)
+(defun lpad-lst (n lst)
   (concatenate 'list (loop repeat (- n (length lst)) collect nil) lst))
+(defun rpad-lst (n lst)
+  (concatenate 'list lst (loop repeat (- n (length lst)) collect nil)))
+
 (defun group (n l) (declare (list l) (fixnum n)) "group l into lists of n elements."
   (if (< n 1) (error "group: group size is smaller than 1"))
   (labels ((rec (l acc)
@@ -75,6 +78,8 @@
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 (defun lst (&rest rest) (apply #'list rest))
+
+(defun clmp (v &optional (a 0.0) (b 1.0)) (declare (number v a b)) (max a (min v b)))
 
 (defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
 (defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))

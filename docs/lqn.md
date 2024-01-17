@@ -464,6 +464,20 @@
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
+#### LQN:LPAD
+
+```
+ ; LQN:LPAD
+ ;   [symbol]
+ ; 
+ ; LPAD names a compiled function:
+ ;   Lambda-list: (S N &OPTIONAL (C  ))
+ ;   Derived type: (FUNCTION (STRING FIXNUM &OPTIONAL T) *)
+ ;   Documentation:
+ ;     left pad to length n. always of length n.
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
 #### LQN:LST?
 
 ```
@@ -530,6 +544,21 @@
  ;   Documentation:
  ;     do nothing. return nil.
  ;   Source file: /data/x/lqn/src/init.lisp
+```
+
+#### LQN:NSTR
+
+```
+ ; LQN:NSTR
+ ;   [symbol]
+ ; 
+ ; NSTR names a compiled function:
+ ;   Lambda-list: (N &OPTIONAL (C  ))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T)
+ ;                  (VALUES (SIMPLE-ARRAY CHARACTER (*)) &OPTIONAL))
+ ;   Documentation:
+ ;     str of length n, filled with c
+ ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
 #### LQN:NUM!?
@@ -664,6 +693,20 @@
  ;   Documentation:
  ;     replace from with to in s
  ;   Source file: /data/x/lqn/src/utils.lisp
+```
+
+#### LQN:RPAD
+
+```
+ ; LQN:RPAD
+ ;   [symbol]
+ ; 
+ ; RPAD names a compiled function:
+ ;   Lambda-list: (S N &OPTIONAL (C  ) &AUX (L (LENGTH S)))
+ ;   Derived type: (FUNCTION (STRING FIXNUM &OPTIONAL T) *)
+ ;   Documentation:
+ ;     right pad to length n. always of length n.
+ ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
 #### LQN:SDWN
