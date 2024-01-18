@@ -16,7 +16,8 @@
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
-  (-run-tests '(#P"test/test-lqn.lisp")))
+  (-run-tests '(#P"test/test-lqn.lisp"))
+  (-run-tests '(#P"test/test-lqn-2.lisp")))
 
 (defun strip (s)
   (lqn::repl s (lqn:str! #\Newline) ""))
