@@ -26,7 +26,10 @@
                        (vex ,ires ,(funcall rec (dat/new conf itr) expr)))
                   finally (return ,ires))))
       (let ((cd (car d)))
-        (etypecase cd (cons (do-map cd)) (vector (do-map cd)))))))
+        (typecase cd
+                  (boolean cd) ; TODO: do this more places or not at all?
+                  (cons (do-map cd)) (vector (do-map cd))
+          (otherwise (error "*map: expected vector, cons. got: ~a." d)))))))
 
 (defun compile/*fld (rec conf d) ; (*fld ...)
   (awg (i res itr par)           ; 0 + ; 0 acc (+ acc _)
@@ -171,21 +174,17 @@
     (keyword (subseq (sdwn (str! s)) 2))
     (symbol `(str! ,(psymb (symbol-package s) (subseq (sup (str! s)) 2 ))))))
 
+(defun custom-modifier? (m d)
+  (and (symbolp d) (pref? (symbol-name d) m)
+       (> (length (symbol-name d)) (length m))))
+
 (defun proc-qry (q &optional conf*) "compile lqn query"
   (awg (dat fn fi)
   (labels
     ((rec (conf d)
        (cond
-
          ((and (symbolp d) (eq (kv d) :∅)) nil)
-         ((and (listp d) (symbolp (car d)) ; TODO: this is a mess
-               (pref? (symbol-name (car d)) "S@")
-               (> (length (symbol-name (car d))) 2))
-          (rec conf `(str! (,(psymb (symbol-package (car d))
-                                    (subseq (sup (str! (car d))) 2)) ,@(cdr d)))))
-         ((and (symbolp d) (pref? (symbol-name d) "S@")
-               (length (symbol-name d))) (compile/s@ d))
-
+         ((custom-modifier? "S@" d) (compile/s@ d))
          ((all? d) (gk conf :dat))
          ((stringp d) d) ; this order is important
          ((vectorp d) (rec conf `(*map ,@(coerce d 'list))))

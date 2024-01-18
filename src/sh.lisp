@@ -30,7 +30,8 @@
 
 (defun sh/is-query (q ex) (or q (sh/exit-msg 5 "MISSING query!~%~%~a~&" ex)))
 (defun sh/parse-query (q) (declare #.*opt*)
-  (handler-case `(|| ,@(read-all-str q))
+  (handler-case (let ((rd (read-all-str q)))
+                 `(|| ,@(if rd rd '(nil))))
     (error (e) (sh/exit-msg 10 "failed to PARSE qry:~%~%~a~&" e))))
 
 (defun sh/compile-query (qq) (declare #.*opt*)

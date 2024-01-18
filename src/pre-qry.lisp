@@ -90,7 +90,9 @@
 (defun pre/|| (qq) (unless qq (warn "||: missing args."))
   (loop for q in (prescan qq) collect
     (if (all? q) (kv q)
-      (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
+      (typecase q (cons q) (keyword `(** ,q))
+                ; (boolean q)
+                (symbol `(*map ,q))
                   (string `(** ,q)) (number `(** ,(ct/kv/str q)))
                   (vector `(*map ,@(coerce q 'list)))
                   (otherwise (error "||: expected cons/symbol/vec/number. got: ~a." q))))))
