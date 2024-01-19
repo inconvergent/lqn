@@ -1,7 +1,6 @@
 (in-package :lqn)
 
-
-(defun compile/|| (rec conf d) ; (|| ...)
+(defun compile/|| (rec conf d) ; (|| ...) pipe
   (awg (∇-)
    (if (< (length d) 2) (funcall rec conf (car d))
       `(let ((,∇- ,(gk conf :dat)))
@@ -102,7 +101,7 @@
 
 (defun pre/** (q &optional (mm :?)) (unless q (warn "**: missing args."))
   (labels ((unpack- (o) (dsb (m sk) (unpack-mode o mm) `(,m ,(pre/xpr-sel sk :_)))))
-    (let* ((q* (remove-if #'all? (prescan q)))
+    (let* ((q* (remove-if #'all? (pre/scan-clauses q '#:**)))
            (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 
@@ -169,22 +168,11 @@
                                         (third d)) ,i (+ ,i 1))))
          (values ,∇- ,i)))))
 
-(defun compile/s@ (s)
-  (etypecase s
-    (keyword (subseq (sdwn (str! s)) 2))
-    (symbol `(str! ,(psymb (symbol-package s) (subseq (sup (str! s)) 2 ))))))
-
-(defun custom-modifier? (m d)
-  (and (symbolp d) (pref? (symbol-name d) m)
-       (> (length (symbol-name d)) (length m))))
-
 (defun proc-qry (q &optional conf*) "compile lqn query"
   (awg (dat fn fi)
   (labels
-    ((rec (conf d)
+    ((rec (conf d* &aux (d (pre/scan-clause d* nil)))
        (cond
-         ((and (symbolp d) (eq (kv d) :∅)) nil)
-         ((custom-modifier? "S@" d) (compile/s@ d))
          ((all? d) (gk conf :dat))
          ((stringp d) d) ; this order is important
          ((vectorp d) (rec conf `(*map ,@(coerce d 'list))))
@@ -204,7 +192,7 @@
          ((qop? :?srch d) (compile/?srch #'rec conf (cdr d)))
          ((qop? :?rec  d) (compile/?rec  #'rec conf (cdr d)))
          ((car- lqnfx? d)    `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
-         ((consp d) (cons (rec conf (car d)) (rec conf (cdr d))))
+         ((consp d) (cons (rec conf (pre/scan-clause (car d))) (rec conf (cdr d))))
          (t (error "lqn: unexpected clause: ~a~%in: ~a." d q)))))
       `(λ (,dat ,fn ,fi) (//fxs/qry (,dat ,fn ,fi)
                                ,(rec `((:dat . ,dat) ,@conf*) q))))))

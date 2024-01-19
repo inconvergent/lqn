@@ -1,6 +1,6 @@
 (in-package #:lqn-tests)
 
-(plan 6)
+(plan 7)
 
 (subtest "utils"
   (is (lqn:sub? "aabb" "ab") "aabb")
@@ -55,6 +55,17 @@
      '((:? (WHEN (CCC :_) :_)) (:? (AND (LQN:STR? :_) (LQN:ISUB? :_ "ddd"))) (:? (AND (LQN:STR? :_) (LQN:SUB? :_ "IIUJ")))
        (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "UU"))) (:? (WHEN (AA :_) :_)) (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
        (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "ABC"))))))
+
+(subtest "modifiers"
+  (is (lqn:qry #("abc" "def") [(sub? _ :s@a)]) #("abc") :test #'equalp)
+  (is (lqn:qry "abc x def x hij" nil) nil)
+  (is (lqn:qry "aa" s@_) "aa")
+  (is (lqn:qry 1 s@_) "1")
+  (is (lqn:qry 1 (s@progn _)) "1")
+  (is (lqn:qry "a" _@sup) "A")
+  (is (lqn:qry "a" (progn _@sup)) "A")
+  (is (lqn:qry 1 (progn (s@progn _))) "1")
+  (is (lqn:qry "abc x def x hij" ∅) nil))
 
 (subtest "lqn qry identities"
   (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* ($* _))))

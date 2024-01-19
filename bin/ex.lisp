@@ -61,13 +61,3 @@
 ;; - 4: 3
 ;; - 5: 5
 ;; ...
-
-    (is (lqn:qry "abc x def x hij"
-
-                 (splt _ :x)
-                 [(sub? _ :s@a)]
-
-                 )
-        nil
-        )
-

@@ -7,10 +7,10 @@
 #              (seq* (reverse #1#) 1)) )
 #   (join _ #\Newline)"
 
-echo '(0 1)' | auxin ~/x/lqn/bin/lqn-sh.lisp -t "
+echo '(0 1)' | auxin ~/x/lqn/bin/lqn-sh.lisp -vt "
   (?rec (< (cnt) (1- 100))
         (cat* _ (apply* + (tail* _ 2))))
-  #( (strcat #1=(strcat (lpad (str! (cnt)) 3 #\0) (lpad (str! _) 30))
+        #( (strcat #1=(strcat (lpad (s@cnt) 3 #\0) (lpad s@_ 30))
              ;(seq* (reverse #1#) 3)
              (bar 20 (/ (cnt) 100.0))
              ) )

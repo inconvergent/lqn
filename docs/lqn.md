@@ -8,7 +8,7 @@
  ;   Lambda-list: (A EXPR &OPTIONAL RES)
  ;   Documentation:
  ;     evaluate expr only iff a is not nil. returns the result of expr or res; or nil.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:@\*
@@ -23,7 +23,7 @@
  ;                  (VALUES (OR SIMPLE-VECTOR NULL) &OPTIONAL))
  ;   Documentation:
  ;     pick these indices/keys from sequence/hash-table into new vector.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:@@
@@ -37,7 +37,7 @@
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:
  ;     get nested key (e.g. aa/2/bb) from nested structure of kv/vec
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:APPLY\*
@@ -50,7 +50,7 @@
  ; 
  ; APPLY* names a macro:
  ;   Lambda-list: (FX V)
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:CAT$
@@ -65,7 +65,7 @@
  ;   Derived type: (FUNCTION * (VALUES HASH-TABLE &OPTIONAL))
  ;   Documentation:
  ;     add all keys from all hash tables in rest. left to right.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:CAT\*
@@ -83,7 +83,7 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     concatenate sequences in rest to vector
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:CNT
@@ -106,7 +106,7 @@
  ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:D?
@@ -120,7 +120,7 @@
  ;   Derived type: (FUNCTION (T) (VALUES &OPTIONAL))
  ;   Documentation:
  ;     describe symbol.
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:FLATALL\*
@@ -135,7 +135,7 @@
  ;   Documentation:
  ;     flatten all sequences into new vector. if str is t strings will become
  ;       individual chars.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:FLATN$
@@ -150,7 +150,7 @@
  ;                  (VALUES (SIMPLE-ARRAY T) &OPTIONAL))
  ;   Documentation:
  ;     flatten ht to vector: k0 v0 k1 v1 ...
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:FLATN\*
@@ -165,7 +165,7 @@
  ;                  (VALUES SEQUENCE &OPTIONAL))
  ;   Documentation:
  ;     flatten n times
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:FLT!?
@@ -179,7 +179,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     f as float if it can be parsed; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:FLT?
@@ -193,7 +193,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     f if float; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:FMT
@@ -224,7 +224,7 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     first ±n elements
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:IND\*
@@ -238,7 +238,7 @@
  ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM) *)
  ;   Documentation:
  ;     get index.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:INT!?
@@ -252,7 +252,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     i as int if it can be parsed; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:INT?
@@ -266,7 +266,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     i if int; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:INUM
@@ -289,7 +289,7 @@
  ;   Derived type: (FUNCTION (STRING STRING &OPTIONAL T) *)
  ;   Documentation:
  ;     ignore case pref?
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:IS?
@@ -303,7 +303,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     k if k is not nil, empty sequence, or empty hash-table; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:ISUB?
@@ -318,7 +318,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     ignore case sub?
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:ISUBX?
@@ -334,7 +334,7 @@
  ;   Documentation:
  ;     ignore case subx?
  ;   Inline proclamation: INLINE (inline expansion available)
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:ISUF?
@@ -349,7 +349,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     ignore case suf?
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:JOIN
@@ -362,7 +362,7 @@
  ;   Lambda-list: (V &REST S)
  ;   Documentation:
  ;     join sequence v with s into new string.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:JSNLOADF
@@ -447,7 +447,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     k if kv; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:LDNOUT
@@ -489,7 +489,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     l if list; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:MSYM?
@@ -504,7 +504,7 @@
  ;     compare symbol a to b. if b is a keword or symbol
  ;     a perfect match is required. if b is a string it performs a substring
  ;     match. If b is an expression, a is compared to the evaluated value of b.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:NEW$
@@ -517,7 +517,7 @@
  ;   Lambda-list: (&REST D)
  ;   Documentation:
  ;     new kv/hash-table from these (k v) pairs
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:NEW\*
@@ -530,7 +530,7 @@
  ;   Lambda-list: (&REST D)
  ;   Documentation:
  ;     new vector with these elements
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:NOOP
@@ -543,7 +543,7 @@
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
  ;     do nothing. return nil.
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:NSTR
@@ -572,7 +572,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     n as number if it can be parsed; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:NUM?
@@ -586,7 +586,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     n if number; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:OUT
@@ -623,7 +623,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if s starts with pref; or d
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:PROC-QRY
@@ -692,7 +692,7 @@
  ;                  (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     replace from with to in s
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:RPAD
@@ -720,7 +720,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and downcase
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SEL\*
@@ -739,7 +739,7 @@
  ;   Documentation:
  ;     new vector with indices or ranges from v.
  ;     ranges are lists that behave like arguments to seq*.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SEQ!?
@@ -753,7 +753,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s as seq if it can be parsed; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:SEQ\*
@@ -768,7 +768,7 @@
  ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
  ;   Documentation:
  ;     (subseq v ,@rest)
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SEQ?
@@ -782,7 +782,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if sequence; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:SIZE?
@@ -796,7 +796,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     length of sequence/number of keys in kv.
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:SPLT
@@ -809,7 +809,7 @@
  ;   Lambda-list: (S X &OPTIONAL (TRIM T) PRUNE)
  ;   Documentation:
  ;     split s at substrings x to vector. trims whitespace by default. prune removes empty strings.
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:STR!
@@ -823,7 +823,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     coerce to string
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:STR!?
@@ -837,7 +837,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s as str if it can be parsed; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:STR?
@@ -851,7 +851,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if string; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:STRCAT
@@ -865,7 +865,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     concatenate all strings in sequences
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SUB?
@@ -880,7 +880,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if sub is substring of s; or d
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SUBX?
@@ -896,7 +896,7 @@
  ;   Documentation:
  ;     returns index where substring matches s from left to right. otherwise nil
  ;   Inline proclamation: INLINE (inline expansion available)
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SUF?
@@ -911,7 +911,7 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if s ends with suf; or d
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SUP
@@ -925,7 +925,7 @@
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     mkstr and upcase
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SYM!
@@ -939,7 +939,7 @@
  ;   Derived type: (FUNCTION * (VALUES SYMBOL &OPTIONAL))
  ;   Documentation:
  ;     stringify, make symbol
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:SYM?
@@ -953,7 +953,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     s if sym; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:SYMB
@@ -968,7 +968,7 @@
  ;   Documentation:
  ;     mkstr, make symbol.
  ;   Inline proclamation: INLINE (inline expansion available)
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:TAIL\*
@@ -986,7 +986,7 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     last ±n elements
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:TRIM
@@ -1007,7 +1007,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     trim string
- ;   Source file: /data/x/lqn/src/utils.lisp
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:V?
@@ -1024,7 +1024,7 @@
  ;   Derived type: (FUNCTION (&OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     return/print lqn version.
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:VEC!
@@ -1038,7 +1038,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     coerce v to vector. if v is not a vector, list, string it returns d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:VEC!?
@@ -1052,7 +1052,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     v as vector if it can be parsed; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:VEC?
@@ -1066,6 +1066,6 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     v if vector; or d
- ;   Source file: /data/x/lqn/src/init.lisp
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 

@@ -81,13 +81,16 @@
 
 (defun clmp (v &optional (a 0.0) (b 1.0)) (declare (number v a b)) (max a (min v b)))
 
-(defmacro car- (fx d) (declare (symbol fx d)) `(and (listp ,d) (,fx (car ,d))))
+(defmacro car- (fx d) (declare (symbol d)) `(and (listp ,d) (,fx (car ,d))))
 (defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))
 (defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
   (if mode-sym (values-list (unpack-mode mode-sym d :?)) (values nil d)))
 (defun qop? (s d &aux (d (and (listp d) (car d)))) (and d (sym-not-kv d) (eq s (kv d))))
 (defun all?    (d) (and (symbolp d)    (eq (kv d) :_)))
 (defun lqnfx?  (d) (and (sym-not-kv d) (member (kv d) *fxns* :test #'eq)))
+(defun custom-modifier? (m d)
+  (and (symbolp d) (pref? (symbol-name d) m)
+       (> (length (symbol-name d)) (length m))))
 
 ; IS TYPE?
 (defun flt? (f &optional d) "f if float; or d"    (if (floatp f) f d))
