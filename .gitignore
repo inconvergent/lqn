@@ -6,3 +6,4 @@ tmp.lisp
 tmp*.lisp
 *.tmp
 tmp.txt
+*.grph

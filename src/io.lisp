@@ -67,8 +67,6 @@
                    finally (return res)))
      (otherwise o)))
 
-(defun nstr (n &optional (c #\Space)) "str of length n, filled with c"
-  (make-string n :initial-element c))
 (defmacro out (s &rest rest) "print to standard out"
   (awg (s*) (if rest `(format *standard-output* ,s ,@rest)
                      `(let ((,s* ,s))
@@ -76,6 +74,9 @@
                           (format *standard-output* "~&~a~&" ,s*))))))
 (defmacro fmt (s &rest rest) "format to string."
   (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
+
+(defun nstr (n &optional (c #\Space)) "str of length n, filled with c"
+  (make-string n :initial-element c))
 (defun lpad (s n &optional (c #\Space))
   (declare (string s) (fixnum n)) "left pad to length n. always of length n."
   (let ((d (- n (length s))))

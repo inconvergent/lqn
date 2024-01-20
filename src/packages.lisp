@@ -9,7 +9,7 @@
     #:pnum #:inum #:cnt
     #:noop #:is? #:kv? #:sym? #:msym? #:trim #:sym!
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
-    #:lst? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!? #:ind* #:sel* #:seq*
+    #:lst? #:lst!? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!? #:ind* #:sel* #:seq*
     #:sup #:sdwn #:strcat #:repl #:splt #:symb #:join
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
     #:cmd #:srt #:lpad #:rpad #:nstr #:ascii #:bar #:clmp))

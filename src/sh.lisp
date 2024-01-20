@@ -84,8 +84,9 @@
    (ecase (opt/outfmt? opts d) (:json (prjsn res)) (:ldn (prldn res)) (:txt (dotxt res)))))
 
 (defun cmd (fx &rest args) (declare (string fx)) "run terminal command"
-  (mvb (res err errcode)
-    (uiop:run-program `(,fx ,@args) :output '(:string :stripped t))
+  (mvb (res err errcode) (uiop:run-program `(,fx ,@args) :output '(:string :stripped t))
+
+       ; (warn err)
     (values (splt res #.(str! #\Newline)) err errcode)))
 ; (defun now () (cmd "date" "+%Y%m%d-%H%M%S-%N"))
 (defun now () "timestamp." (cmd "date" "+%Y-%m-%dT%H:%M:%S.%N"))

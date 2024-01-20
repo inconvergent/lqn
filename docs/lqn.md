@@ -536,6 +536,20 @@
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
+#### LQN:LST!?
+
+```
+ ; LQN:LST!?
+ ;   [symbol]
+ ; 
+ ; LST!? names a compiled function:
+ ;   Lambda-list: (N &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     v as list if it can be a list; or d
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:LST?
 
 ```
@@ -543,10 +557,10 @@
  ;   [symbol]
  ; 
  ; LST? names a compiled function:
- ;   Lambda-list: (L &OPTIONAL D)
+ ;   Lambda-list: (V &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     l if list; or d
+ ;     v if list; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 

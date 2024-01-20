@@ -230,7 +230,7 @@ ranges are lists that behave like arguments to seq*."
   a)
 (defun flatn$ (a) "flatten ht to vector: k0 v0 k1 v1 ..."
   (declare (hash-table a))
-  (let ((res (make-array (size? a) :adjustable nil)))
+  (let ((res (make-array (* 2 (size? a)) :adjustable nil)))
     (loop for k being the hash-keys of a using (hash-value v)
           for i from 0 by 2 do (setf (aref res i) k (aref res (1+ i)) v))
     res))

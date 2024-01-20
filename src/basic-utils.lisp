@@ -15,7 +15,7 @@
                  :sup :sdwn :mkstr :repl :strcat :splt
                  :msym? :is? :kv? :sym? :sym! :trim
                  :num!? :num? :flt!? :flt? :int!? :int?
-                 :lst? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?))
+                 :lst? :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?))
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*
       #+CMU extensions:*command-line-words* nil))
@@ -46,7 +46,7 @@
 (abbrev vpe vector-push-extend)  (defmacro vex (v o) `(vpe ,o ,v))
 
 (defmacro λ (&rest rest) `(lambda ,@rest))
-(defun internal-path-string (path &optional (pkg :lqn)) (declare (string path))
+(defun internal-path-string (&optional (path "") (pkg :lqn)) (declare (string path))
   (namestring (asdf:system-relative-pathname pkg path)))
 
 (defun d? (s) "describe symbol." (describe s)) (defun i? (s) "inspect s" (inspect s))
@@ -96,10 +96,10 @@
 (defun int? (i &optional d) "i if int; or d"      (if (integerp i) i d))
 (defun kv?  (k &optional d) "k if kv; or d"       (if (hash-table-p k) k d))
 (defun sym? (s &optional d) "s if sym; or d"      (if (symbolp s) s d))
-(defun lst? (l &optional d) "l if list; or d"     (if (listp l) l d))
 (defun num? (n &optional d) "n if number; or d"   (if (numberp n) n d))
 (defun str? (s &optional d) "s if string; or d"   (if (stringp s) s d))
 (defun vec? (v &optional d) "v if vector; or d"   (if (vectorp v) v d))
+(defun lst? (v &optional d) "v if list; or d"     (if (listp v) d d))
 (defun seq? (s &optional d) "s if sequence; or d" (or (lst? s) (str? s) (vec? s) d))
 
 ; PARSE AS TYPE OR DEFAULT
@@ -115,6 +115,9 @@
   (handler-case (or (vec? n) (vec? (read-from-string n nil nil)) d) (error () d)))
 (defun seq!? (n &optional d) "s as seq if it can be parsed; or d"
   (handler-case (or (seq? n) (seq? (read-from-string n nil nil)) d) (error () d)))
+(defun lst!? (n &optional d) "v as list if it can be a list; or d"
+  (labels ((cnv (a) (if (vec? a) (coerce a 'list) nil)))
+    (handler-case (or (cnv n) (cnv (read-from-string n nil nil)) d) (error () d))))
 
 ; COERCE TO TYPE
 (defun sym! (&rest rest) "stringify, make symbol" (apply #'symb rest))

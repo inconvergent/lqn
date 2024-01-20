@@ -210,6 +210,7 @@
     `(funcall ,cq ,dat ":internal:" 0)))
 (defmacro qry (dat &rest rest) "query data. rest is wrapped in the pipe operator."
   `(qryd ,dat (|| ,@rest)))
+(abbrev @q qry)
 (defmacro qrydb (dat &rest rest) "query data. rest is wrapped in the pipe operator."
   `(qryd ,dat (|| ,@rest) :db t))
 (defun qryl (dat q &key db) "compile lqn query and run on dat"
