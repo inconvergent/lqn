@@ -43,14 +43,43 @@
 #### LQN:APPLY\*
 
 ```
-:missing:todo:
-
  ; LQN:APPLY*
  ;   [symbol]
  ; 
  ; APPLY* names a macro:
  ;   Lambda-list: (FX V)
+ ;   Documentation:
+ ;     apply, but for sequences.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
+#### LQN:ASCII
+
+```
+ ; LQN:ASCII
+ ;   [symbol]
+ ; 
+ ; ASCII names a compiled function:
+ ;   Lambda-list: (S)
+ ;   Derived type: (FUNCTION (FLOAT) *)
+ ;   Documentation:
+ ;     ascii char with this density.
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
+#### LQN:BAR
+
+```
+ ; LQN:BAR
+ ;   [symbol]
+ ; 
+ ; BAR names a compiled function:
+ ;   Lambda-list: (SIZE S &OPTIONAL (PAD  ) (BBB  ▏▎▍▌▋▊▉█) &AUX
+ ;                 (L (LENGTH BBB)))
+ ;   Derived type: (FUNCTION (FIXNUM FLOAT &OPTIONAL T T) *)
+ ;   Documentation:
+ ;     draw progress bar
+ ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
 #### LQN:CAT$
@@ -84,6 +113,35 @@
  ;   Documentation:
  ;     concatenate sequences in rest to vector
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
+#### LQN:CLMP
+
+```
+ ; LQN:CLMP
+ ;   [symbol]
+ ; 
+ ; CLMP names a compiled function:
+ ;   Lambda-list: (V &OPTIONAL (A 0.0) (B 1.0))
+ ;   Derived type: (FUNCTION (NUMBER &OPTIONAL NUMBER NUMBER)
+ ;                  (VALUES REAL &OPTIONAL))
+ ;   Documentation:
+ ;     clamp to range (a b).
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
+#### LQN:CMD
+
+```
+ ; LQN:CMD
+ ;   [symbol]
+ ; 
+ ; CMD names a compiled function:
+ ;   Lambda-list: (FX &REST ARGS)
+ ;   Derived type: (FUNCTION (STRING &REST T) (VALUES T T T &OPTIONAL))
+ ;   Documentation:
+ ;     run terminal command
+ ;   Source file: /data/x/lqn/src/sh.lisp
 ```
 
 #### LQN:CNT
@@ -809,6 +867,20 @@
  ;   Lambda-list: (S X &OPTIONAL (TRIM T) PRUNE)
  ;   Documentation:
  ;     split s at substrings x to vector. trims whitespace by default. prune removes empty strings.
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
+#### LQN:SRT
+
+```
+ ; LQN:SRT
+ ;   [symbol]
+ ; 
+ ; SRT names a compiled function:
+ ;   Lambda-list: (L &OPTIONAL (DIR S<) (KEY (FUNCTION IDENTITY)))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T T) (VALUES SEQUENCE &OPTIONAL))
+ ;   Documentation:
+ ;     sort sequence by: s<, s> < >
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 

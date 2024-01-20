@@ -85,8 +85,16 @@
   (let ((d (- n l)))
     (cond ((< d 0) (subseq s 0 (+ l d))) ((> d 0) (strcat s (nstr d c))) (t s))))
 
-; https://stackoverflow.com/questions/30097953/ascii-art-sorting-an-array-of-ascii-characters-by-brightness-levels-c-c
-(defun ascii (s)
+(defun bar (size s &optional (pad #\Space) (bbb " ▏▎▍▌▋▊▉█") &aux (l (length bbb)))
+  (declare (fixnum size) (float s)) "draw progress bar"
+  (labels ((pad? (res) (if pad (rpad res size pad) res)))
+    (when (<= s 0.0) (return-from bar (pad? "")))
+    (let* ((i* (* (max 0.0 (clmp s)) size))
+           (full (floor i*))
+           (part (mod (floor (* l (rem i* 1))) l))
+           (res (strcat (nstr full (char bbb (1- l))) (char bbb part))))
+      (pad? res))))
+(defun ascii (s) (declare (float s))"ascii char with this density."
   (let ((chars " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@")
         (dens #(0 0.0751 0.0829 0.0848 0.1227 0.1403 0.1559 0.185 0.2183 0.2417
                   0.2571 0.2852 0.2902 0.2919 0.3099 0.3192 0.3232 0.3294
@@ -102,14 +110,4 @@
     (loop with s = (clmp s) for i from 0 for v across dens
           if (>= v s) do (return-from ascii (aref chars (print i))))
     (@@ chars -1 nil)))
-
-(defun bar (size i &optional (pad #\Space) (bbb " ▏▎▍▌▋▊▉█") &aux (l (length bbb)))
-  (declare (fixnum size l) (float i))
-  (labels ((pad? (res) (if pad (rpad res size pad) res)))
-    (when (<= i 0.0) (return-from bar (pad? "")))
-    (let* ((i* (* (max 0.0 (clmp i)) size))
-           (full (floor i*))
-           (part (mod (floor (* l (rem i* 1))) l))
-           (res (strcat (nstr full (char bbb (1- l))) (char bbb part))))
-      (pad? res))))
 

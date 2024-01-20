@@ -34,6 +34,11 @@
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s)))) syms) ,@body))
 
+(defun make-adjustable-vector (&key init (type t) (size 128))
+  (if init (make-array (length init) :fill-pointer t :initial-contents init
+                                     :element-type type :adjustable t)
+           (make-array size :fill-pointer 0 :element-type type :adjustable t)))
+
 (defmacro abbrev (short long) `(defmacro ,short (&rest args) `(,',long ,@args)))
 (abbrev awg with-gensyms)        (abbrev mav make-adjustable-vector)
 (abbrev dsb destructuring-bind)  (abbrev mvb multiple-value-bind)
@@ -49,22 +54,18 @@
            &aux (v (slot-value (asdf:find-system 'lqn) 'asdf:version)))
   "return/print lqn version." (unless silent (format t "~&LQN version: ~a~%." v)) v)
 
-(defun make-adjustable-vector (&key init (type t) (size 128))
-  (if init (make-array (length init) :fill-pointer t :initial-contents init
-                                     :element-type type :adjustable t)
-           (make-array size :fill-pointer 0 :element-type type :adjustable t)))
+(defun clmp (v &optional (a 0.0) (b 1.0))
+  (declare (number v a b)) "clamp to range (a b)."
+  (max a (min v b)))
 
-(defun lpad-lst (n lst)
-  (concatenate 'list (loop repeat (- n (length lst)) collect nil) lst))
-(defun rpad-lst (n lst)
-  (concatenate 'list lst (loop repeat (- n (length lst)) collect nil)))
+(defun lpad-lst (n lst) (concatenate 'list (loop repeat (- n (length lst)) collect nil) lst))
+(defun rpad-lst (n lst) (concatenate 'list lst (loop repeat (- n (length lst)) collect nil)))
 
 (defun group (n l) (declare (list l) (fixnum n)) "group l into lists of n elements."
   (if (< n 1) (error "group: group size is smaller than 1"))
-  (labels ((rec (l acc)
-             (let ((rest (nthcdr n l)))
-               (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
-                                (nreverse (cons l acc))))))
+  (labels ((rec (l acc) (let ((rest (nthcdr n l)))
+                          (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
+                                           (nreverse (cons l acc))))))
     (if l (rec l nil) nil)))
 (defun mkstr (&rest args) "coerce all arguments to a string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
@@ -78,8 +79,6 @@
   "mkstr, make symbol in pkg."
   (values (intern (apply #'mkstr args) pkg)))
 (defun lst (&rest rest) (apply #'list rest))
-
-(defun clmp (v &optional (a 0.0) (b 1.0)) (declare (number v a b)) (max a (min v b)))
 
 (defmacro car- (fx d) (declare (symbol d)) `(and (listp ,d) (,fx (car ,d))))
 (defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))

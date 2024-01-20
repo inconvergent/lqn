@@ -161,12 +161,19 @@ match. If b is an expression, a is compared to the evaluated value of b."
 
 (defmacro splt (s x &optional (trim t) prune)
   "split s at substrings x to vector. trims whitespace by default. prune removes empty strings."
-      `(vec! (str-split ,(ct/kv/str s) ,(ct/kv/str x)
-                :prune ,prune :trim ,trim)))
+  `(vec! (str-split ,(ct/kv/str s) ,(ct/kv/str x) :prune ,prune :trim ,trim)))
+
+(defun srt (l &optional (dir :s<) (key #'identity))
+  "sort sequence by: s<, s> < >" ; TODO: copy sequence?
+  (sort l (ecase dir (:s< #'string-lessp) (:s> #'string-greaterp)
+                     (:< #'<) (:> #'>) )
+          :key key))
 
 (defun repl (s from to) (declare (string s from to)) "replace from with to in s"
   (let ((s (strcat (mapcar (λ (s) (mkstr s to)) (str-split s from)))))
     (subseq s 0 (- (length s) (length to)))))
+
+(defmacro apply* (fx v) "apply, but for sequences." `(apply #',fx (coerce ,v 'list)))
 
 (defun seq* (v i &optional j) ; TODO: negative indices, tests
   (declare (vector v) (fixnum i)) "(subseq v ,@rest)"
@@ -200,8 +207,6 @@ ranges are lists that behave like arguments to seq*."
   res)
 (defun cat* (&rest rest) "concatenate sequences in rest to vector"
   (apply #'concatenate 'vector (mapcar #'vec! rest))) ; inefficient
-
-(defmacro apply* (fx v) `(apply #',fx (coerce ,v 'list)))
 
 (defun flatall* (x &optional (str nil))
   "flatten all sequences into new vector. if str is t strings will become

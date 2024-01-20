@@ -87,15 +87,13 @@
   (is (lqn:qry "a b c x def x 27" (splt _ :x) [_ :-@de] ) #("a b c" "27") :test #'equalp)
   (is (lqn:qry "a b c x def x 27" (splt _ :x) [-@int!?]) #("a b c" "def") :test #'equalp)
   (is (lqn:qry "a b c x def x 27" (splt _ :x) [_ -@int!?]) #("a b c" "def") :test #'equalp)
+  (is (lqn:qry "a b c x def x 27" (splt _ :x) [-@int!?]) #("a b c" "def") :test #'equalp)
 
   (is (lqn:qry "1 xx x 2 3" (splt _ :x t))     #("1" "" "" "2 3") :test #'equalp)
   (is (lqn:qry "1 xx x 2 3" (splt _ :x t t))   #("1" "2 3") :test #'equalp)
   (is (lqn:qry "1 xx x 2 3" (splt _ :x nil))   #("1 " "" " " " 2 3") :test #'equalp)
   (is (lqn:qry "1 xx x 2 3" (splt _ :x t nil)) #("1" "" "" "2 3") :test #'equalp)
   (is (lqn:qry "1 xx x 2 3" (splt _ :x nil t)) #("1 " " " " 2 3") :test #'equalp)
-
-  ; this is invalid becuae int!? is a map by default: is that logical?
-  ; (is (lqn:qry "a b c x def x 27" (splt _ :x) -@int!?) #("a b c" "def") :test #'equalp)
 
   (is (lqn:qry "aaakyyy x akbc x def x ukuu x sssssk x auiuu x aaaaa"
         (splt _ :x) [(hld :v (isubx? _ "k")) (-@isubx? _ "a") (%@new* _ (ghv :v))])
