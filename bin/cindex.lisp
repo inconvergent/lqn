@@ -16,12 +16,12 @@
                 (otherwise (warn "unexpected type: ~a" s) :/t/unknown))))
 
 (defmacro code/qry (co &rest rest)
-  `(auxin:with-struct (code- grp) ,co (grph:qry grp ,@rest)))
+  `(with-struct (code- grp) ,co (grph:qry grp ,@rest)))
 
 (defun allsym (o) (remove-duplicates (flatall* o 2)) )
 
 (defun prt (o &optional s)
-  (auxin:with-struct (code- i grp) o
+  (with-struct (code- i grp) o
     (format s "<@code (frags: ~a~%  ~a)>" i grp)))
 (defstruct (code (:constructor -code ()) (:print-object prt))
   (frags (make-array 500000 :initial-element nil))
@@ -34,13 +34,13 @@
 (defun frag/mget (co &rest rest) (apply #'sel* (code-frags co) rest))
 (defun frag/get (co i)
   (declare (fixnum i))
-  (auxin:with-struct (code- frags) co (aref frags i)))
+  (with-struct (code- frags) co (aref frags i)))
 (defun frag/fnd (co frag &optional (d :/o/unknown))
   (values (or (gethash frag (code-frag->ind co))
               (gethash d (code-frag->ind co)))))
 (defun frag/reg (co frag)
   (labels ((reg (co frag)
-             (auxin:with-struct (code- frag->ind i) co
+             (with-struct (code- frag->ind i) co
                (setf (aref (code-frags co) i) frag)
                (incf (code-i co))
                (setf (gethash frag frag->ind) i)
@@ -49,7 +49,7 @@
 
 (defun frag/lnk (co parent child prop)
   (declare (fixnum parent child))
-  (auxin:with-struct (code- grp) co
+  (with-struct (code- grp) co
     (grph:add*! grp parent child -> prop)
     (setf (code-grp co) grp)
     child))
@@ -58,7 +58,7 @@
   (frag/lnk co parent (frag/reg co frag) prop))
 
 (defun code/index (co fn)
-  (auxin:with-struct (code- frag->ind) co
+  (with-struct (code- frag->ind) co
     (labels
       ((-link-obj-type (o oi)
          (typecase o
@@ -68,7 +68,7 @@
                                :/o/in-package :/o/set-macro-character)
                               (frag/lnk co (frag/reg co (second o)) oi '(:name))))))))
        (-do-file-obj (o oi)
-         (frag/lnk co (frag/fnd co :/f/file) oi '(:file))
+         ; (frag/lnk co (frag/fnd co :/f/file) oi '(:file))
          (frag/lnk co (frag/fnd co :/f/top) oi '(:file))
          (frag/lnk co (frag/get-type co o) oi '(:type))
          (-link-obj-type o oi)
@@ -81,7 +81,7 @@
             do (-do-file-obj o (frag/attach co fni o '(:has)))))))
 
 (defun code/write (co fn)
-  (auxin:with-struct (code- grp i frag->ind frags) co
+  (with-struct (code- grp i frag->ind frags) co
     (grph/io:gwrite fn grp :meta `((:frags . ,(head* frags i))
                                    (:frag->ind . ,(flatn$ frag->ind))))))
 

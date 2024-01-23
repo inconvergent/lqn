@@ -52,7 +52,7 @@
 (defun compile/$$ (rec conf d) ; {...} ; sel
   (awg (kres par dat)
     `(let* ((,par ,(gk conf :dat))
-            (,kres ,(if (car- all? d) `(make$ ,par) `(make$))))
+            (,kres ,(if (car- dat? d) `(make$ ,par) `(make$))))
        (∈ (,par) ; MOVE??
          ,@(loop for (m kk expr) in (strip-all d) collect
              `(let ((,dat (@@ ,par ,kk)))
@@ -66,7 +66,7 @@
            with ,par of-type vector = (vec! ,(gk conf :dat))
            for ,itr across ,par for ,i from 0
            do (∈ (,par ,i ,itr)
-                ,(when (car- all? d) (compile/*add rec conf :+ ires itr))
+                ,(when (car- dat? d) (compile/*add rec conf :+ ires itr))
                 ,@(loop for (m kk expr) in (strip-all d) collect
                     `(let ((,dat (@@ ,itr ,kk)))
                         (declare (ignorable ,dat))
@@ -78,7 +78,7 @@
     `(loop with ,ires of-type vector = (mav)
            with ,par of-type vector = (vec! ,(gk conf :dat))
            for ,itr of-type hash-table across ,par for ,i from 0
-           for ,kvres of-type hash-table = ,(if (car- all? d) `(make$ ,itr) `(make$))
+           for ,kvres of-type hash-table = ,(if (car- dat? d) `(make$ ,itr) `(make$))
            do (∈ (,par ,i ,itr)
                 ,@(loop for (m kk expr) in (strip-all d)
                     collect `(let ((,dat (@@ ,itr ,kk)))
@@ -101,7 +101,7 @@
 
 (defun pre/** (q &optional (mm :?)) (unless q (warn "**: missing args."))
   (labels ((unpack- (o) (dsb (m sk) (unpack-mode o mm) `(,m ,(pre/xpr-sel sk :_)))))
-    (let* ((q* (remove-if #'all? (pre/scan-clauses q '#:**)))
+    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:**)))
            (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 
@@ -121,7 +121,7 @@
   (labels ((rec (expr) (funcall rec conf expr)))
     (let ((ands (get-modes cd :+)) (nots (get-modes cd :-)) (ors (get-modes cd :?)))
       (cond ((and nots (null ands) (null ors)) (rec `(not (or ,@nots))))
-            (t (rec `(and (or ,(car- all? cd) ,@ors ,@(and ands `((and ,@ands))))
+            (t (rec `(and (or ,(car- dat? cd) ,@ors ,@(and ands `((and ,@ands))))
                           ,@(when nots `((not (or ,@nots)))))))))))
 (defun compile/?xpr (rec conf d) ; (xpr sel .. hit miss)
   (labels ((do-last (d n) (mapcar (λ (d) (funcall rec conf (pre/or-all d))) (last d n))))
@@ -173,7 +173,7 @@
   (labels
     ((rec (conf d* &aux (d (pre/scan-clause d* nil)))
        (cond
-         ((all? d) (gk conf :dat))
+         ((dat? d) (gk conf :dat))
          ((stringp d) d) ; this order is important
          ((vectorp d) (rec conf `(*map ,@(coerce d 'list))))
          ((atom d) d)

@@ -40,6 +40,20 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:ALL?
+
+```
+ ; LQN:ALL?
+ ;   [symbol]
+ ; 
+ ; ALL? names a compiled function:
+ ;   Lambda-list: (V &OPTIONAL EMPTY)
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     check if all; or empty.
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:APPLY\*
 
 ```
@@ -115,6 +129,20 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:CD
+
+```
+ ; LQN:CD
+ ;   [symbol]
+ ; 
+ ; CD names a compiled function:
+ ;   Lambda-list: (PATH)
+ ;   Derived type: (FUNCTION (T) *)
+ ;   Documentation:
+ ;     change dir.
+ ;   Source file: /data/x/lqn/src/sh.lisp
+```
+
 #### LQN:CLMP
 
 ```
@@ -167,6 +195,20 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:CWD
+
+```
+ ; LQN:CWD
+ ;   [symbol]
+ ; 
+ ; CWD names a compiled function:
+ ;   Lambda-list: ()
+ ;   Derived type: (FUNCTION NIL *)
+ ;   Documentation:
+ ;     current working dir.
+ ;   Source file: /data/x/lqn/src/sh.lisp
+```
+
 #### LQN:D?
 
 ```
@@ -179,6 +221,48 @@
  ;   Documentation:
  ;     describe symbol.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
+#### LQN:DIR?
+
+```
+ ; LQN:DIR?
+ ;   [symbol]
+ ; 
+ ; DIR? names a compiled function:
+ ;   Lambda-list: (PATH)
+ ;   Derived type: (FUNCTION (T) *)
+ ;   Documentation:
+ ;     does this dir exist?
+ ;   Source file: /data/x/lqn/src/sh.lisp
+```
+
+#### LQN:EMPTY?
+
+```
+:missing:todo:
+
+ ; LQN:EMPTY?
+ ;   [symbol]
+ ; 
+ ; EMPTY? names a compiled function:
+ ;   Lambda-list: (L &OPTIONAL D &AUX (N (SIZE? L)))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
+#### LQN:FILE?
+
+```
+ ; LQN:FILE?
+ ;   [symbol]
+ ; 
+ ; FILE? names a compiled function:
+ ;   Lambda-list: (PATH)
+ ;   Derived type: (FUNCTION (T) *)
+ ;   Documentation:
+ ;     does this file exist?
+ ;   Source file: /data/x/lqn/src/sh.lisp
 ```
 
 #### LQN:FLATALL\*
@@ -204,8 +288,7 @@
  ; 
  ; FLATN$ names a compiled function:
  ;   Lambda-list: (A)
- ;   Derived type: (FUNCTION (HASH-TABLE)
- ;                  (VALUES (SIMPLE-ARRAY T) &OPTIONAL))
+ ;   Derived type: (FUNCTION (HASH-TABLE) (VALUES SIMPLE-VECTOR &OPTIONAL))
  ;   Documentation:
  ;     flatten ht to vector: k0 v0 k1 v1 ...
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
@@ -536,6 +619,20 @@
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
+#### LQN:LS
+
+```
+ ; LQN:LS
+ ;   [symbol]
+ ; 
+ ; LS names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (PATTERN *))
+ ;   Derived type: (FUNCTION (&OPTIONAL T) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     list dir contents at this pattern.
+ ;   Source file: /data/x/lqn/src/sh.lisp
+```
+
 #### LQN:LST!?
 
 ```
@@ -605,6 +702,20 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:NONE?
+
+```
+ ; LQN:NONE?
+ ;   [symbol]
+ ; 
+ ; NONE? names a compiled function:
+ ;   Lambda-list: (V &OPTIONAL (EMPTY T))
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     check if none; or empty.
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:NOOP
 
 ```
@@ -616,6 +727,20 @@
  ;   Documentation:
  ;     do nothing. return nil.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
+#### LQN:NOW
+
+```
+ ; LQN:NOW
+ ;   [symbol]
+ ; 
+ ; NOW names a compiled function:
+ ;   Lambda-list: ()
+ ;   Derived type: (FUNCTION NIL *)
+ ;   Documentation:
+ ;     timestamp.
+ ;   Source file: /data/x/lqn/src/sh.lisp
 ```
 
 #### LQN:NSTR
@@ -672,6 +797,20 @@
  ;   Documentation:
  ;     print to standard out
  ;   Source file: /data/x/lqn/src/io.lisp
+```
+
+#### LQN:PATH?
+
+```
+ ; LQN:PATH?
+ ;   [symbol]
+ ; 
+ ; PATH? names a compiled function:
+ ;   Lambda-list: (PATH)
+ ;   Derived type: (FUNCTION (T) *)
+ ;   Documentation:
+ ;     does this path exist?
+ ;   Source file: /data/x/lqn/src/sh.lisp
 ```
 
 #### LQN:PNUM
@@ -871,6 +1010,20 @@
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
+#### LQN:SOME?
+
+```
+ ; LQN:SOME?
+ ;   [symbol]
+ ; 
+ ; SOME? names a compiled function:
+ ;   Lambda-list: (V &OPTIONAL EMPTY)
+ ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     check if some; or empty.
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:SPLT
 
 ```
@@ -967,6 +1120,34 @@
  ;   Documentation:
  ;     s if sub is substring of s; or d
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
+#### LQN:SUBDIR
+
+```
+ ; LQN:SUBDIR
+ ;   [symbol]
+ ; 
+ ; SUBDIR names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (PATH (CWD)))
+ ;   Derived type: (FUNCTION (&OPTIONAL T) *)
+ ;   Documentation:
+ ;     list subdirectories.
+ ;   Source file: /data/x/lqn/src/sh.lisp
+```
+
+#### LQN:SUBFILES
+
+```
+ ; LQN:SUBFILES
+ ;   [symbol]
+ ; 
+ ; SUBFILES names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (PATH (CWD)))
+ ;   Derived type: (FUNCTION (&OPTIONAL T) *)
+ ;   Documentation:
+ ;     list subdirectories.
+ ;   Source file: /data/x/lqn/src/sh.lisp
 ```
 
 #### LQN:SUBX?

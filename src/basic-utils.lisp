@@ -15,7 +15,8 @@
                  :sup :sdwn :mkstr :repl :strcat :splt
                  :msym? :is? :kv? :sym? :sym! :trim
                  :num!? :num? :flt!? :flt? :int!? :int?
-                 :lst? :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?))
+                 :lst? :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?
+                 :path? :subdir :subfiles :ls :dir? :file? :cwd :now :cmd :some? :all? :none? :cd))
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*
       #+CMU extensions:*command-line-words* nil))
@@ -27,6 +28,13 @@
   #+abcl (ext:quit:status status) #+allegro (excl:exit status :quiet t)
   #+gcl (common-lisp-user::bye status) #+ecl (ext:quit status))
 
+(defmacro with-struct ((name . fields) struct &body body)
+  (let ((gs (gensym)))
+    `(let ((,gs ,struct))
+       (let ,(mapcar #'(lambda (f)
+                         `(,f (,(psymb (symbol-package name) name f) ,gs)))
+                     fields)
+         ,@body))))
 (defmacro pretty-json (v) `(lqn:out (lqn:jsnstr ,v :indent t)))
 (defmacro noop (&rest rest) (declare (ignore rest)) "do nothing. return nil." nil)
 (defmacro lit (a) `(progn ,a))
@@ -85,7 +93,7 @@
 (defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
   (if mode-sym (values-list (unpack-mode mode-sym d :?)) (values nil d)))
 (defun qop? (s d &aux (d (and (listp d) (car d)))) (and d (sym-not-kv d) (eq s (kv d))))
-(defun all?    (d) (and (symbolp d)    (eq (kv d) :_)))
+(defun dat?    (d) (and (symbolp d)    (eq (kv d) :_)))
 (defun lqnfx?  (d) (and (sym-not-kv d) (member (kv d) *fxns* :test #'eq)))
 (defun custom-modifier? (m d)
   (and (symbolp d) (pref? (symbol-name d) m)
@@ -129,6 +137,17 @@
 (defun size? (l &optional d) "length of sequence/number of keys in kv."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
 (defun empty? (l &optional d &aux (n (size? l))) (if (int? n) (< n 1) d))
+; TODO: extend to check kvs?
+; TODO: actually test this
+(defun all? (v &optional empty) "check if all; or empty."
+  (declare (sequence v))
+  (if (not (empty? v)) (loop for k across (vec!? v) always (is? v)) empty))
+(defun none? (v &optional (empty t)) "check if none; or empty."
+  (declare (sequence v))
+  (if (not (empty? v)) (loop for k across (vec!? v) never (is? k)) empty))
+(defun some? (v &optional empty) "check if some; or empty."
+  (declare (sequence v))
+  (if (not (empty? v)) (not (none? v)) empty))
 
 (defmacro smth? (v &body body) ; TODO: recursive strip with ext function
   (declare (symbol v)) "do body if v is not nil, empty sequence, or empty hash-table"

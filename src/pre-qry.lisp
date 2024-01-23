@@ -21,7 +21,7 @@
 
 (defun ct/path/key (pp) (first (last (str-split pp "/"))))
 (defun dat/new (conf dat) `((:dat . ,dat) ,@conf))
-(defun strip-all (d) (declare (list d)) (if (car- all? d) (cdr d) d))
+(defun strip-all (d) (declare (list d)) (if (car- dat? d) (cdr d) d))
 
 ; CONTEXTS
 
@@ -64,7 +64,7 @@
                (cons `(str! (,(re-sym (car s)) ,@(cdr s))))))
 
 (defun pre/or-all (d) (etypecase d (boolean d) (cons d) (keyword d) (sequence d)
-                        (symbol (if (all? d) :_ `(,d :_)))))
+                        (symbol (if (dat? d) :_ `(,d :_)))))
 (defun pre/xpr-sel (ty k) (declare (symbol k))
   (etypecase ty (number `(when-equal ,k ,ty))
                 (keyword `(and (str? ,k) (isub? ,k ,(ct/kv/str ty))))
@@ -89,7 +89,7 @@
 
 (defun pre/|| (qq) (unless qq (warn "||: missing args.")) ; pipe
   (loop for q in (pre/scan-clauses qq '#:pipe) collect
-    (if (all? q) (kv q)
+    (if (dat? q) (kv q)
       (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
                   (string `(** ,q))           (vector `(*map ,@(coerce q 'list)))
                   (otherwise q)))))
@@ -99,7 +99,7 @@
              (dsb (m sk) (unpack-mode o mm)
                (unless (eq m :+) (error "*map: expected mode :+, got: ~a." m))
                (etypecase sk (sequence sk) (keyword sk) (symbol `(,sk :_))))))
-    (let* ((q* (remove-if #'all? (pre/scan-clauses q '#:*map)))
+    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:*map)))
            (res (mapcar #'unpack- q*))
            (allres (if (= (length q) (length q*)) res (cons `(lit :_) res))))
       (if (< (length allres) 2) allres `((|| ,@allres))))))
@@ -113,7 +113,7 @@
                       (sdwn (mkstr b)))
               (otherwise (error "$$: expected string/:keyword/uninterned symbol. got: ~a." b)))
            ,(typecase c (keyword c) (boolean c)
-                        (symbol (if (all? c) :_ `(,c :_))) ; TODO: fix: #{(:aa #:aa)}
+                        (symbol (if (dat? c) :_ `(,c :_))) ; TODO: fix: #{(:aa #:aa)}
                         (otherwise c))))
      (repack- (o) (subseq `(,@o :_) 0 3))
      (repack-cons (ck k) (ecase (length k) (3 k) (2 `(,ck ,(caadr k) ,(cadadr k)))))
@@ -121,7 +121,7 @@
        (apply #'tx- (etypecase (second k)
                       (symbol (repack- k)) (string (repack- k))
                       (cons (repack-cons ck k))))))
-    (let* ((q* (remove-if #'all? (pre/scan-clauses q '#:$$)))
+    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:$$)))
            (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 

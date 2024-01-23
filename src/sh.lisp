@@ -83,11 +83,31 @@
                       (otherwise  (prtxt res*)))))
    (ecase (opt/outfmt? opts d) (:json (prjsn res)) (:ldn (prldn res)) (:txt (dotxt res)))))
 
+; TODO: auto split args, handle errors
 (defun cmd (fx &rest args) (declare (string fx)) "run terminal command"
   (mvb (res err errcode) (uiop:run-program `(,fx ,@args) :output '(:string :stripped t))
-
-       ; (warn err)
     (values (splt res #.(str! #\Newline)) err errcode)))
 ; (defun now () (cmd "date" "+%Y%m%d-%H%M%S-%N"))
 (defun now () "timestamp." (cmd "date" "+%Y-%m-%dT%H:%M:%S.%N"))
+
+; https://quickref.common-lisp.net/uiop.html#g_t_2768268_2769
+; TODO: how are #P/strings handled here for input/output to other fxs?
+(defun path? (path) "does this path exist?"
+  (uiop:probe-file* (uiop:ensure-pathname path)))
+
+(defun ls (&optional (pattern "*")) "list dir contents at this pattern." (directory pattern))
+(defun subdir (&optional (path (cwd))) "list subdirectories."
+  (uiop:subdirectories (uiop:ensure-pathname path)))
+(defun subfiles (&optional (path (cwd))) "list subdirectories."
+  (uiop:directory-files (uiop:ensure-pathname path)))
+
+(defun cwd () "current working dir." (uiop:getcwd))
+(defun dir? (path) "does this dir exist?"
+  (uiop:directory-exists-p (uiop:ensure-pathname path)))
+(defun file? (path) "does this file exist?"
+  (uiop:file-exists-p (uiop:ensure-pathname path)))
+(defun cd (path) "change dir." (uiop:chdir path))
+
+; TODO: some other functions?
+; escape-shell-command (find-preferred-file) ensure-list
 

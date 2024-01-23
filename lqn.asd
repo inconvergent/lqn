@@ -4,7 +4,7 @@
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :in-order-to ((asdf:test-op (asdf:test-op #:lqn/tests)))
   :licence "MIT" :pathname "src/" :serial nil
-  :depends-on (#:yason)
+  :depends-on (#:yason #:uiop)
   :components ((:file "packages")
                (:file "basic-utils" :depends-on ("packages"))
                (:file "reader-macros" :depends-on ("basic-utils"))
