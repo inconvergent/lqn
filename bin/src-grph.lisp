@@ -3,88 +3,54 @@
 (let ((init (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname))))
   (when (probe-file init) (load init)))
 
+(setf lparallel:*kernel* (lparallel:make-kernel 8))
+
 (ql:quickload :grph)
 (ql:quickload :veq)
-(in-package :lqn)
-(load (internal-path-string "bin/cindex.lisp"))
-(defvar *opt* '*opt*)
-(defvar *dev* '*dev*)
-(defvar *vv-a@* '*vv-a@*)
-(defvar *vv-m@* '*vv-m@*)
-(defvar *vv-f@* '*vv-f@*)
-(defvar *vv-r@* '*vv-r@*)
-(defvar *vv-x@* '*vv-x@*)
-(defvar *vv-%@* '*vv-%@*)
-(defvar *vv-!@* '*vv-!@*)
-(defvar *vv-r@* '*vv-r@*)
-(defvar *vv-_@* '*vv-_@*)
-(defvar *vv-.@* '*vv-.@*)
-(defvar *vv-r@* '*vv-r@*)
-(defvar *vv-r@* '*vv-r@*)
-(defvar *srndopt* '*srndopt*)
+(load (lqn::internal-path-string "bin/cindex.lisp"))
 
-; todo handle #Paths in str!?
+(defvar *places* '(
+                   (:veq ("/home/anders/x/veq/src/*.lisp"))
+                   (:grph ("/home/anders/x/grph/src/*.lisp"))
+                   (:lqn ("/home/anders/x/lqn/src/*.lisp"))
+                   (:auxin ("/home/anders/x/auxin/src/*.lisp"
+                            "/home/anders/x/auxin/src/*/*.lisp"))))
+
+#|(cl:*read-eval* nil)|#
 (defun main ()
-  (let ((co (code))
-        (path (internal-path-string "src/")) (ft ".lisp"))
-    (print
-      (qry (cat* (ls #P"/data/x/lqn/src/*.lisp")
-                 (ls #P"/data/x/veq/src/*.lisp")
-                 (ls #P"/data/x/grph/src/*.lisp")
-                 (ls #P"/data/x/auxin/src/*.lisp")
-                 (ls #P"/data/x/auxin/src/*/*.lisp"))
-           str!
-           #((code/index co _))
+  (let ((co (lqn/code:code)))
+    (loop for (sys pth) in *places*
+      do (let ((cl:*package* (find-package sys)))
+           (lqn:qry pth ls (flatn* _)
+                    #(str! (lqn/code:index co _ sys)))))
+    ; (mapc #'print
+    ;  (lqn::code/cqry co :select (?a (grp ?file)) :db t
+    ;    :where (and (?file :/file/form ?form)
+    ;                (?form :/form/atom ?a)
+    ;                (?form :/form/name ?a))
+    ;    :collect (list (lqn::frag/mget co ?a)
+    ;                   (loop for f across (lqn:flatall* (grp ?file))
+    ;                         collect (lqn::frag/get co f)))))
+    ; (mapc #'print
+    ;   (lqn/code:cqry co :select (?file ?name) :db t
+    ;     :where (and (?file :/file/form ?form)
+    ;                 (//ft/defun :/form-type ?form)
+    ;                 (?form :/form/name ?name))
+    ;     :collect (lqn/code:mget co ?name ?file )))
 
-         ; [(suf? _ ft)] ;(tail* _ 1)
-         ; #((strcat path _) (code/index co _))
-         ))
-
+    (mapc #'print
+      (lqn/code:cqry co :select (?file ?sys ?pkg (grp ?atom)) :db :full
+        :where (and (?sys :/sys/file ?file)
+                    (?file :/file/form ?form)
+                    (?pkg :/pkg ?form)
+                    (?form :/form/atom ?atom)
+                    (//ty/fixnum :/type ?atom))
+        :collect (lqn:qry (lqn:cat* ?file ?sys ?pkg !?ty/fixnum
+                                    (lqn:uniq (lqn:flatall* (grp ?atom))))
+                          #((lqn/code:fget co _)))))
 
     (print co)
-    ; (code/write co "tmp")
-    ))
+    (lqn/code:gwrite co "tmp")))
 
 (main)
-
-; NOTE no forms can be the same. always create fresh
-
-; >>>> (uniq: FILE)     :/is[filenum]            {:/ext/file}
-; EX:  #((defun ..)..)  :/is[filenum]             :/ext/file
-
-; >>>> (uniq: FILE)     :/file/has-name  -->     (ATOM: FILENAME)
-; EX   #((defun ..)..)  :/file/has-name          "src.lisp"
-
-; >>>> (uniq: FILE)     :/file/has-form[fnum]    (uniq: FORM)
-; EX:  "src.lisp"       :/file/has-form[fnum]    (defun fx ...)
-
-; >>>> (uniq: FORM)     :/form/has-name  -->     (ATOM: FORM-NAME)
-; EX   (defun fx ..)    :/form/has-name          fx                | unknown
-
-; >>>> (uniq: FORM)     :/is                     {:/ext/form}
-; EX:  (defun fx..)     :/is                      :/ext/form
-
-
-; >>>> (uniq: FORM)     :/form/has-atom          (ATOM)
-; EX:  (defpackage ...) :/form/has-atom          abc
-
-
-;                                                :/ft/set-macro-character        :/ft/defun
-;                                                :/ft/defmacro   :/ft/defvar     :/ft/let
-;                                                :/ft/labels     :/ft/in-package :/ft/declaim
-;                                                :/ft/defpackage :/ft/unknown
-; >>>> (uniq: FORM)     :/form/is-type   -->     {form-type}
-; EX:  (defun fx ..)    :/form/is-type           :ft/defun
-
-; >>>> (ATOM)           :/is                     {:/ext/atom}
-; EX:  abc              :/is                      :/ext/atom
-
-
-;                                                :/ty/string  :/ty/keyword :/ty/boolean :/ty/fixnum
-;                                                :/ty/float   :/ty/number :/ty/cons    :/ty/character
-;                                                :/ty/symbol  :/ty/comma :/ty/unknown
-; >>>> (ATOM)           :/atom/is-type   -->     {atom-type}
-; EX:  "ninja"          :/atom/is-type           :/ty/string
-
-
 

@@ -6,11 +6,9 @@
 (in-package :lqn)
 
 (defun main ()
-  (let ((path (internal-path-string "src/")) (ft ".lisp")
-        (chars (lst!? "abcdefghijklmnopqrstuvwxyz")))
-    (qry (cmd :s@ls path) [(suf? _ ft)]
-         #((strcat path _)
-           (progn (out "~%~3,'0d: ** ~a **~%~%" (cnt) (seq* _ 8)) _)
+  (let ((chars (lst!? "abcdefghijklmnopqrstuvwxyz")))
+    (qry (ls "../src/*.lisp") str!
+         #((progn (out "~%~3,'0d: ** ~a **~%~%" (cnt) (seq* _ 8)) _)
            read-file-as-vector
            #((repl _ "defun" "DEFUN")
              (repl _ "defmacro" "DEFMACRO")

@@ -63,7 +63,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defmacro new$ (&rest d) "new kv/hash-table from these (k v) pairs"
   (awg (kv) `(let ((,kv (make$)))
                ,@(loop for (kk expr) in (group 2 d)
-                       collect `(setf (gethash ,(ct/kv/str kk) ,kv) ,expr))
+                       collect `(setf (gethash ,(ct/kw/str kk) ,kv) ,expr))
                ,kv)))
 
 (defmacro ?? (a expr &optional res) (declare (symbol a)) ; todo: dont require sym?
@@ -161,7 +161,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
 
 (defmacro splt (s x &optional (trim t) prune)
   "split s at substrings x to vector. trims whitespace by default. prune removes empty strings."
-  `(vec! (str-split ,(ct/kv/str s) ,(ct/kv/str x) :prune ,prune :trim ,trim)))
+  `(vec! (str-split ,(ct/kw/str s) ,(ct/kw/str x) :prune ,prune :trim ,trim)))
 
 (defun srt (l &optional (dir :s<) (key #'identity))
   "sort sequence by: s<, s> < >" ; TODO: copy sequence?

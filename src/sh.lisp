@@ -20,8 +20,8 @@
 
 (defun split-opts-args (args)
   (declare (optimize speed (safety 3)))
-  (labels ((expl- (o) (loop for s across (subseq o 1) collect (kv (mkstr "-" s))))
-           (explode- (opts) (loop for o in opts if (= (length o) 2) nconc `(,(kv o))
+  (labels ((expl- (o) (loop for s across (subseq o 1) collect (kw (mkstr "-" s))))
+           (explode- (opts) (loop for o in opts if (= (length o) 2) nconc `(,(kw o))
                                                 else nconc (expl- o))))
    (loop named opts for k in args for i from 0
          if (pref? k "-") collect k into opts
@@ -95,7 +95,7 @@
 (defun path? (path) "does this path exist?"
   (uiop:probe-file* (uiop:ensure-pathname path)))
 
-(defun ls (&optional (pattern "*")) "list dir contents at this pattern." (directory pattern))
+(defun ls (&optional (pattern "*.*")) "list dir contents at this pattern." (uiop:directory* pattern))
 (defun subdir (&optional (path (cwd))) "list subdirectories."
   (uiop:subdirectories (uiop:ensure-pathname path)))
 (defun subfiles (&optional (path (cwd))) "list subdirectories."

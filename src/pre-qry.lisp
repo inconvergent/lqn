@@ -7,7 +7,7 @@
            (unpack-cons (cns) (if (valid-mode (car cns)) cns
                                   (dsb (m s) (unpack- (car cns)) `(,m (,s ,@(cdr cns))))))
            (unpack- (s &aux (s* (mkstr s)) (sx (subx? s* "@")))
-             (if (and sx (= sx 1)) (let ((m (kv (subseq s* 0 1)))) ; nil -> :nil
+             (if (and sx (= sx 1)) (let ((m (kw (subseq s* 0 1)))) ; nil -> :nil
                                      (if (or merciful (valid-mode m)) (list m (repack- s s*))
                                        (error "lqn: invalid mode in: ~a" s)))
                                    (list default s))))
@@ -56,7 +56,7 @@
 ; PRE PROCESSORS
 
 (defun when-equal (a b) (when (equal a b) a))
-(defun re-sym (s &optional (n 2)) (psymb (symbol-package s) (subseq (sup (str! s)) n)))
+(defun re-sym (s &optional (n 2)) (psymb (symbol-package s) (subseq (str! s) n)))
 (defun compile/_@ (s) (etypecase s (symbol `(,(re-sym s) :_))))
 (defun compile/s@ (s)
   (etypecase s (keyword (subseq (sdwn (str! s)) 2))
@@ -67,7 +67,7 @@
                         (symbol (if (dat? d) :_ `(,d :_)))))
 (defun pre/xpr-sel (ty k) (declare (symbol k))
   (etypecase ty (number `(when-equal ,k ,ty))
-                (keyword `(and (str? ,k) (isub? ,k ,(ct/kv/str ty))))
+                (keyword `(and (str? ,k) (isub? ,k ,(ct/kw/str ty))))
                 (string `(and (str? ,k) (sub? ,k ,ty)))
                 (symbol `(when (,ty ,k) ,k))
                 (cons ty) (boolean `(when-equal ,ty ,k))))
@@ -77,19 +77,19 @@
   (labels ((s@? (s) (custom-modifier? "S@" s))
            (_@? (s) (custom-modifier? "_@" s))
            (do-sym (s) (cond ((s@? s) (compile/s@ s)) ((_@? s) (compile/_@ s))
-                             ((eq (kv s) :∅) nil)     (t s)))
+                             ((eq (kw s) :∅) nil)     (t s)))
            (do-cons (s) (cond ((not full) s) ((car- s@? s)  (compile/s@ s)) (t s))))
    (typecase q (cons (do-cons q)) (symbol (do-sym q)) (otherwise q))))
 
 (defun pre/scan-clauses (qq &optional (ctx "pre-compile"))
   (declare (list qq))
-  (let ((isect (intersection (mapcar (λ (k) (kv (sym-not-kv k))) qq) *operators* :test #'equal)))
+  (let ((isect (intersection (mapcar (λ (k) (kw (ssym? k))) qq) *operators* :test #'equal)))
     (when isect (error "~a: unexpected bare operator(s) ~a~%in: ~a." ctx isect qq)))
   (loop for q in qq collect (pre/scan-clause q)))
 
 (defun pre/|| (qq) (unless qq (warn "||: missing args.")) ; pipe
   (loop for q in (pre/scan-clauses qq '#:pipe) collect
-    (if (dat? q) (kv q)
+    (if (dat? q) (kw q)
       (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
                   (string `(** ,q))           (vector `(*map ,@(coerce q 'list)))
                   (otherwise q)))))
@@ -133,9 +133,7 @@
       (:? `(when ,(gk conf :dat) (setf (gethash ,(ct/path/key k) ,lft) ,(rec v))))
       (:% (awg (v*) `(let ((,v* ,(rec v)))
                        (smth? ,v* (setf (gethash ,(ct/path/key k) ,lft) ,v*)))))
-      (:+ `(setf (gethash ,(ct/path/key k) ,lft)
-                 ,(rec v)
-                 ))
+      (:+ `(setf (gethash ,(ct/path/key k) ,lft) ,(rec v)))
       (:- `(remhash ,k ,lft))
       (otherwise (error "$: expected :?, :%, :+, :- mode, got: ~a." mode)))))
 

@@ -471,7 +471,7 @@
  ; ISUBX? names a compiled function:
  ;   Lambda-list: (S SUB)
  ;   Derived type: (FUNCTION (STRING STRING)
- ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
+ ;                  (VALUES (OR (MOD 17592186044415) NULL) &OPTIONAL))
  ;   Documentation:
  ;     ignore case subx?
  ;   Inline proclamation: INLINE (inline expansion available)
@@ -591,6 +591,20 @@
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
+#### LQN:KW?
+
+```
+ ; LQN:KW?
+ ;   [symbol]
+ ; 
+ ; KW? names a compiled function:
+ ;   Lambda-list: (K &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     k if kw; or d
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:LDNOUT
 
 ```
@@ -626,11 +640,25 @@
  ;   [symbol]
  ; 
  ; LS names a compiled function:
- ;   Lambda-list: (&OPTIONAL (PATTERN *))
- ;   Derived type: (FUNCTION (&OPTIONAL T) (VALUES LIST &OPTIONAL))
+ ;   Lambda-list: (&OPTIONAL (PATTERN *.*))
+ ;   Derived type: (FUNCTION (&OPTIONAL T) *)
  ;   Documentation:
  ;     list dir contents at this pattern.
  ;   Source file: /data/x/lqn/src/sh.lisp
+```
+
+#### LQN:LST!
+
+```
+ ; LQN:LST!
+ ;   [symbol]
+ ; 
+ ; LST! names a compiled function:
+ ;   Lambda-list: (V &OPTIONAL (D `(,V)))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     coerce v to list if v; else d
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:LST!?
@@ -1051,6 +1079,20 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:SSYM?
+
+```
+ ; LQN:SSYM?
+ ;   [symbol]
+ ; 
+ ; SSYM? names a compiled function:
+ ;   Lambda-list: (S &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     s if sym, not kw; or d
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:STR!
 
 ```
@@ -1159,7 +1201,7 @@
  ; SUBX? names a compiled function:
  ;   Lambda-list: (S SUB)
  ;   Derived type: (FUNCTION (STRING STRING)
- ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
+ ;                  (VALUES (OR (MOD 17592186044415) NULL) &OPTIONAL))
  ;   Documentation:
  ;     returns index where substring matches s from left to right. otherwise nil
  ;   Inline proclamation: INLINE (inline expansion available)
@@ -1206,20 +1248,6 @@
  ;   Derived type: (FUNCTION * (VALUES SYMBOL &OPTIONAL))
  ;   Documentation:
  ;     stringify, make symbol
- ;   Source file: /data/x/lqn/src/basic-utils.lisp
-```
-
-#### LQN:SYM?
-
-```
- ; LQN:SYM?
- ;   [symbol]
- ; 
- ; SYM? names a compiled function:
- ;   Lambda-list: (S &OPTIONAL D)
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     s if sym; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -1275,6 +1303,24 @@
  ;   Documentation:
  ;     trim string
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
+#### LQN:UNIQ
+
+```
+ ; LQN:UNIQ
+ ;   [symbol]
+ ; 
+ ; UNIQ names a compiled function:
+ ;   Lambda-list: (S &OPTIONAL (FX (FUNCTION EQUAL)))
+ ;   Derived type: (FUNCTION (T &OPTIONAL FUNCTION)
+ ;                  (VALUES
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
+ ;                   &OPTIONAL))
+ ;   Documentation:
+ ;     remove duplicates from sequence
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:V?

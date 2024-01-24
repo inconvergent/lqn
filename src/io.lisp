@@ -61,7 +61,7 @@
   (typecase o (string o)
      (cons (cons (ldnout (car o)) (ldnout (cdr o))))
      (hash-table (loop for k being the hash-keys of o using (hash-value v)
-                       collect `(,(kv k) . ,(ldnout v))))
+                       collect `(,(kw k) . ,(ldnout v))))
      (vector (loop with res = (make-adjustable-vector)
                    for v across o do (vex res (ldnout v))
                    finally (return res)))

@@ -7,11 +7,12 @@
     #:some? #:none? #:all? #:empty? #:size? #:is?
     #:path? #:subdir #:subfiles #:ls #:dir? #:file? #:cwd #:now #:cmd #:some? #:all? #:none? #:cd
     #:new* #:new$ #:cat$ #:cat* #:head* #:tail* #:apply*
-    #:flatn* #:compct #:flatall* #:flatn$
+    #:flatn* #:compct #:flatall* #:flatn$ #:uniq
     #:pnum #:inum #:cnt
-    #:noop #:kv? #:sym? #:msym? #:trim #:sym!
+    #:noop #:kv? #:kw? #:ssym? #:msym? #:trim #:sym!
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
-    #:lst? #:lst!? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!? #:ind* #:sel* #:seq*
+    #:lst? #:lst! #:lst!? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!?
+    #:ind* #:sel* #:seq*
     #:sup #:sdwn #:strcat #:repl #:splt #:symb #:join
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
     #:srt #:lpad #:rpad #:nstr #:ascii #:bar #:clmp

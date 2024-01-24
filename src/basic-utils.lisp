@@ -10,12 +10,12 @@
                  :fmt :out :jsnstr
                  :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth? :ind* :sel* :seq* :apply* :join
                  :new* :new$ :cat* :cat$ :head* :tail* :size?
-                 :flatn* :flatall* :flatn$
+                 :flatn* :flatall* :flatn$ :uniq
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx? :lpad :rpad :nstr
                  :sup :sdwn :mkstr :repl :strcat :splt
-                 :msym? :is? :kv? :sym? :sym! :trim
+                 :msym? :is? :kv? kw? :sym? :ssym? :sym! :trim
                  :num!? :num? :flt!? :flt? :int!? :int?
-                 :lst? :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?
+                 :lst? :lst! :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?
                  :path? :subdir :subfiles :ls :dir? :file? :cwd :now :cmd :some? :all? :none? :cd))
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*
@@ -77,38 +77,40 @@
     (if l (rec l nil) nil)))
 (defun mkstr (&rest args) "coerce all arguments to a string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
-(defun kv (s) "mkstr, upcase, keyword."
+(defun kw (s) "mkstr, upcase, keyword."
   (intern (string-upcase (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
           :keyword))
-(defun ct/kv/str (a)
+(defun ct/kw/str (a)
   (typecase a (string a) (keyword (string-downcase (mkstr a))) (otherwise a)))
-(defun symb (&rest args) "mkstr, make symbol." (values (intern (apply #'mkstr args))))
+(defun symb (&rest args) "mkstr, make symbol." (values (intern (sup (apply #'mkstr args)))))
 (defun psymb (&optional (pkg 'lqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
   "mkstr, make symbol in pkg."
-  (values (intern (apply #'mkstr args) pkg)))
+  (values (intern (sup (apply #'mkstr args)) pkg)))
 (defun lst (&rest rest) (apply #'list rest))
 
 (defmacro car- (fx d) (declare (symbol d)) `(and (listp ,d) (,fx (car ,d))))
-(defun sym-not-kv (d) (when (and (symbolp d) (not (keywordp d))) d))
 (defun sym-mode? (d &aux (mode-sym (unpack-mode d nil)))
   (if mode-sym (values-list (unpack-mode mode-sym d :?)) (values nil d)))
-(defun qop? (s d &aux (d (and (listp d) (car d)))) (and d (sym-not-kv d) (eq s (kv d))))
-(defun dat?    (d) (and (symbolp d)    (eq (kv d) :_)))
-(defun lqnfx?  (d) (and (sym-not-kv d) (member (kv d) *fxns* :test #'eq)))
+(defun qop? (s d &aux (d (and (listp d) (car d)))) (and d (ssym? d) (eq s (kw d))))
+(defun dat?    (d) (and (symbolp d)    (eq (kw d) :_)))
+(defun lqnfx?  (d) (and (ssym? d) (member (kw d) *fxns* :test #'eq)))
 (defun custom-modifier? (m d)
   (and (symbolp d) (pref? (symbol-name d) m)
        (> (length (symbol-name d)) (length m))))
 
 ; IS TYPE?
-(defun flt? (f &optional d) "f if float; or d"    (if (floatp f) f d))
-(defun int? (i &optional d) "i if int; or d"      (if (integerp i) i d))
-(defun kv?  (k &optional d) "k if kv; or d"       (if (hash-table-p k) k d))
-(defun sym? (s &optional d) "s if sym; or d"      (if (symbolp s) s d))
-(defun num? (n &optional d) "n if number; or d"   (if (numberp n) n d))
-(defun str? (s &optional d) "s if string; or d"   (if (stringp s) s d))
-(defun vec? (v &optional d) "v if vector; or d"   (if (vectorp v) v d))
-(defun lst? (v &optional d) "v if list; or d"     (if (listp v) d d))
-(defun seq? (s &optional d) "s if sequence; or d" (or (lst? s) (str? s) (vec? s) d))
+(defun flt?  (f &optional d) "f if float; or d"            (if (floatp f) f d))
+(defun int?  (i &optional d) "i if int; or d"              (if (integerp i) i d))
+(defun kv?   (k &optional d) "k if kv; or d"               (if (hash-table-p k) k d))
+(defun kw?   (k &optional d) "k if kw; or d"               (if (keywordp k) k d))
+(defun sym?  (s &optional d) "s if sym; or d"              (if (symbolp s) s d))
+(defun ssym? (s &optional d) "s if sym, not kw; or d"      (if (and (sym? s)
+                                                                    (not (kw? s))) s d))
+(defun num?  (n &optional d) "n if number; or d"           (if (numberp n) n d))
+(defun str?  (s &optional d) "s if string; or d"           (if (stringp s) s d))
+(defun vec?  (v &optional d) "v if vector; or d"           (if (vectorp v) v d))
+(defun lst?  (v &optional d) "v if list; or d"             (if (listp v) d d))
+(defun seq?  (s &optional d) "s if sequence; or d"         (or (lst? s) (str? s) (vec? s) d))
 
 ; PARSE AS TYPE OR DEFAULT
 (defun int!? (i &optional d) "i as int if it can be parsed; or d"
@@ -133,10 +135,16 @@
   (apply #'mkstr (loop for s in rest collect (typecase s (string s) (symbol (string-downcase s)) (t (mkstr s))))))
 (defun vec! (v &optional (d `#(,v))) "coerce v to vector. if v is not a vector, list, string it returns d"
   (etypecase v (vector v) (list (coerce v 'vector)) (t d)))
+(defun lst! (v &optional (d `(,v))) "coerce v to list if v; else d"
+  (etypecase v (list v) (vector (coerce v 'list)) (t d)))
 
 (defun size? (l &optional d) "length of sequence/number of keys in kv."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
 (defun empty? (l &optional d &aux (n (size? l))) (if (int? n) (< n 1) d))
+(defun uniq (s &optional (fx #'equal))
+  (declare (function fx)) "remove duplicates from sequence"
+  (remove-duplicates s :test fx))
+
 ; TODO: extend to check kvs?
 ; TODO: actually test this
 (defun all? (v &optional empty) "check if all; or empty."
