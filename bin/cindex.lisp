@@ -1,17 +1,22 @@
 (in-package :lqn)
 
 (defvar *fragment-types*
-  '(:/t/string :/t/keyword :/t/boolean :/t/fixnum :/t/float :/t/number
-    :/t/cons :/t/character :/t/symbol :/t/comma :/t/unknown
-    :/f/file :/f/filename :/f/top
-    :/o/defun :/o/defmacro :/o/defvar :/o/let :/o/labels :/o/in-package
-    :/o/declaim :/o/set-macro-character :/o/defpackage
-    :/o/unknown))
+  '(
+    :/ext/file :/ext/atom :/ext/form :/ext/unknown
+
+    :/ft/in-package :/ft/defpackage :/ft/defun :/ft/defmacro
+    :/ft/defvar :/ft/declaim :/ft/let :/ft/labels :/ft/set-macro-character
+    :/ft/unknown
+
+    :/ty/keyword :/ty/symbol :/ty/string :/ty/character :/ty/cons
+    :/ty/boolean :/ty/fixnum :/ty/float :/ty/number
+    :/ty/comma :/ty/unknown
+    ))
 (defun frag/get-type (co s)
   (frag/fnd co
-    (typecase s (string :/t/string) (keyword :/t/keyword) (boolean :/t/boolean)
-                (cons :/t/cons)     (symbol :/t/symbol)   (fixnum :/t/fixnum)
-                (float :/t/float)   (number :/t/number)   (character :/t/character)
+    (typecase s (string :/ty/string) (keyword :/ty/keyword) (boolean   :/ty/boolean)
+                (cons   :/ty/cons)   (symbol  :/ty/symbol)  (fixnum    :/ty/fixnum)
+                (float  :/ty/float)  (number  :/ty/number)  (character :/ty/character)
                 (sb-impl::comma :/t/comma)
                 (otherwise (warn "unexpected type: ~a" s) :/t/unknown))))
 
