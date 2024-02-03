@@ -81,16 +81,18 @@
     (format s "<@code (frags: ~a~%  ~a)>" i grp)))
 
 ; TODO: handle form mappings ambiguity
-(defstruct (code (:constructor -code ()) (:print-object prt))
+(defstruct (code (:constructor -make-code ()) (:print-object prt))
   (frags (make-array 500000 :initial-element nil))
   (frag->ind (make-hash-table :test #'equalp))
   (grp (grph:make)) (i 0))
 
-(defun code (&aux (co (-code)))
+(defun code (&aux (co (-make-code)))
   (loop for oo in `(,*ext-nodes* ,*ft-nodes* ,*type-nodes*)
-        do (loop with root = (reg co (car oo) :lnk nil)
-                 for o in (cdr oo) for i = (reg co o :lnk nil)
-                 do (lnk co root i `(,(car oo))))) ; use root as edge prop? /is
+        for root = (reg co (car oo) :lnk nil)
+        do (setf (code-grp co) (grph:prop (code-grp co) root (car oo)))
+        do (loop for o in (cdr oo) for i = (reg co o :lnk nil)
+                 do (setf (code-grp co) (grph:prop (code-grp co) i o)) ; HEREHEREHER HERE
+                    (lnk co root i `(,(car oo))))) ; use root as edge prop? /is
   (setf (code-i co) *lower*) ; fix this
   co)
 

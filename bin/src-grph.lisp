@@ -38,16 +38,29 @@
     ;                 (?form :/form/name ?name))
     ;     :collect (lqn/code:mget co ?name ?file )))
 
+    ; (print (grph::mid (lqn/code::code-grp co)))
+
     (mapc #'print
-      (lqn/code:cqry co :select (?file ?sys ?pkg (grp ?atom)) :db :full
-        :where (and (?sys :/sys/file ?file)
-                    (?file :/file/form ?form)
-                    (?pkg :/pkg ?form)
-                    (?form :/form/atom ?atom)
-                    (//ty/fixnum :/type ?atom))
-        :collect (lqn:qry (lqn:cat* ?file ?sys ?pkg !?ty/fixnum
-                                    (lqn:uniq (lqn:flatall* (grp ?atom))))
-                          #((lqn/code:fget co _)))))
+      (lqn/code:cqry co :select (?atom) :db :full
+        :where (and
+                    ; (//ty/fixnum :/type ?atom)
+                    (:/ext _ ?atom)
+                    )
+        :collect (lqn/code:mget co ?atom)
+        ))
+
+    ; (mapc #'print
+    ;   (lqn/code:cqry co :select (?file ?sys ?pkg (grp ?atom)) :db :full
+    ;     :where (and (?sys :/sys/file ?file)
+    ;                 (?file :/file/form ?form)
+    ;                 (?pkg :/pkg ?form)
+    ;                 (?form :/form/atom ?atom)
+    ;                 ; (//ty/fixnum :/type ?atom)
+    ;                 (:/ty/fixnum :/type ?atom)
+    ;                 )
+    ;     :collect (lqn:qry (lqn:cat* ?file ?sys ?pkg ;!?ty/fixnum
+    ;                                 (lqn:uniq (lqn:flatall* (grp ?atom))))
+    ;                       #((lqn/code:fget co _)))))
 
     (print co)
     (lqn/code:gwrite co "tmp")))
