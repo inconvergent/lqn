@@ -40,14 +40,14 @@
 
     ; (print (grph::mid (lqn/code::code-grp co)))
 
-    (mapc #'print
-      (lqn/code:cqry co :select (?atom) :db :full
-        :where (and
-                    ; (//ty/fixnum :/type ?atom)
-                    (:/ext _ ?atom)
-                    )
-        :collect (lqn/code:mget co ?atom)
-        ))
+    ; (mapc #'print
+    ;   (lqn/code:cqry co :select (?atom) :db :full
+    ;     :where (and
+    ;                 ; (//ty/fixnum :/type ?atom)
+    ;                 (:/ext _ ?atom)
+    ;                 )
+    ;     :collect (lqn/code:mget co ?atom)
+    ;     ))
 
     ; (mapc #'print
     ;   (lqn/code:cqry co :select (?file ?sys ?pkg (grp ?atom)) :db :full

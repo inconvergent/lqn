@@ -59,7 +59,10 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun $nil (kv) "return nil for emtpy hash-tables. otherwise return kv." ; TODO: use kv?
   (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
                (otherwise kv)))
-(defmacro new* (&rest d) "new vector with these elements" `(vector ,@d))
+; (defmacro new* (&rest d) "new vector with these elements" `(vector ,@d))
+(defmacro new* (&rest d) "new vector with these elements"
+  `(make-array ,(length d) :initial-contents (list ,@d)
+               :adjustable t :fill-pointer t))
 (defmacro new$ (&rest d) "new kv/hash-table from these (k v) pairs"
   (awg (kv) `(let ((,kv (make$)))
                ,@(loop for (kk expr) in (group 2 d)
@@ -180,7 +183,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
   (subseq v i j))
 (defun ind* (v &optional (i 0))
   (declare (vector v) (fixnum i)) "get index."
-  (@@ v i nil))
+  (aref v i))
 
 (defun head* (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "first ±n elements"

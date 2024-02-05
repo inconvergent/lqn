@@ -376,7 +376,8 @@
  ; 
  ; IND* names a compiled function:
  ;   Lambda-list: (V &OPTIONAL (I 0))
- ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM) *)
+ ;   Derived type: (FUNCTION (VECTOR &OPTIONAL FIXNUM)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     get index.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
