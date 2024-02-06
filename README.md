@@ -313,7 +313,8 @@ Iterate a datastructure (as if with `?txpr`) and collect the matches in a new
 
 The internal representation of in `lqn` means you can use the regular CL
 utilities such as `gethash`, `aref`, `subseq`, `length` etc.  But for
-convenience there are some utility functions/macros in defined in `lqn`.
+convenience there are some utility functions/macros in defined in `lqn`. Some
+of them are described below. There are more in the documentation.
 
 ### Global Query Context Fxs
 Defined in the query scope:

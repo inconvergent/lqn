@@ -59,7 +59,6 @@ match. If b is an expression, a is compared to the evaluated value of b."
 (defun $nil (kv) "return nil for emtpy hash-tables. otherwise return kv." ; TODO: use kv?
   (typecase kv (hash-table (if (> (hash-table-count kv) 0) kv nil))
                (otherwise kv)))
-; (defmacro new* (&rest d) "new vector with these elements" `(vector ,@d))
 (defmacro new* (&rest d) "new vector with these elements"
   `(make-array ,(length d) :initial-contents (list ,@d)
                :adjustable t :fill-pointer t))
@@ -68,8 +67,25 @@ match. If b is an expression, a is compared to the evaluated value of b."
                ,@(loop for (kk expr) in (group 2 d)
                        collect `(setf (gethash ,(ct/kw/str kk) ,kv) ,expr))
                ,kv)))
+(defun range* (a &optional (b 0 b?) (leap 1)) ; TODO: count downwards
+  (declare (fixnum a b leap)) "declare range. from 0 to a; or a to b."
+  (unless b? (setf b a a 0))
+  (let ((init (loop for i from a below b by leap collect i)))
+    (make-array (length init) :initial-contents init
+                :adjustable t :fill-pointer t)))
 
-(defmacro ?? (a expr &optional res) (declare (symbol a)) ; todo: dont require sym?
+; TODO: fx to convert non-fill-ptr array to fpa?
+(defmacro psh* (a o) (declare (symbol a)) "extend a with o. return a. destructive."
+  `(progn (vector-push-extend ,o ,a) ,a))
+(defmacro pop* (a &optional d)
+  (declare (symbol a)) "remove element from end of a. return last element. destructive."
+  (awg (o) `(if (empty? ,a) ,d
+              (let ((,o (aref ,a (1- (length ,a)))))
+                (setf ,a (adjust-array ,a (length ,a)
+                           :fill-pointer (1- (fill-pointer ,a))))
+                ,o))))
+
+(defmacro ?? (a expr &optional res) (declare (symbol a)) ; TODO: dont require sym?
   "evaluate expr only iff a is not nil. returns the result of expr or res; or nil."
   `(and ,a ,expr ,@(if res `(,res))))
 

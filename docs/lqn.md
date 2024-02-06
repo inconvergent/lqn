@@ -851,6 +851,19 @@
  ;   [symbol]
 ```
 
+#### LQN:POP\*
+
+```
+ ; LQN:POP*
+ ;   [symbol]
+ ; 
+ ; POP* names a macro:
+ ;   Lambda-list: (A &OPTIONAL D)
+ ;   Documentation:
+ ;     remove element from end of a. return last element. destructive.
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
 #### LQN:PREF?
 
 ```
@@ -878,6 +891,19 @@
  ;   Documentation:
  ;     compile lqn query
  ;   Source file: /data/x/lqn/src/qry.lisp
+```
+
+#### LQN:PSH\*
+
+```
+ ; LQN:PSH*
+ ;   [symbol]
+ ; 
+ ; PSH* names a macro:
+ ;   Lambda-list: (A O)
+ ;   Documentation:
+ ;     extend a with o. return a. destructive.
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:QRY
@@ -918,6 +944,21 @@
  ;   Documentation:
  ;     compile lqn query and run on dat
  ;   Source file: /data/x/lqn/src/qry.lisp
+```
+
+#### LQN:RANGE\*
+
+```
+ ; LQN:RANGE*
+ ;   [symbol]
+ ; 
+ ; RANGE* names a compiled function:
+ ;   Lambda-list: (A &OPTIONAL (B 0 B?) (LEAP 1))
+ ;   Derived type: (FUNCTION (FIXNUM &OPTIONAL FIXNUM FIXNUM)
+ ;                  (VALUES (AND (VECTOR T) (NOT SIMPLE-ARRAY)) &OPTIONAL))
+ ;   Documentation:
+ ;     declare range. from 0 to a; or a to b.
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:REPL
