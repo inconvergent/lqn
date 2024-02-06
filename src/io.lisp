@@ -1,34 +1,33 @@
 (in-package #:lqn)
 ; YASON DOCS https://phmarek.github.io/yason/
+; (setf (readtable-case *readtable*) :preserve)
 
 (defun read-all-str (s &aux (pos 0))
   (declare #.*opt*)
   (loop for (l new-pos) = (mvl (read-from-string s nil 'lqn::eof :start pos))
         while (not (eq l 'lqn::eof)) do (setf pos new-pos) collect l))
 
-(defun read-stream-lines-as-vector (&optional (s *standard-input*)
-                                    &aux (res (make-adjustable-vector)))
-  (declare #.*opt*)
+(defun txt-read-stream (&optional (s *standard-input*) &aux (res (make-adjustable-vector)))
+  (declare #.*opt*) "read lines of text from stream into vector."
   (loop for l = (read-line s nil nil) while l do (vex res l))
   res)
-(defun read-file-as-vector (fn &aux (res (make-adjustable-vector)))
-  (declare #.*opt*)
+(defun txt-read-file (fn &aux (res (make-adjustable-vector)))
+  (declare #.*opt*) "read lines of text from file into vector."
   (with-open-file (in fn)
     (loop for l = (read-line in nil nil) while l do (vex res l)))
   res)
-; (setf (readtable-case *readtable*) :preserve)
-(defun read-file-as-data-vector (fn &aux (res (make-adjustable-vector)))
-  (declare #.*opt*)
+(defun dat-read-file (fn &aux (res (mav)))
+  (declare #.*opt*) "read lisp data from file into vector."
   (with-open-file (in fn)
     (loop for l = (read in nil nil) while l do (vex res l)))
   res)
-(defun read-stream-as-data-vector (s &aux (res (make-adjustable-vector)))
-  (declare #.*opt*)
+(defun dat-read-stream (s &aux (res (mav)))
+  (declare #.*opt*) "read lisp data from stream into vector."
   (loop for l = (read s nil nil) while l do (vex res l))
   res)
 
 (defun jsnloads (&optional (s *standard-input*) all)
-  (declare #.*opt* ) "parse json from stream; or *standard-input*"
+  (declare #.*opt*) "parse json from stream; or *standard-input*"
   (let ((yason:*parse-json-arrays-as-vectors* t))
     (if all (let ((res (mav)))
               (handler-case
@@ -56,8 +55,7 @@
   (jsnout o :s s :indent indent)
   (get-output-stream-string s))
 
-(defun ldnout (o)
-  "serialize internal representation to readable lisp data."
+(defun ldnout (o) "serialize internal representation to readable lisp data. see ldnload."
   (typecase o (string o)
      (cons (cons (ldnout (car o)) (ldnout (cdr o))))
      (hash-table (loop for k being the hash-keys of o using (hash-value v)
@@ -66,6 +64,13 @@
                    for v across o do (vex res (ldnout v))
                    finally (return res)))
      (otherwise o)))
+(defun ldnload (o) "reverse of ldnout."
+  (typecase o (vector (map 'vector #'ldnload o))
+              (list (loop with res = (make-hash-table :test #'equal)
+                          for (k . v) in o
+                          do (setf (gethash (str! k) res) (ldnload v))
+                          finally (return res)))
+              (otherwise o)))
 
 (defmacro out (s &rest rest) "print to standard out"
   (awg (s*) (if rest `(format *standard-output* ,s ,@rest)

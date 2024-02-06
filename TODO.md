@@ -1,0 +1,1 @@
+ - terminal flag to read all input files into the same structure

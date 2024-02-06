@@ -3,7 +3,7 @@
   (:nicknames #:cl-lqn)
   (:export #:d? #:v?
     #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
-    #:jsnloads #:jsnloadf #:jsnout #:ldnout #:fmt #:out #:jsnstr #:@* #:@@ #:??
+    #:jsnloads #:jsnloadf #:jsnout #:ldnout #:ldnload #:fmt #:out #:jsnstr #:@* #:@@ #:??
     #:some? #:none? #:all? #:empty? #:size? #:is?
     #:path? #:subdir #:subfiles #:ls #:dir? #:file? #:cwd #:now #:cmd
     #:some? #:all? #:none? #:cd
@@ -17,5 +17,6 @@
     #:sup #:sdwn #:strcat #:repl #:splt #:symb #:join
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
     #:srt #:lpad #:rpad #:nstr #:ascii #:bar #:clmp
+    #:dat-read-file #:dat-read-files #:dat-read-stream #:txt-read-file #:txt-read-stream
     ))
 

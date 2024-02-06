@@ -75,7 +75,7 @@
 
 (defmacro cqry (co &rest rest) (proc-cqry co rest))
 
-(defun allsym (o) (uniq (flatall* o 2)) )
+(defun allsym (o) (uniq (flatall* o 2)))
 (defun prt (o &optional s)
   (lqn::with-struct (code- i grp) o
     (format s "<@code (frags: ~a~%  ~a)>" i grp)))
@@ -158,7 +158,7 @@
       (let ((sysi (reg co sys)))
         (loop with fi = (-reg-file sysi)
               with pkgi = (fnd co :/ext/pkg/none)
-              for o across (lqn::read-file-as-data-vector fn)
+              for o across (lqn:dat-read-file fn)
               if (and (consp o) (ssym? (car o))
                       (eq :in-package (lqn::kw (car o))))
               do (setf pkgi (attach co (fnd co :/ext/pkg) (second o) '(:/ext/pkg)))

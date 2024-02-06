@@ -6,10 +6,10 @@
 (in-package :lqn)
 
 (defun tqn/read-from-file (f) (declare #.*opt*)
-  (handler-case (read-file-as-vector f)
+  (handler-case (txt-read-file f)
     (error (e) (sh/exit-msg 55 "TXT: failed to READ file: ~a~%~%~a" f e))))
 (defun tqn/read-from-pipe () (declare #.*opt*)
-  (handler-case (read-stream-lines-as-vector)
+  (handler-case (txt-read-stream)
     (error (e) (sh/exit-msg 55 "TXT: failed to READ from pipe:~%~%~a" e))))
 
 (defun tqn/run-files (opts fx files)

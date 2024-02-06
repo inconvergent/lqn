@@ -223,6 +223,48 @@
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
+#### LQN:DAT-READ-FILE
+
+```
+ ; LQN:DAT-READ-FILE
+ ;   [symbol]
+ ; 
+ ; DAT-READ-FILE names a compiled function:
+ ;   Lambda-list: (FN &AUX (RES (MAV)))
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     read lisp data from file into vector.
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
+#### LQN:DAT-READ-FILES
+
+```
+ ; LQN:DAT-READ-FILES
+ ;   [symbol]
+ ; 
+ ; DAT-READ-FILES names a compiled function:
+ ;   Lambda-list: (PATH-OR-SEQ)
+ ;   Derived type: (FUNCTION ((OR LIST VECTOR)) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     read lisp code from these paths (via lqn:ls) or read this list of files as one large vector.
+ ;   Source file: /data/x/lqn/src/qry-extra.lisp
+```
+
+#### LQN:DAT-READ-STREAM
+
+```
+ ; LQN:DAT-READ-STREAM
+ ;   [symbol]
+ ; 
+ ; DAT-READ-STREAM names a compiled function:
+ ;   Lambda-list: (S &AUX (RES (MAV)))
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     read lisp data from stream into vector.
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
 #### LQN:DIR?
 
 ```
@@ -606,6 +648,20 @@
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
+#### LQN:LDNLOAD
+
+```
+ ; LQN:LDNLOAD
+ ;   [symbol]
+ ; 
+ ; LDNLOAD names a compiled function:
+ ;   Lambda-list: (O)
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     reverse of ldnout.
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
 #### LQN:LDNOUT
 
 ```
@@ -616,7 +672,7 @@
  ;   Lambda-list: (O)
  ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     serialize internal representation to readable lisp data.
+ ;     serialize internal representation to readable lisp data. see ldnload.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
@@ -1360,6 +1416,35 @@
  ;   Documentation:
  ;     trim string
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
+#### LQN:TXT-READ-FILE
+
+```
+ ; LQN:TXT-READ-FILE
+ ;   [symbol]
+ ; 
+ ; TXT-READ-FILE names a compiled function:
+ ;   Lambda-list: (FN &AUX (RES (MAKE-ADJUSTABLE-VECTOR)))
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     read lines of text from file into vector.
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
+#### LQN:TXT-READ-STREAM
+
+```
+ ; LQN:TXT-READ-STREAM
+ ;   [symbol]
+ ; 
+ ; TXT-READ-STREAM names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (S *STANDARD-INPUT*) &AUX
+ ;                 (RES (MAKE-ADJUSTABLE-VECTOR)))
+ ;   Derived type: (FUNCTION (&OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     read lines of text from stream into vector.
+ ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
 #### LQN:UNIQ

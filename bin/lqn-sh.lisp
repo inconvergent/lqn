@@ -7,10 +7,10 @@
 
 
 (defun lqn/read-from-file (f) (declare #.*opt*)
-  (handler-case (read-file-as-data-vector f)
+  (handler-case (dat-read-file f)
     (error (e) (sh/exit-msg 55 "LDN: failed to READ file: ~a~%~%~a~&" f e))))
 (defun lqn/read-from-pipe () (declare #.*opt*)
-  (handler-case (read-stream-as-data-vector *standard-input*)
+  (handler-case (dat-read-stream *standard-input*)
     (error (e) (sh/exit-msg 55 "LDN: failed to READ from pipe:~%~%~a~&" e))))
 
 (defun lqn/run-files (opts fx files)

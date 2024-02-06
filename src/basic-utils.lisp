@@ -16,7 +16,8 @@
                  :msym? :is? :kv? kw? :sym? :ssym? :sym! :trim
                  :num!? :num? :flt!? :flt? :int!? :int?
                  :lst? :lst! :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?
-                 :path? :subdir :subfiles :ls :dir? :file? :cwd :now :cmd :some? :all? :none? :cd))
+                 :path? :subdir :subfiles :ls :dir? :file? :cwd :now :cmd :some? :all? :none? :cd
+                 ))
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*
       #+CMU extensions:*command-line-words* nil))
@@ -99,18 +100,17 @@
        (> (length (symbol-name d)) (length m))))
 
 ; IS TYPE?
-(defun flt?  (f &optional d) "f if float; or d"            (if (floatp f) f d))
-(defun int?  (i &optional d) "i if int; or d"              (if (integerp i) i d))
-(defun kv?   (k &optional d) "k if kv; or d"               (if (hash-table-p k) k d))
-(defun kw?   (k &optional d) "k if kw; or d"               (if (keywordp k) k d))
-(defun sym?  (s &optional d) "s if sym; or d"              (if (symbolp s) s d))
-(defun ssym? (s &optional d) "s if sym, not kw; or d"      (if (and (sym? s)
-                                                                    (not (kw? s))) s d))
-(defun num?  (n &optional d) "n if number; or d"           (if (numberp n) n d))
-(defun str?  (s &optional d) "s if string; or d"           (if (stringp s) s d))
-(defun vec?  (v &optional d) "v if vector; or d"           (if (vectorp v) v d))
-(defun lst?  (v &optional d) "v if list; or d"             (if (listp v) d d))
-(defun seq?  (s &optional d) "s if sequence; or d"         (or (lst? s) (str? s) (vec? s) d))
+(defun flt?  (f &optional d) "f if float; or d"       (if (floatp f) f d))
+(defun int?  (i &optional d) "i if int; or d"         (if (integerp i) i d))
+(defun kv?   (k &optional d) "k if kv; or d"          (if (hash-table-p k) k d))
+(defun kw?   (k &optional d) "k if kw; or d"          (if (keywordp k) k d))
+(defun sym?  (s &optional d) "s if sym; or d"         (if (symbolp s) s d))
+(defun ssym? (s &optional d) "s if sym, not kw; or d" (if (and (sym? s) (not (kw? s))) s d))
+(defun num?  (n &optional d) "n if number; or d"      (if (numberp n) n d))
+(defun str?  (s &optional d) "s if string; or d"      (if (stringp s) s d))
+(defun vec?  (v &optional d) "v if vector; or d"      (if (vectorp v) v d))
+(defun lst?  (v &optional d) "v if list; or d"        (if (listp v) d d))
+(defun seq?  (s &optional d) "s if sequence; or d"    (or (lst? s) (str? s) (vec? s) d))
 
 ; PARSE AS TYPE OR DEFAULT
 (defun int!? (i &optional d) "i as int if it can be parsed; or d"

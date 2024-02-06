@@ -9,7 +9,7 @@
   (let ((chars (lst!? "abcdefghijklmnopqrstuvwxyz")))
     (qry (ls "../src/*.lisp") str!
          #((progn (out "~%~3,'0d: ** ~a **~%~%" (cnt) (seq* _ 8)) _)
-           read-file-as-vector
+           txt-read-file
            #((repl _ "defun" "DEFUN")
              (repl _ "defmacro" "DEFMACRO")
              #((if (member _ chars) #\― _))
