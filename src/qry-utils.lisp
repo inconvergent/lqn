@@ -74,6 +74,16 @@ match. If b is an expression, a is compared to the evaluated value of b."
     (make-array (length init) :initial-contents init
                 :adjustable t :fill-pointer t)))
 
+(defun linspace* (n &optional (a 0.0) (b 1.0) (end t))
+  (declare #.*opt* (fixnum n) (real a b) (boolean end)) "n floats from a to b."
+  (let ((res (make-array n :initial-element 0.0 :adjustable t
+                           :fill-pointer t :element-type 'float)))
+    (if (> n 1) (loop with ban = (/ (- b a) (if end (1- n) n))
+                      for i of-type fixnum from 0 below n
+                      do (setf (aref res i) (coerce (+ a (* i ban)) 'float)))
+                (setf (aref res 0) a))
+    res))
+
 ; TODO: fx to convert non-fill-ptr array to fpa?
 (defmacro psh* (a o) (declare (symbol a)) "extend a with o. return a. destructive."
   `(progn (vector-push-extend ,o ,a) ,a))

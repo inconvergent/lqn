@@ -620,6 +620,21 @@
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
+#### LQN:LINSPACE\*
+
+```
+ ; LQN:LINSPACE*
+ ;   [symbol]
+ ; 
+ ; LINSPACE* names a compiled function:
+ ;   Lambda-list: (N &OPTIONAL (A 0.0) (B 1.0) (END T))
+ ;   Derived type: (FUNCTION (FIXNUM &OPTIONAL REAL REAL BOOLEAN)
+ ;                  (VALUES (AND (VECTOR T) (NOT SIMPLE-ARRAY)) &OPTIONAL))
+ ;   Documentation:
+ ;     n floats from a to b.
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
 #### LQN:LPAD
 
 ```

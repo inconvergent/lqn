@@ -9,7 +9,7 @@
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr
                  :fn :fi :ctx  :par :itr :compct :?? :@@ :@* :smth? :ind* :sel* :seq* :apply* :join
-                 :new* :new$ :cat* :cat$ :head* :tail* :size? :range* :pop* :psh*
+                 :new* :new$ :cat* :cat$ :head* :tail* :size? :range* :linspace* :pop* :psh*
                  :flatn* :flatall* :flatn$ :uniq
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx? :lpad :rpad :nstr
                  :sup :sdwn :mkstr :repl :strcat :splt

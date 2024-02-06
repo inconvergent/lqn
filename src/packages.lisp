@@ -5,8 +5,9 @@
     #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
     #:jsnloads #:jsnloadf #:jsnout #:ldnout #:fmt #:out #:jsnstr #:@* #:@@ #:??
     #:some? #:none? #:all? #:empty? #:size? #:is?
-    #:path? #:subdir #:subfiles #:ls #:dir? #:file? #:cwd #:now #:cmd #:some? #:all? #:none? #:cd
-    #:new* #:new$ #:cat$ #:cat* #:head* #:tail* #:apply* #:range* #:psh* #:pop*
+    #:path? #:subdir #:subfiles #:ls #:dir? #:file? #:cwd #:now #:cmd
+    #:some? #:all? #:none? #:cd
+    #:new* #:new$ #:cat$ #:cat* #:head* #:tail* #:apply* #:range* #:linspace* #:psh* #:pop*
     #:flatn* #:compct #:flatall* #:flatn$ #:uniq
     #:pnum #:inum #:cnt
     #:noop #:kv? #:kw? #:ssym? #:msym? #:trim #:sym!
