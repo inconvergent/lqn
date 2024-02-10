@@ -247,7 +247,7 @@
  ;   Lambda-list: (PATH-OR-SEQ)
  ;   Derived type: (FUNCTION ((OR LIST VECTOR)) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     read lisp code from these paths (via lqn:ls) or read this list of files as one large vector.
+ ;     read lisp data from these paths (via lqn:ls) or this list of files as one large vector.
  ;   Source file: /data/x/lqn/src/qry-extra.lisp
 ```
 
@@ -390,6 +390,21 @@
  ;   Documentation:
  ;     format to string.
  ;   Source file: /data/x/lqn/src/io.lisp
+```
+
+#### LQN:GRP
+
+```
+:missing:todo:
+
+ ; LQN:GRP
+ ;   [symbol]
+ ; 
+ ; GRP names a compiled function:
+ ;   Lambda-list: (V KEYFX &OPTIONAL (VALFX (FUNCTION IDENTITY)))
+ ;   Derived type: (FUNCTION (SEQUENCE FUNCTION &OPTIONAL FUNCTION)
+ ;                  (VALUES HASH-TABLE &OPTIONAL))
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:HEAD\*

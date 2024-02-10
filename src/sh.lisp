@@ -6,6 +6,7 @@
 (defun opt/help? (opts)    (member :-h opts :test #'equal))
 (defun opt/indent? (opts)  (null (member :-m opts :test #'equal)))
 
+(defun opt/all?    (opts) (member :-a opts :test #'eq))
 (defun opt/nils?   (opts) (member :-z opts :test #'eq))
 (defun opt/jsnopt? (opts) (member :-j opts :test #'eq))
 (defun opt/ldnopt? (opts) (member :-l opts :test #'eq))
@@ -43,6 +44,7 @@
 
 (defun sh/execute-qry (fx &rest rest) (declare #.*opt* (function fx))
   (handler-case (apply fx rest)
+    (stream-error () (sh/exit-msg 0 ""))
     (error (e) (sh/exit-msg 80 "failed to EXECUTE qry:~%~%~a~&" e))))
 
 (defun sh/run-from-shell (ex args filefx pipefx &optional no-data)
@@ -65,8 +67,10 @@
   (labels
     ((prtxt (res*) (format s "~&~a~%" res*))
      (prldn (res*) (handler-case (format s "~&~s~&" (ldnout res*))
+                     (stream-error () (sh/exit-msg 0 ""))
                      (error (e) (sh/exit-msg 102 "LDN: failed to SERIALIZE:~%~%~a~&" e))))
      (prjsn (res*) (handler-case (jsnout res* :indent (opt/indent? opts) :s s)
+                     (stream-error () (sh/exit-msg 0 ""))
                      (error (e) (sh/exit-msg 101 "JSON: failed to SERIALIZE:~%~%~a~&" e))))
      (dotxt (res*) (handler-case
                      (typecase res*
@@ -74,6 +78,7 @@
                         (vector (loop for s across res*
                                   if (or zeros (smth? s t)) do (doline s)))
                         (otherwise (doline res*)))
+                     (stream-error () (sh/exit-msg 0 ""))
                      (error (e) (sh/exit-msg 103 "TXT: failed to SERIALIZE:~%~%~a~&" e))))
      (doline (res*) (typecase res* (null nil)
                       (string     (prtxt res*)) (number (prtxt res*))

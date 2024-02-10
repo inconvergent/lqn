@@ -133,6 +133,15 @@ match. If b is an expression, a is compared to the evaluated value of b."
                  (otherwise o*))))
     (rec o)))
 
+(defun grp (v keyfx &optional (valfx #'identity))
+  (declare (sequence v) (function keyfx valfx))
+  (loop with res = (make-hash-table :test #'equal)
+        for o across (vec! v)
+        for k = (funcall keyfx o)
+        for acc = (gethash k res (new*))
+        do (setf (gethash k res) (psh* acc (funcall valfx o)))
+        finally (return res)))
+
 (defun @* (a d &rest rest &aux l) (declare #.*opt*)
   "pick these indices/keys from sequence/hash-table into new vector."
   (labels ((lt (l) (or (nth l a) d))

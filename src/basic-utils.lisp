@@ -4,7 +4,7 @@
 
 (defvar *qmodes* '(:+ :? :- :%))
 (defvar *operators*
-  `(:*map :@ :|| ?rec :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?srch))
+  `(:*map :@ :|| ?rec :*$ :$$ :$* :** :*fld :?* :?xpr :?txpr :?mxpr :?srch :?grp))
 (defvar *opt* '(optimize (speed 3) (safety 1)))
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr
@@ -17,6 +17,7 @@
                  :num!? :num? :flt!? :flt? :int!? :int?
                  :lst? :lst! :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?
                  :path? :subdir :subfiles :ls :dir? :file? :cwd :now :cmd :some? :all? :none? :cd
+                 :grp
                  ))
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*

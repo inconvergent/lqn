@@ -56,16 +56,21 @@
   (get-output-stream-string s))
 
 (defun ldnout (o) "serialize internal representation to readable lisp data. see ldnload."
-  (typecase o (string o)
+  (labels ((make-key (k)
+             (typecase k (number k) (string (kw k)) (sequence k)
+                         (character k)
+                         (otherwise (kw k)))))
+   (typecase o (string o)
      (cons (cons (ldnout (car o)) (ldnout (cdr o))))
      (hash-table (loop for k being the hash-keys of o using (hash-value v)
-                       collect `(,(kw k) . ,(ldnout v))))
+                       collect `(,(make-key k) . ,(ldnout v))))
      (vector (loop with res = (make-adjustable-vector)
                    for v across o do (vex res (ldnout v))
                    finally (return res)))
-     (otherwise o)))
+     (otherwise o))))
 (defun ldnload (o) "reverse of ldnout."
-  (typecase o (vector (map 'vector #'ldnload o))
+  (typecase o (string o)
+              (vector (map 'vector #'ldnload o))
               (list (loop with res = (make-hash-table :test #'equal)
                           for (k . v) in o
                           do (setf (gethash (str! k) res) (ldnload v))

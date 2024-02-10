@@ -168,6 +168,22 @@
                                         (third d)) ,i (+ ,i 1))))
          (values ,∇- ,i)))))
 
+; TODO: smarter selectors?
+; key: (fx _) key: (ind* _ 0)
+; key: (gethash :key _) key: (gethash "key" _)
+(defun compile/?grp (rec conf d)
+  (unless (< 0 (length d) 3) (error "?grp: expected 1,2 args. got: ~a." d))
+  (awg (i kvres key itr par dat acc)
+    `(loop with ,kvres of-type hash-table = (make$)
+           with ,par of-type vector = (vec! ,(gk conf :dat))
+           for ,itr across ,par for ,i from 0
+           for ,key = ,(funcall rec (dat/new conf itr) (first d))
+           for ,acc = (gethash ,key ,kvres (new*))
+           for ,dat = ,(case (length d)
+                          (1 itr) (2 (funcall rec (dat/new conf itr) (second d))))
+           do (∈ (,par ,i ,itr) (setf (gethash ,key ,kvres) (psh* ,acc ,dat)))
+           finally (return ,kvres))))
+
 (defun proc-qry (q &optional conf*) "compile lqn query"
   (awg (dat fn fi)
   (labels
@@ -191,6 +207,7 @@
          ((qop? :?txpr d) (compile/?txpr #'rec conf (cdr d)))
          ((qop? :?srch d) (compile/?srch #'rec conf (cdr d)))
          ((qop? :?rec  d) (compile/?rec  #'rec conf (cdr d)))
+         ((qop? :?grp  d) (compile/?grp  #'rec conf (cdr d)))
          ((car- lqnfx? d)    `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
          ((consp d) (cons (rec conf (pre/scan-clause (car d))) (rec conf (cdr d))))
          (t (error "lqn: unexpected clause: ~a~%in: ~a." d q)))))
