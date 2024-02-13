@@ -2,7 +2,7 @@
 (let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname))))
   (when (probe-file quicklisp-init) (load quicklisp-init)))
 
-(ql:quickload :lqn :silent t)
+(unless (find-package :lqn) (ql:quickload :lqn :silent t))
 (in-package :lqn)
 
 (defun jqn/read-from-file (f) (declare #.*opt*)
@@ -15,13 +15,6 @@
                   all)
     (end-of-file () nil)
     (error (e) (sh/exit-msg 55 "JSON: failed to PARSE from pipe:~%~%~a~&" e))))
-
-; (defun read-all ()
-;   (print
-;    (join (loop with res = (mav)
-;                for n = (read-from-string *standard-input* nil nil) while n do (vex res n)
-;                 finally (return res)
-;                ) #\Newline )))
 
 (defun jqn/run-files (opts fx files) (declare #.*opt* (function fx))
   (loop for fn in files for fi from 0 do

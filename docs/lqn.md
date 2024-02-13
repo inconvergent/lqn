@@ -220,7 +220,7 @@
  ;   Derived type: (FUNCTION (T) (VALUES &OPTIONAL))
  ;   Documentation:
  ;     describe symbol.
- ;   Source file: /data/x/lqn/src/basic-utils.lisp
+ ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
 #### LQN:DAT-READ-FILE
@@ -1494,7 +1494,7 @@
  ;   Derived type: (FUNCTION (&OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     return/print lqn version.
- ;   Source file: /data/x/lqn/src/basic-utils.lisp
+ ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
 #### LQN:VEC!

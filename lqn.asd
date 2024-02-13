@@ -6,7 +6,8 @@
   :licence "MIT" :pathname "src/" :serial nil
   :depends-on (#:yason #:uiop)
   :components ((:file "packages")
-               (:file "basic-utils" :depends-on ("packages"))
+               (:file "init" :depends-on ("packages"))
+               (:file "basic-utils" :depends-on ("init"))
                (:file "reader-macros" :depends-on ("basic-utils"))
                (:file "qry-utils" :depends-on ("reader-macros" "basic-utils"))
                (:file "docs" :depends-on ("qry-utils"))
@@ -14,8 +15,7 @@
                (:file "pre-qry" :depends-on ("io" "qry-utils" "docs"))
                (:file "qry" :depends-on ("pre-qry"))
                (:file "sh" :depends-on ("qry"))
-               (:file "qry-extra" :depends-on ("qry"))
-               ))
+               (:file "qry-extra" :depends-on ("qry"))))
 
 (asdf:defsystem #:lqn/tests
   :depends-on (#:lqn #:prove #:uiop #:asdf)
