@@ -119,6 +119,6 @@
                   0.6759 0.6809 0.6816 0.6925 0.7039 0.7086 0.7235 0.7302
                   0.7332 0.7602 0.7834 0.8037 0.9999)))
     (loop with s = (clmp s) for i from 0 for v across dens
-          if (>= v s) do (return-from ascii (aref chars (print i))))
+          if (>= v s) do (return-from ascii (aref chars i)))
     (@@ chars -1 nil)))
 
