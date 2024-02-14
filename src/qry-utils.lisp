@@ -106,8 +106,9 @@ match. If b is an expression, a is compared to the evaluated value of b."
            (gv (a* k) (when (vec? a*)
                         (let ((kk (ind a* k)))
                           (when (< -1 kk (length a*)) (aref a* kk)))))
-           (good-key (k) (or (int? k) (characterp k) (seq? k)
-                             (and (str? k) (> (length k) 0)) (symbolp k)))
+           (good-key (k) (or (int? k) (characterp k)  ; TODO: reverse this, look for "", nil as bad?
+                             (and (str? k) (> (length k) 0))
+                             (seq? k) (symbolp k)))
            (not-empty (a*) (remove-if-not #'good-key a*))
            (int-or-str (k) (cond ((int!? k)) (t k)))
            (pre (kk) (not-empty (mapcar #'int-or-str (str-split kk "/"))))
@@ -116,11 +117,8 @@ match. If b is an expression, a is compared to the evaluated value of b."
                     (v (cond ((equal k "*")
                                 (return-from rec
                                   (and (vec? a*) (compct (map 'vector (λ (b) (rec b kk)) a*)))))
-                             ((str? k) (gkv a* k))
                              ((int? k) (gv a* k))
-                             ((characterp k) (gkv a* k))
-                             ((seq? k) (gkv a* k))
-                             ((symbolp k) (gkv a* k)))))
+                             (t (gkv a* k)))))
                (if (is? v) (rec v kk) (return-from rec d)))))
     (compct
       (rec a (etypecase path (fixnum (list path)) (character (list path)) (list path)
