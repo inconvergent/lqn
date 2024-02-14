@@ -13,11 +13,10 @@
     #:noop #:kv? #:kw? #:ssym? #:msym? #:trim #:sym!
     #:num!? #:num? #:flt!? #:flt? #:int!? #:int?
     #:lst? #:lst! #:lst!? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!?
-    #:ind* #:sel* #:seq*
+    #:grp #:ind* #:sel* #:seq*
     #:sup #:sdwn #:strcat #:repl #:splt #:symb #:join
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
     #:srt #:lpad #:rpad #:nstr #:ascii #:bar #:clmp
-    #:dat-read-file #:dat-read-files #:dat-read-stream #:txt-read-file #:txt-read-stream
-    #:grp
-    ))
+    #:dat-read-file #:dat-read-files #:dat-read-stream #:dat-export
+    #:txt-read-file #:txt-read-stream))
 

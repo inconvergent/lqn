@@ -223,6 +223,21 @@
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
 
+#### LQN:DAT-EXPORT
+
+```
+ ; LQN:DAT-EXPORT
+ ;   [symbol]
+ ; 
+ ; DAT-EXPORT names a compiled function:
+ ;   Lambda-list: (FN O &OPTIONAL (PFX .dat))
+ ;   Derived type: (FUNCTION (STRING T &OPTIONAL STRING)
+ ;                  (VALUES NULL &OPTIONAL))
+ ;   Documentation:
+ ;     write o to file. see dat-read-file
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
 #### LQN:DAT-READ-FILE
 
 ```
@@ -233,7 +248,7 @@
  ;   Lambda-list: (FN &AUX (RES (MAV)))
  ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     read lisp data from file into vector.
+ ;     read lisp data from file into vector. see dat-export.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 

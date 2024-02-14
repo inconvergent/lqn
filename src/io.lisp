@@ -16,8 +16,10 @@
   (with-open-file (in fn)
     (loop for l = (read-line in nil nil) while l do (vex res l)))
   res)
+; TODO: txt export
+
 (defun dat-read-file (fn &aux (res (mav)))
-  (declare #.*opt*) "read lisp data from file into vector."
+  (declare #.*opt*) "read lisp data from file into vector. see dat-export."
   (with-open-file (in fn)
     (loop for l = (read in nil nil) while l do (vex res l)))
   res)
@@ -25,14 +27,17 @@
   (declare #.*opt*) "read lisp data from stream into vector."
   (loop for l = (read s nil nil) while l do (vex res l))
   res)
+(defun dat-export (fn o &optional (pfx ".dat"))
+  (declare #.*opt* (string fn pfx)) "write o to file. see dat-read-file"
+  (with-open-file (f (mkstr fn pfx) :direction :output :if-exists :supersede)
+    (format f "~s~%" o) nil))
 
 (defun jsnloads (&optional (s *standard-input*) all)
   (declare #.*opt*) "parse json from stream; or *standard-input*"
   (let ((yason:*parse-json-arrays-as-vectors* t))
     (if all (let ((res (mav)))
-              (handler-case
-                (loop for j = (yason:parse s) while j
-                      do (vex res j) finally (return res))
+              (handler-case (loop for j = (yason:parse s) while j
+                                  do (vex res j) finally (return res))
                 (end-of-file () res)))
             (yason:parse s))))
 (defun jsnloadf (fn)
