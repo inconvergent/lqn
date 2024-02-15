@@ -18,5 +18,5 @@
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
     #:srt #:lpad #:rpad #:nstr #:ascii #:bar #:clmp
     #:dat-read-file #:dat-read-files #:dat-read-stream #:dat-export
-    #:txt-read-file #:txt-read-stream))
+    #:txt-read-file #:txt-read-stream #:txt-export))
 

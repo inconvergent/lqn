@@ -1448,6 +1448,21 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:TXT-EXPORT
+
+```
+ ; LQN:TXT-EXPORT
+ ;   [symbol]
+ ; 
+ ; TXT-EXPORT names a compiled function:
+ ;   Lambda-list: (FN V &OPTIONAL (PFX .txt))
+ ;   Derived type: (FUNCTION (STRING VECTOR &OPTIONAL STRING)
+ ;                  (VALUES NULL &OPTIONAL))
+ ;   Documentation:
+ ;     write lines from vector to file. see txt-read-file
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
 #### LQN:TXT-READ-FILE
 
 ```

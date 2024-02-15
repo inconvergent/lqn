@@ -16,7 +16,11 @@
   (with-open-file (in fn)
     (loop for l = (read-line in nil nil) while l do (vex res l)))
   res)
-; TODO: txt export
+(defun txt-export (fn v &optional (pfx ".txt"))
+  (declare #.*opt* (string fn pfx) (vector v))
+  "write lines from vector to file. see txt-read-file"
+  (with-open-file (f (mkstr fn pfx) :direction :output :if-exists :supersede)
+    (loop for l across v do (format f "~&~a~%" l)) nil))
 
 (defun dat-read-file (fn &aux (res (mav)))
   (declare #.*opt*) "read lisp data from file into vector. see dat-export."
