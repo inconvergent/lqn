@@ -6,7 +6,7 @@
     #:jsnloads #:jsnloadf #:jsnout #:ldnout #:ldnload #:fmt #:out #:jsnstr #:@* #:@@ #:??
     #:some? #:none? #:all? #:empty? #:size? #:is?
     #:path? #:subdir #:subfiles #:ls #:dir? #:file? #:cwd #:now #:cmd
-    #:some? #:all? #:none? #:cd
+    #:some? #:all? #:none? #:cd #:keys?
     #:new* #:new$ #:cat$ #:cat* #:head* #:tail* #:apply* #:range* #:linspace* #:psh* #:pop*
     #:flatn* #:compct #:flatall* #:flatn$ #:uniq
     #:pnum #:inum #:cnt
@@ -17,6 +17,6 @@
     #:sup #:sdwn #:strcat #:repl #:splt #:symb #:join
     #:pref? #:suf? #:sub? #:subx? #:ipref? #:isuf? #:isub? #:isubx?
     #:srt #:lpad #:rpad #:nstr #:ascii #:bar #:clmp
-    #:dat-read-file #:dat-read-files #:dat-read-stream #:dat-export
+    #:dat-read-file #:dat-read-files #:dat-read-one #:dat-read-stream #:dat-export
     #:txt-read-file #:txt-read-stream #:txt-export))
 

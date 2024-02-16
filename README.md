@@ -285,6 +285,9 @@ Repeat the same expression while something is true:
    get the number of the current iteration. `(par)` always refers to the input
    value.
 
+### Group by Operator - `?grp`
+  TODO
+
 ### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
 Perform operation on when pattern or condition is satisfied:
   - `(?xpr sel)`: match current value against `EXPR Selector`. Return the

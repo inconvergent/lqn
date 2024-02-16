@@ -266,6 +266,20 @@
  ;   Source file: /data/x/lqn/src/qry-extra.lisp
 ```
 
+#### LQN:DAT-READ-ONE
+
+```
+ ; LQN:DAT-READ-ONE
+ ;   [symbol]
+ ; 
+ ; DAT-READ-ONE names a compiled function:
+ ;   Lambda-list: (FN)
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     read lisp one object from file. see dat-export.
+ ;   Source file: /data/x/lqn/src/io.lisp
+```
+
 #### LQN:DAT-READ-STREAM
 
 ```
@@ -650,6 +664,20 @@
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
+#### LQN:KEYS?
+
+```
+ ; LQN:KEYS?
+ ;   [symbol]
+ ; 
+ ; KEYS? names a compiled function:
+ ;   Lambda-list: (KV &OPTIONAL D)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     vector with keys from kv; or d
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
 #### LQN:KV?
 
 ```
@@ -688,7 +716,7 @@
  ;   Lambda-list: (O)
  ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     reverse of ldnout.
+ ;     read serialized data. reverse of ldnout.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
@@ -702,7 +730,9 @@
  ;   Lambda-list: (O)
  ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     serialize internal representation to readable lisp data. see ldnload.
+ ;     serialize internal representation to readable lisp data.
+ ;     most notably lists and vectors are serialized as #(..), and hash-tables are serialized
+ ;     as alists. see ldnload.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 

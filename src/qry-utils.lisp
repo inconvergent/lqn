@@ -95,13 +95,22 @@ match. If b is an expression, a is compared to the evaluated value of b."
                            :fill-pointer (1- (fill-pointer ,a))))
                 ,o))))
 
+(defun keys? (kv &optional d)
+  "vector with keys from kv; or d"
+  (typecase kv (hash-table (if (> (size? kv) 0)
+                               (loop with res = (new*)
+                                     for k being the hash-keys of kv do (psh* res k)
+                                     finally (return res))
+                               d))
+               (otherwise d)))
+
 (defmacro ?? (a expr &optional res) (declare (symbol a)) ; TODO: dont require sym?
   "evaluate expr only iff a is not nil. returns the result of expr or res; or nil."
   `(and ,a ,expr ,@(if res `(,res))))
 
 (defun @@ (a path &optional d) (declare #.*opt*)
   "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
-  (labels ((gkv (a* k) (and (kv? a*) (gethash k a*)))
+  (labels ((gkv (a* k) (typecase a* (hash-table (gethash k a*)) (otherwise nil)))
            (ind (a* k) (if (< k 0) (+ (length a*) k) k))
            (gv (a* k) (when (vec? a*)
                         (let ((kk (ind a* k)))

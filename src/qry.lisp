@@ -9,8 +9,8 @@
 
 (defun compile/@ (rec conf d &aux (dat (gk conf :dat)))
   (case (length d) (0 `(@@ ,dat 0 nil))
-                   (1 `(@@ ,(gk conf :dat) ,(funcall rec conf (car d))))
-                   (2 `(@@ ,(gk conf :dat) ,@(funcall rec conf d)))
+                   (1 `(@@ ,dat ,(funcall rec conf (car d))))
+                   (2 `(@@ ,dat ,@(funcall rec conf d)))
                    (3 `(@@ ,@(funcall rec conf d)))
                    (otherwise (error "@: expected 0-3 arguments. got: ~a." d))))
 
@@ -190,7 +190,7 @@
     ((rec (conf d* &aux (d (pre/scan-clause d* nil)))
        (cond
          ((dat? d) (gk conf :dat))
-         ((stringp d) d) ; this order is important
+         ((stringp d) d) ; remember that this order is important
          ((vectorp d) (rec conf `(*map ,@(coerce d 'list))))
          ((atom d) d)
          ((qop? :||    d) (compile/||    #'rec conf (pre/|| (cdr d))))
@@ -208,7 +208,7 @@
          ((qop? :?srch d) (compile/?srch #'rec conf (cdr d)))
          ((qop? :?rec  d) (compile/?rec  #'rec conf (cdr d)))
          ((qop? :?grp  d) (compile/?grp  #'rec conf (cdr d)))
-         ((car- lqnfx? d)    `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
+         ((car- lqnfx? d) `(,(psymb 'lqn (car d)) ,@(rec conf (cdr d))))
          ((consp d) (cons (rec conf (pre/scan-clause (car d))) (rec conf (cdr d))))
          (t (error "lqn: unexpected clause: ~a~%in: ~a." d q)))))
       `(λ (,dat ,fn ,fi) (//fxs/qry (,dat ,fn ,fi)

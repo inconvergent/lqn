@@ -22,6 +22,9 @@
   (with-open-file (f (mkstr fn pfx) :direction :output :if-exists :supersede)
     (loop for l across v do (format f "~&~a~%" l)) nil))
 
+(defun dat-read-one (fn)
+  (declare #.*opt*) "read lisp one object from file. see dat-export."
+  (with-open-file (in fn) (read in nil nil)))
 (defun dat-read-file (fn &aux (res (mav)))
   (declare #.*opt*) "read lisp data from file into vector. see dat-export."
   (with-open-file (in fn)
@@ -64,27 +67,30 @@
   (jsnout o :s s :indent indent)
   (get-output-stream-string s))
 
-(defun ldnout (o) "serialize internal representation to readable lisp data. see ldnload."
-  (labels ((make-key (k)
-             (typecase k (number k) (string (kw k)) (sequence k)
-                         (character k)
-                         (otherwise (kw k)))))
+; TODO: character keys are probably not compatible with the internal json representation?
+; TODO: is this consistent with JSON representation in general?
+(defun ldnout (o) "serialize internal representation to readable lisp data.
+most notably lists and vectors are serialized as #(..), and hash-tables are serialized
+as alists. see ldnload."
+  (labels ((ldnkey (k) (typecase k (number k) (string (kw k)) (sequence k)
+                                   (character k) (otherwise (kw k)))))
    (typecase o (string o)
      (cons (cons (ldnout (car o)) (ldnout (cdr o))))
      (hash-table (loop for k being the hash-keys of o using (hash-value v)
-                       collect `(,(make-key k) . ,(ldnout v))))
+                       collect `(,(ldnkey k) . ,(ldnout v))))
      (vector (loop with res = (make-adjustable-vector)
                    for v across o do (vex res (ldnout v))
                    finally (return res)))
      (otherwise o))))
-(defun ldnload (o) "reverse of ldnout."
-  (typecase o (string o)
+(defun ldnload (o) "read serialized data. reverse of ldnout."
+  (labels ((ldnkey (k) (typecase k (keyword (sdwn (str! k))) (number k) (string (kw k))
+                                   (sequence k) (character k) (otherwise (kw k)))))
+   (typecase o (string o) (character o)
               (vector (map 'vector #'ldnload o))
               (list (loop with res = (make-hash-table :test #'equal)
-                          for (k . v) in o
-                          do (setf (gethash (str! k) res) (ldnload v))
+                          for (k . v) in o do (setf (gethash (ldnkey k) res) (ldnload v))
                           finally (return res)))
-              (otherwise o)))
+              (otherwise o))))
 
 (defmacro out (s &rest rest) "print to standard out"
   (awg (s*) (if rest `(format *standard-output* ,s ,@rest)

@@ -75,6 +75,7 @@
 
 ; COERCE TO TYPE
 (defun sym! (&rest rest) "stringify, make symbol" (apply #'symb rest))
+(defun kw! (&rest rest) "stringify, make keyword" (apply #'psymb :keyword rest))
 (defun str! (&rest rest) "coerce to string"
   (apply #'mkstr (loop for s in rest collect (typecase s (string s) (symbol (string-downcase s)) (t (mkstr s))))))
 (defun vec! (v &optional (d `#(,v))) "coerce v to vector. if v is not a vector, list, string it returns d"
