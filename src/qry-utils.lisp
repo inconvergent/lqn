@@ -115,9 +115,9 @@ match. If b is an expression, a is compared to the evaluated value of b."
            (gv (a* k) (when (vec? a*)
                         (let ((kk (ind a* k)))
                           (when (< -1 kk (length a*)) (aref a* kk)))))
-           (good-key (k) (or (int? k) (characterp k)  ; TODO: reverse this, look for "", nil as bad?
-                             (and (str? k) (> (length k) 0))
-                             (seq? k) (symbolp k)))
+           (good-key (k) (etypecase k (fixnum k) (symbol k)
+                                      (string (and (> (length k) 0) k))
+                                      (sequence (and (> (length k) 0) k))))
            (not-empty (a*) (remove-if-not #'good-key a*))
            (int-or-str (k) (cond ((int!? k)) (t k)))
            (pre (kk) (not-empty (mapcar #'int-or-str (str-split kk "/"))))
