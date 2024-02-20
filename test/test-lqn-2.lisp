@@ -1,6 +1,27 @@
 (in-package #:lqn-tests)
 
-(plan 2)
+(plan 3)
+
+(subtest "lqn vector"
+  (is (lqn:empty? (lqn:new* 1 2 3)) nil)
+  (is (lqn:empty? (lqn:new*)) t)
+  (is (lqn:empty? 1 :empty) :empty)
+  (is (lqn:some? (lqn:new*) :empty) :empty)
+  (is (lqn:some? (lqn:new* nil nil) :empty) nil)
+  (is (lqn:some? (lqn:new* nil nil t) :empty) t)
+
+  (is (lqn:none? (lqn:new*) :empty) :empty)
+  (is (lqn:none? (lqn:new*)) t)
+  (is (lqn:none? (lqn:new* nil nil) :empty) t)
+  (is (lqn:none? (lqn:new* nil nil t) :empty) nil)
+
+  (is (lqn:all? (lqn:new*) :empty) :empty)
+  (is (lqn:all? (lqn:new*)) nil)
+  (is (lqn:all? (lqn:new* nil nil) :empty) nil)
+  (is (lqn:all? (lqn:new* nil nil t) :empty) nil)
+  (is (lqn:all? (lqn:new* t t t) :empty) t)
+
+  (is (lqn:uniq (lqn:new* 5 1 1 1 2 3 3 4 5)) #(1 2 3 4 5) :test #'equalp))
 
 (subtest "lqn qry @@/@"
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ "a") (@ "b"))) 3)
@@ -134,8 +155,8 @@
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 1000 +)) 1109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- acc _))) -109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 3 acc (- _ acc))) 96)
-  (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head* _ 7) (tail* _ 3)) #(5 6 7) :test #'equalp)
-  (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head* _ -6) (tail* _ -6)) #(1 2 3 4) :test #'equalp)
+  (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ 7) (tail _ 3)) #(5 6 7) :test #'equalp)
+  (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ -6) (tail _ -6)) #(1 2 3 4) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x)
                (*? (isubx? _ "k") (new* _ (trim (itr)))))
       #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
@@ -146,7 +167,7 @@
                (*? (isubx? _ "k") (new* _ (itr))))
       #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
 
-  (is (lqn:qry #(0 1) (?rec (< (@ -1) 10000) (cat* _ (apply* + (tail* _ 2))))
+  (is (lqn:qry #(0 1) (?rec (< (@ -1) 10000) (cat* _ (apply* + (tail _ 2))))
                      #((str! "- " (cnt) ": " _)) (join _ " "))
        "- 0: 0 - 1: 1 - 2: 1 - 3: 2 - 4: 3 - 5: 5 - 6: 8 - 7: 13 - 8: 21 - 9: 34 - 10: 55 - 11: 89 - 12: 144 - 13: 233 - 14: 377 - 15: 610 - 16: 987 - 17: 1597 - 18: 2584 - 19: 4181 - 20: 6765 - 21: 10946")
   )

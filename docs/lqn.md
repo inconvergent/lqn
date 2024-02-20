@@ -436,13 +436,13 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
-#### LQN:HEAD\*
+#### LQN:HEAD
 
 ```
- ; LQN:HEAD*
+ ; LQN:HEAD
  ;   [symbol]
  ; 
- ; HEAD* names a compiled function:
+ ; HEAD names a compiled function:
  ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
  ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
  ;                  (VALUES
@@ -736,13 +736,13 @@
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
-#### LQN:LINSPACE\*
+#### LQN:LINSPACE
 
 ```
- ; LQN:LINSPACE*
+ ; LQN:LINSPACE
  ;   [symbol]
  ; 
- ; LINSPACE* names a compiled function:
+ ; LINSPACE names a compiled function:
  ;   Lambda-list: (N &OPTIONAL (A 0.0) (B 1.0) (END T))
  ;   Derived type: (FUNCTION (FIXNUM &OPTIONAL REAL REAL BOOLEAN)
  ;                  (VALUES (AND (VECTOR T) (NOT SIMPLE-ARRAY)) &OPTIONAL))
@@ -1077,13 +1077,13 @@
  ;   Source file: /data/x/lqn/src/qry.lisp
 ```
 
-#### LQN:RANGE\*
+#### LQN:RANGE
 
 ```
- ; LQN:RANGE*
+ ; LQN:RANGE
  ;   [symbol]
  ; 
- ; RANGE* names a compiled function:
+ ; RANGE names a compiled function:
  ;   Lambda-list: (A &OPTIONAL (B 0 B?) (LEAP 1))
  ;   Derived type: (FUNCTION (FIXNUM &OPTIONAL FIXNUM FIXNUM)
  ;                  (VALUES (AND (VECTOR T) (NOT SIMPLE-ARRAY)) &OPTIONAL))
@@ -1135,13 +1135,13 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
-#### LQN:SEL\*
+#### LQN:SEL
 
 ```
- ; LQN:SEL*
+ ; LQN:SEL
  ;   [symbol]
  ; 
- ; SEL* names a compiled function:
+ ; SEL names a compiled function:
  ;   Lambda-list: (V &REST SEQS)
  ;   Derived type: (FUNCTION (VECTOR &REST T)
  ;                  (VALUES
@@ -1150,7 +1150,22 @@
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     new vector with indices or ranges from v.
- ;     ranges are lists that behave like arguments to seq*.
+ ;     ranges are lists that behave like arguments to seq.
+ ;   Source file: /data/x/lqn/src/qry-utils.lisp
+```
+
+#### LQN:SEQ
+
+```
+ ; LQN:SEQ
+ ;   [symbol]
+ ; 
+ ; SEQ names a compiled function:
+ ;   Lambda-list: (V I &OPTIONAL J)
+ ;   Derived type: (FUNCTION (VECTOR FIXNUM &OPTIONAL T)
+ ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
+ ;   Documentation:
+ ;     (subseq v ,@rest)
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
@@ -1166,21 +1181,6 @@
  ;   Documentation:
  ;     s as seq if it can be parsed; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
-```
-
-#### LQN:SEQ\*
-
-```
- ; LQN:SEQ*
- ;   [symbol]
- ; 
- ; SEQ* names a compiled function:
- ;   Lambda-list: (V I &OPTIONAL J)
- ;   Derived type: (FUNCTION (VECTOR FIXNUM &OPTIONAL T)
- ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
- ;   Documentation:
- ;     (subseq v ,@rest)
- ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
 #### LQN:SEQ?
@@ -1318,7 +1318,7 @@
  ;   Lambda-list: (&REST REST)
  ;   Derived type: (FUNCTION * (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
- ;     concatenate all strings in sequences
+ ;     concatenate all strings in these sequences
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
@@ -1439,13 +1439,13 @@
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
-#### LQN:TAIL\*
+#### LQN:TAIL
 
 ```
- ; LQN:TAIL*
+ ; LQN:TAIL
  ;   [symbol]
  ; 
- ; TAIL* names a compiled function:
+ ; TAIL names a compiled function:
  ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
  ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
  ;                  (VALUES

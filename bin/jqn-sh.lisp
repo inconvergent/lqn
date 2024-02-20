@@ -9,10 +9,7 @@
   (handler-case (jsnloadf f)
     (error (e) (sh/exit-msg 55 "JSON: failed to READ file: ~a~%~%~a~&" f e))))
 (defun jqn/read-from-pipe (&optional all) (declare #.*opt*)
-  (handler-case (jsnloads
-                  *standard-input*
-                  ; (read-all)
-                  all)
+  (handler-case (jsnloads *standard-input* all)
     (end-of-file () nil)
     (error (e) (sh/exit-msg 55 "JSON: failed to PARSE from pipe:~%~%~a~&" e))))
 

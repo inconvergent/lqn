@@ -67,14 +67,14 @@ match. If b is an expression, a is compared to the evaluated value of b."
                ,@(loop for (kk expr) in (group 2 d)
                        collect `(setf (gethash ,(ct/kw/str kk) ,kv) ,expr))
                ,kv)))
-(defun range* (a &optional (b 0 b?) (leap 1)) ; TODO: count downwards
+(defun range (a &optional (b 0 b?) (leap 1)) ; TODO: count downwards
   (declare (fixnum a b leap)) "declare range. from 0 to a; or a to b."
   (unless b? (setf b a a 0))
   (let ((init (loop for i from a below b by leap collect i)))
     (make-array (length init) :initial-contents init
                 :adjustable t :fill-pointer t)))
 
-(defun linspace* (n &optional (a 0.0) (b 1.0) (end t))
+(defun linspace (n &optional (a 0.0) (b 1.0) (end t))
   (declare #.*opt* (fixnum n) (real a b) (boolean end)) "n floats from a to b."
   (let ((res (make-array n :initial-element 0.0 :adjustable t
                            :fill-pointer t :element-type 'float)))
@@ -153,7 +153,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
         do (setf (gethash k res) (psh* acc (funcall valfx o)))
         finally (return res)))
 
-(defun @* (a d &rest rest &aux l) (declare #.*opt*)
+(defun @* (a d &rest rest &aux l) (declare #.*opt*) ; TODO: use @@ for all
   "pick these indices/keys from sequence/hash-table into new vector."
   (labels ((lt (l) (or (nth l a) d))
            (kv (k) (@@ a k d))
@@ -162,7 +162,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
                 (hash-table (map 'vector #'kv rest))
                 (list (map 'vector #'lt rest)))))
 
-(defun strcat (&rest rest) "concatenate all strings in sequences"
+(defun strcat (&rest rest) "concatenate all strings in these sequences"
   (apply #'mkstr
     (mapcar (λ (s) (etypecase s (string s)
                      (list (apply #'concatenate 'string s))
@@ -172,8 +172,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
             rest)))
 
 (defun pref? (s pref &optional d)
-  (declare #.*opt* (string s pref))
-  "s if s starts with pref; or d"
+  (declare #.*opt* (string s pref)) "s if s starts with pref; or d"
   (if (and (<= (length pref) (length s))
            (string= pref s :end2 (length pref)))
        s d))
@@ -224,29 +223,29 @@ match. If b is an expression, a is compared to the evaluated value of b."
 
 (defmacro apply* (fx v) "apply, but for sequences." `(apply #',fx (coerce ,v 'list)))
 
-(defun seq* (v i &optional j) ; TODO: negative indices, tests
+(defun seq (v i &optional j) ; TODO: negative indices, tests
   (declare (vector v) (fixnum i)) "(subseq v ,@rest)"
   (subseq v i j))
 (defun ind* (v &optional (i 0))
   (declare (vector v) (fixnum i)) "get index."
   (aref v i))
 
-(defun head* (s &optional (n 10) &aux (l (length s)))
+(defun head (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "first ±n elements"
   (cond ((zerop n) #()) ((plusp n) (subseq s 0 (min n l)))
                         (t         (subseq s 0 (max 0 (+ l n))))))
 
-(defun tail* (s &optional (n 10) &aux (l (length s)))
+(defun tail (s &optional (n 10) &aux (l (length s)))
   (declare (sequence s) (fixnum n l)) "last ±n elements"
   (cond ((zerop n) #()) ((plusp n) (subseq s (max 0 (- l n)) l))
                         (t         (subseq s (max 0 (+ l n)) l) )))
 
-(defun sel* (v &rest seqs) (declare (vector v))
+(defun sel (v &rest seqs) (declare (vector v))
   "new vector with indices or ranges from v.
-ranges are lists that behave like arguments to seq*."
+ranges are lists that behave like arguments to seq."
   (apply #'concatenate 'vector
     (loop for s in seqs collect
-      (etypecase s (list (apply #'seq* v s)) (fixnum `(,(ind* v s)))))))
+      (etypecase s (list (apply #'seq v s)) (fixnum `(,(ind* v s)))))))
 
 (defun cat$ (&rest rest &aux (res (make-hash-table :test #'equal)))
   "add all keys from all hash tables in rest. left to right."

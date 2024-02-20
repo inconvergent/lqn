@@ -87,7 +87,7 @@ You can also read CL code from pipe or file:
 
 # or search for defmacro symbol in several source code files:
 ❭ lqn -t '#((?srch (msym? _ defmacro)
-                   (new$ :fn (fn) :hit (head* (itr) 3))))
+                   (new$ :fn (fn) :hit (head (itr) 3))))
           [is?] (flatall* _)' src/*lisp
 ⇒ ((:FN . "src/docs.lisp") (:HIT DEFMACRO PCKGS (PKG)))
   ((:FN . "src/init.lisp") (:HIT DEFMACRO PRETTY-JSON (V)))
@@ -369,10 +369,10 @@ Make or join `kvs`:
 Primarily for `sequences` (`string`, `vector`, `list`):
  - `(new* ..)`: new `vector` with these elements.
  - `(ind* s i)`: get this index from `sequence`.
- - `(sel* ..)`: get new `vector` with these `ind*s` or `seq*s` from `sequence`.
- - `(seq* v i [j])`: get range `i ..` or `i .. (1- j)` from `sequence`.
- - `(head* s [n=10])`: first `n` items of `sequence`.
- - `(tail* s [n=10])`: last `n` items of `sequence`.
+ - `(sel ..)`: get new `vector` with these `ind*s` or `seqs` from `sequence`.
+ - `(seq v i [j])`: get range `i ..` or `i .. (1- j)` from `sequence`.
+ - `(head s [n=10])`: first `n` items of `sequence`.
+ - `(tail s [n=10])`: last `n` items of `sequence`.
  - `(cat* s ..)`: concatenate these `sequences` to a `vector`.
  - `(flatn* s [n=1] [str=nil])`: flatten `sequence` `n` times into a `vector`.
    if `str=t` strings are flattened into individual chars as well.

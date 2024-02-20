@@ -51,7 +51,7 @@
 ;;      "things": [ "Star", "Ball" ] } ]
 
  (print (lqn:qry #(0 1) (?rec (< (@ -1) 10000)
-                              (cat* _ (apply* + (tail* _ 2))))
+                              (cat* _ (apply* + (tail _ 2))))
                        #((str! "- " (cnt) ": " _))
                         (join _ #\Newline)))
 ;; - 0: 0

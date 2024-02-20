@@ -91,16 +91,15 @@
   (remove-duplicates s :test fx))
 
 ; TODO: extend to check kvs?
-; TODO: actually test this
 (defun all? (v &optional empty) "check if all; or empty."
   (declare (sequence v))
-  (if (not (empty? v)) (loop for k across (vec!? v) always (is? v)) empty))
+  (if (empty? v) empty (loop for k across (vec!? v) always (is? k))))
 (defun none? (v &optional (empty t)) "check if none; or empty."
   (declare (sequence v))
-  (if (not (empty? v)) (loop for k across (vec!? v) never (is? k)) empty))
+  (if (empty? v) empty (loop for k across (vec!? v) never (is? k))))
 (defun some? (v &optional empty) "check if some; or empty."
   (declare (sequence v))
-  (if (not (empty? v)) (not (none? v)) empty))
+  (if (empty? v) empty (not (none? v))))
 
 (defmacro smth? (v &body body) ; TODO: recursive strip with ext function
   (declare (symbol v)) "do body if v is not nil, empty sequence, or empty hash-table"

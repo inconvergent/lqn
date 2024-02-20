@@ -27,14 +27,14 @@ a='"- 0:0x- 1:1x- 2:1x- 3:2x- 4:3x- 5:5x- 6:8x- 7:13x- 8:21x- 9:34x- 10:55x- 11:
 r=`echo '#(0 1)' |\
     sbcl --script ./lqn-sh.lisp -l \
     '(?rec (< (@ -1) 10000)
-           (cat* _ (apply* + (tail* _ 2))))
+           (cat* _ (apply* + (tail _ 2))))
            #((str! "- " (cnt) ":" _)) (join _ "x")'`; check;
 
 a='[0,1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181,6765,10946]'
 r=`echo '#(0 1)' |\
     sbcl --script ./lqn-sh.lisp -jm \
     '(?rec (< (@ -1) 10000)
-           (cat* _ (apply* + (tail* _ 2))))'`; check;
+           (cat* _ (apply* + (tail _ 2))))'`; check;
 
 ###### TQN #####################################################################
 echo '## running TQN terminal tests:'
