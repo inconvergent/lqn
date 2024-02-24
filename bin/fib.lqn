@@ -1,9 +1,9 @@
 #!/bin/bash
 
 echo '(0 1)' | auxin ~/x/lqn/bin/lqn-sh.lisp -t "
-  (?rec (< (cnt) (1- 60))
-        (cat* _ (apply* + (tail* _ 2))))
-  #( (strcat #1=(fmt  \"~2,'0d ~30,'0d.\" (cnt) _)
-             (seq* (reverse #1#) 1)) )
+  (?rec (< (cnt) (1- 10))
+        (cat* _ (apply* + (tail _ 2))))
+  #( (strcat #1=(fmt  \"~2,'0d ~5,'0d.\" (cnt) _)
+             (seq (reverse #1#) 1)) )
   (join _ #\Newline)"
 

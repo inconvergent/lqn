@@ -131,8 +131,10 @@
   (labels ((rec (x) (funcall rec conf x)))
     (case mode
       (:? `(when ,(gk conf :dat) (setf (gethash ,(ct/path/key k) ,lft) ,(rec v))))
+      ; NOTE: remember that there was a bug here for _ -@ with %@
       (:% (awg (v*) `(let ((,v* ,(rec v)))
-                       (smth? ,v* (setf (gethash ,(ct/path/key k) ,lft) ,v*)))))
+                       (if (is? ,v*) (setf (gethash ,(ct/path/key k) ,lft) ,v*)
+                                     (remhash ,(ct/path/key k) ,lft)))))
       (:+ `(setf (gethash ,(ct/path/key k) ,lft) ,(rec v)))
       (:- `(remhash ,k ,lft))
       (otherwise (error "$: expected :?, :%, :+, :- mode, got: ~a." mode)))))
