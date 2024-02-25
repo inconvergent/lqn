@@ -7,7 +7,7 @@
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr
                  :fn :fi :ctx  :par :itr :compct :?? :@@ :@*
-                 :some? :all? :none? :smth? :size?
+                 :read? :some? :all? :none? :smth? :size?
                  :new* :new$ :cat* :cat$
                  :ind* :sel :seq :apply* :grp :uniq
                  :flatn* :flatall* :flatn$
@@ -15,7 +15,7 @@
                  :pref? :suf? :sub? :subx? :ipref? :isuf? :isub? :isubx?
                  :lpad :rpad :nstr :sup :sdwn :mkstr :repl :strcat :splt :join
                  :msym? :is? :kv? kw? :sym? :ssym? :sym! :trim
-                 :num!? :num? :flt!? :flt? :int!? :int?
+                 :num!? :num? :flt! :flt!? :flt? :int! :int!? :int?
                  :lst? :lst! :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?
                  :path? :subdir :subfiles :ls :dir? :file? :cwd :now :cmd :cd))
 (defun cmd-args ()

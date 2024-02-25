@@ -44,34 +44,50 @@
        (> (length (symbol-name d)) (length m))))
 
 ; IS TYPE?
-(defun flt?  (f &optional d) "f if float; or d"       (if (floatp f) f d))
-(defun int?  (i &optional d) "i if int; or d"         (if (integerp i) i d))
-(defun kv?   (k &optional d) "k if kv; or d"          (if (hash-table-p k) k d))
-(defun kw?   (k &optional d) "k if kw; or d"          (if (keywordp k) k d))
-(defun sym?  (s &optional d) "s if sym; or d"         (if (symbolp s) s d))
+(defun flt?  (f &optional d) "f if float; or d"
+  (typecase f (double-float (coerce f 'single-float)) (single-float f) (otherwise d)))
+(defun int?  (i &optional d) "i if int; or d"
+  (typecase i (integer (coerce i 'fixnum)) (fixnum i) (otherwise d)))
+
+(defun kv? (k &optional d) "k if kv; or d"            (typecase k (hash-table k) (otherwise d)))
+(defun kw? (k &optional d) "k if kw; or d"            (typecase k (keyword k) (otherwise d)))
+(defun sym? (s &optional d) "s if sym; or d"          (typecase s (symbol s) (otherwise d)))
 (defun ssym? (s &optional d) "s if sym, not kw; or d" (if (and (sym? s) (not (kw? s))) s d))
-(defun num?  (n &optional d) "n if number; or d"      (if (numberp n) n d))
-(defun str?  (s &optional d) "s if string; or d"      (if (stringp s) s d))
-(defun vec?  (v &optional d) "v if vector; or d"      (if (vectorp v) v d))
-(defun lst?  (v &optional d) "v if list; or d"        (if (listp v) d d))
-(defun seq?  (s &optional d) "s if sequence; or d"    (or (lst? s) (str? s) (vec? s) d))
+
+(defun num? (n &optional d) "n if number; or d"   (typecase n (number n) (otherwise d)))
+(defun str? (s &optional d) "s if string; or d"   (typecase s (string s) (otherwise d)))
+(defun vec? (v &optional d) "v if vector; or d"   (typecase v (vector v) (otherwise d)))
+(defun lst? (l &optional d) "l if list; or d"     (typecase l (list l) (otherwise d)))
+(defun seq? (s &optional d) "s if sequence; or d" (typecase s (sequence s) (otherwise d)))
 
 ; PARSE AS TYPE OR DEFAULT
-(defun int!? (i &optional d) "i as int if it can be parsed; or d"
-  (handler-case (or (int? i) (int? (read-from-string i nil nil)) d) (error () d)))
-(defun flt!? (f &optional d) "f as float if it can be parsed; or d"
-  (handler-case (or (flt? f) (flt? (read-from-string f nil nil)) d) (error () d)))
-(defun num!? (n &optional d) "n as number if it can be parsed; or d"
-  (handler-case (or (num? n) (num? (read-from-string n nil nil)) d) (error () d)))
-(defun str!? (n &optional d) "s as str if it can be parsed; or d"
-  (handler-case (or (str? n) (str? (read-from-string n nil nil)) d) (error () d)))
-(defun vec!? (n &optional d) "v as vector if it can be parsed; or d"
-  (handler-case (or (vec? n) (vec? (read-from-string n nil nil)) d) (error () d)))
-(defun seq!? (n &optional d) "s as seq if it can be parsed; or d"
-  (handler-case (or (seq? n) (seq? (read-from-string n nil nil)) d) (error () d)))
-(defun lst!? (n &optional d) "v as list if it can be a list; or d"
-  (labels ((cnv (a) (if (vec? a) (coerce a 'list) nil)))
-    (handler-case (or (cnv n) (cnv (read-from-string n nil nil)) d) (error () d))))
+(defun read? (s &optional d &rest rest) "read from string; or d"
+  (typecase s (string (apply #'read-from-string s rest)) (otherwise d)))
+
+; this is messy, but it works (i think)
+(defun int!? (i &optional d strict) "i as int if it is or can be parsed or coerced as int; or d"
+  (handler-case (or (int? i) (int? (read? i))
+                    (and (not strict) (floor (or (flt? i) (flt? (read? i)) d)))
+                    d)
+                (error () d)))
+(defun flt!? (f &optional d strict) "f as flt if it is or can be parsed or coerced as flt; or d"
+  (handler-case (or (flt? f) (flt? (read? f))
+                    (and (not strict) (coerce (or (int? f) (int? (read? f)) d) 'single-float))
+                    d)
+                (error () d)))
+
+(defun num!? (n &optional d) "n as number if it is or can be parsed as num; or d"
+  (handler-case (or (num? n) (num? (read? n)) d) (error () d)))
+
+(defun str!? (s &optional d) "s as str if it or can be parsed as str; or d"
+  (handler-case (or (str? (read? s)) (str? s)  d) (error () d)))
+; (defun vec!? (v &optional d) "v as vector if it is vec; or d"
+;   (handler-case (or (vec? v) (vec? (read? v)) d) (error () d)))
+; (defun seq!? (s &optional d) "s as seq if it can be parsed; or d"
+;   (handler-case (or (seq? s) (seq? (read? s)) d) (error () d)))
+(defun lst!? (l &optional d) "v as list if it can be a list; or d"
+  (labels ((cnv (a) (when (vec? a) (coerce a 'list))))
+    (handler-case (or (cnv l) (cnv (read? l)) d) (error () d))))
 
 ; COERCE TO TYPE
 (defun sym! (&rest rest) "stringify, make symbol" (apply #'symb rest))
@@ -80,25 +96,28 @@
   (apply #'mkstr (loop for s in rest collect (typecase s (string s) (symbol (string-downcase s)) (t (mkstr s))))))
 (defun vec! (v &optional (d `#(,v))) "coerce v to vector. if v is not a vector, list, string it returns d"
   (etypecase v (vector v) (list (coerce v 'vector)) (t d)))
-(defun lst! (v &optional (d `(,v))) "coerce v to list if v; else d"
-  (etypecase v (list v) (vector (coerce v 'list)) (t d)))
+
+(defun int! (i) "i as int; or fail." ; remember to use strict
+  (or (int!? i nil t) (error "unable to force ~a to int" i)))
+(defun flt! (f)  "f as int; or fail."
+  (or (flt!? f nil t) (error "unable to force ~a to flt" f)))
+
+(defun lst! (v &optional d) "coerce v to list if v; else d"
+  (etypecase v (list v) (string d) (vector (coerce v 'list)) (t d)))
 
 (defun size? (l &optional d) "length of sequence/number of keys in kv."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
 (defun empty? (l &optional d &aux (n (size? l))) (if (int? n) (< n 1) d))
-(defun uniq (s &optional (fx #'equal))
-  (declare (function fx)) "remove duplicates from sequence"
+
+(defun uniq (s &optional (fx #'equal)) (declare (function fx)) "remove duplicates from sequence"
   (remove-duplicates s :test fx))
 
 ; TODO: extend to check kvs?
-(defun all? (v &optional empty) "check if all; or empty."
-  (declare (sequence v))
-  (if (empty? v) empty (loop for k across (vec!? v) always (is? k))))
-(defun none? (v &optional (empty t)) "check if none; or empty."
-  (declare (sequence v))
-  (if (empty? v) empty (loop for k across (vec!? v) never (is? k))))
-(defun some? (v &optional empty) "check if some; or empty."
-  (declare (sequence v))
+(defun all? (v &optional empty) (declare (sequence v)) "check if all; or empty."
+  (if (empty? v) empty (loop for k across (vec? v) always (is? k))))
+(defun none? (v &optional (empty t)) (declare (sequence v)) "check if none; or empty."
+  (if (empty? v) empty (loop for k across (vec? v) never (is? k))))
+(defun some? (v &optional empty) (declare (sequence v)) "check if some; or empty."
   (if (empty? v) empty (not (none? v))))
 
 (defmacro smth? (v &body body) ; TODO: recursive strip with ext function

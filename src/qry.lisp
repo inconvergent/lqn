@@ -21,14 +21,18 @@
                `(loop with ,ires = (mav)
                   with ,par = (vec! ,(gk conf :dat))
                   for ,itr across ,par for ,i from 0
-                  do (∈ (,par ,i ,itr)
+                  do (∈ (,par ,i ,itr) ; TODO: rename i
                        (vex ,ires ,(funcall rec (dat/new conf itr) expr)))
                   finally (return ,ires))))
       (let ((cd (car d)))
         (typecase cd
-                  (boolean cd) ; TODO: do this more places or not at all?
-                  (cons (do-map cd)) (vector (do-map cd))
+                  ; (boolean cd) ; TODO: do this more places or not at all?
+                  (cons (do-map cd))
+                  (vector (do-map cd))
           (otherwise (error "*map: expected vector, cons. got: ~a." d)))))))
+
+; what does the || preproc do for relevant cases? eg nil/t
+; move logic from ||/preproc to map?
 
 (defun compile/*fld (rec conf d) ; (*fld ...)
   (awg (i res itr par)           ; 0 + ; 0 acc (+ acc _)

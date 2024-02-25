@@ -380,6 +380,20 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:FLT!
+
+```
+ ; LQN:FLT!
+ ;   [symbol]
+ ; 
+ ; FLT! names a compiled function:
+ ;   Lambda-list: (F)
+ ;   Derived type: (FUNCTION (T) (VALUES (NOT NULL) &OPTIONAL))
+ ;   Documentation:
+ ;     f as int; or fail.
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:FLT!?
 
 ```
@@ -387,10 +401,10 @@
  ;   [symbol]
  ; 
  ; FLT!? names a compiled function:
- ;   Lambda-list: (F &OPTIONAL D)
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (F &OPTIONAL D STRICT)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     f as float if it can be parsed; or d
+ ;     f as flt if it is or can be parsed or coerced as flt; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -469,6 +483,20 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:INT!
+
+```
+ ; LQN:INT!
+ ;   [symbol]
+ ; 
+ ; INT! names a compiled function:
+ ;   Lambda-list: (I)
+ ;   Derived type: (FUNCTION (T) (VALUES (NOT NULL) &OPTIONAL))
+ ;   Documentation:
+ ;     i as int; or fail.
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:INT!?
 
 ```
@@ -476,10 +504,10 @@
  ;   [symbol]
  ; 
  ; INT!? names a compiled function:
- ;   Lambda-list: (I &OPTIONAL D)
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (I &OPTIONAL D STRICT)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     i as int if it can be parsed; or d
+ ;     i as int if it is or can be parsed or coerced as int; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -786,7 +814,7 @@
  ;   [symbol]
  ; 
  ; LST! names a compiled function:
- ;   Lambda-list: (V &OPTIONAL (D `(,V)))
+ ;   Lambda-list: (V &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     coerce v to list if v; else d
@@ -800,7 +828,7 @@
  ;   [symbol]
  ; 
  ; LST!? names a compiled function:
- ;   Lambda-list: (N &OPTIONAL D)
+ ;   Lambda-list: (L &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     v as list if it can be a list; or d
@@ -814,10 +842,10 @@
  ;   [symbol]
  ; 
  ; LST? names a compiled function:
- ;   Lambda-list: (V &OPTIONAL D)
+ ;   Lambda-list: (L &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     v if list; or d
+ ;     l if list; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -928,7 +956,7 @@
  ;   Lambda-list: (N &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     n as number if it can be parsed; or d
+ ;     n as number if it is or can be parsed as num; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -1092,6 +1120,21 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:READ?
+
+```
+ ; LQN:READ?
+ ;   [symbol]
+ ; 
+ ; READ? names a compiled function:
+ ;   Lambda-list: (S &OPTIONAL D &REST REST)
+ ;   Derived type: (FUNCTION (T &REST T)
+ ;                  (VALUES T &OPTIONAL (UNSIGNED-BYTE 44)))
+ ;   Documentation:
+ ;     read from string; or d
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+
 #### LQN:REPL
 
 ```
@@ -1172,15 +1215,10 @@
 #### LQN:SEQ!?
 
 ```
+:missing:todo:
+
  ; LQN:SEQ!?
  ;   [symbol]
- ; 
- ; SEQ!? names a compiled function:
- ;   Lambda-list: (N &OPTIONAL D)
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     s as seq if it can be parsed; or d
- ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:SEQ?
@@ -1287,10 +1325,10 @@
  ;   [symbol]
  ; 
  ; STR!? names a compiled function:
- ;   Lambda-list: (N &OPTIONAL D)
+ ;   Lambda-list: (S &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     s as str if it can be parsed; or d
+ ;     s as str if it or can be parsed as str; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -1574,15 +1612,10 @@
 #### LQN:VEC!?
 
 ```
+:missing:todo:
+
  ; LQN:VEC!?
  ;   [symbol]
- ; 
- ; VEC!? names a compiled function:
- ;   Lambda-list: (N &OPTIONAL D)
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     v as vector if it can be parsed; or d
- ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
 #### LQN:VEC?

@@ -5,6 +5,8 @@
 (subtest "lqn vector"
   (is (lqn:empty? (lqn:new* 1 2 3)) nil)
   (is (lqn:empty? (lqn:new*)) t)
+  (is (lqn:empty? (lqn:new$)) t)
+  (is (lqn:empty? (lqn:new$) :empty) t)
   (is (lqn:empty? 1 :empty) :empty)
   (is (lqn:some? (lqn:new*) :empty) :empty)
   (is (lqn:some? (lqn:new* nil nil) :empty) nil)
@@ -47,6 +49,7 @@
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (@ :a/b :miss)) 3)
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (@ "a/b")) 3)
 
+  (is (lqn:qry (lqn:new* 1 2 3 4 5) (@)) 1)
   (is (lqn:qry (lqn:new* 1 2 3 4 5) (@ -1)) 5)
   (is (lqn:qry (lqn:new* 1 2 3 4 5) (@ -5)) 1)
   (is (lqn:qry (lqn:new* 1 2 3 4 5) (@ -100)) nil)
