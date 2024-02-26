@@ -23,9 +23,9 @@
 (defun dat/new (conf dat) `((:dat . ,dat) ,@conf))
 (defun strip-all (d) (declare (list d)) (if (car- dat? d) (cdr d) d))
 
-; CONTEXTS
+; CONTEXTS ; envs
 
-(defmacro //fxs/qry ((dat fn fi) &body body)
+(defmacro q∈ ((dat fn fi) &body body)
   (declare (symbol dat fn fi))
   (awg (nope meta)
     `(let ((,meta (make-hash-table :test #'eq)))
@@ -41,17 +41,18 @@
                 (wrn (&optional a) (warn "qry wrn: ~a." a))
                 (par () ,dat)
                 (pnum (&optional d) (size? (par) d))
-                (itr () (wrn "no (itr) in qry scope."))
-                (inum () (wrn "no (inum) in qry scope.")))
+                (itr () (wrn "no (itr) in this scope."))
+                (key () (wrn "no (key) in this scope."))
+                (inum () (wrn "no (inum) in this scope.")))
          ,@body)))))
 
-(defmacro ∈ ((par &optional i itr) &body body)
-  (declare (symbol par itr))
+(defmacro ∈ ((&key par cnt itr key) &body body)
+  (declare (symbol par cnt itr))
   `(labels (,@(when par `((par () ,par) (pnum () (size? ,par))))
             ,@(when itr `((itr () ,itr) (inum () (size? ,itr))))
-            ,@(when i `((cnt (&optional (k 0)) (+ ,i k)))))
+            ,@(when cnt `((cnt (&optional (k 0)) (+ ,cnt k))))
+            ,@(when key `((key () ,key))))
      ,@body))
-
 
 ; PRE PROCESSORS
 
@@ -90,16 +91,17 @@
 (defun pre/|| (qq) (unless qq (warn "||: missing args.")) ; pipe
   (loop for q in (pre/scan-clauses qq '#:pipe) collect
     (if (dat? q) (kw q)
-      (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
-                  (string `(** ,q))           (vector `(*map ,@(coerce q 'list)))
+      (typecase q (cons q) (boolean q)
+                  (keyword `(** ,q)) (string `(** ,q))
+                  (symbol `(?map ,q)) (vector `(?map ,@(coerce q 'list)))
                   (otherwise q)))))
 
-(defun pre/*map (q &optional (mm :+)) (unless q (warn "*map: missing args."))
+(defun pre/?map (q &optional (mm :+)) (unless q (warn "?map: missing args."))
   (labels ((unpack- (o) ; NOTE: can we use modes here?
              (dsb (m sk) (unpack-mode o mm)
-               (unless (eq m :+) (error "*map: expected mode :+, got: ~a." m))
+               (unless (eq m :+) (error "?map: expected mode :+, got: ~a." m))
                (etypecase sk (sequence sk) (keyword sk) (symbol `(,sk :_))))))
-    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:*map)))
+    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:?map)))
            (res (mapcar #'unpack- q*))
            (allres (if (= (length q) (length q*)) res (cons `(lit :_) res))))
       (if (< (length allres) 2) allres `((|| ,@allres))))))

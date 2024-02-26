@@ -54,7 +54,7 @@ r=`echo '1
 
 a='109'
 r=`echo '1 x 1 x 7 x 100' |\
-    sbcl --script ./tqn-sh.lisp '(splt _ :x) int!? (*fld 0 +)'`; check;
+    sbcl --script ./tqn-sh.lisp '(splt _ :x) int!? (?fld 0 +)'`; check;
 
 a='[{"v":1},{"v":1},{"v":7},{"v":100}]'
 r=`echo '1 x 1 x 7 x 100' |\

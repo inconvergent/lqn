@@ -1,6 +1,6 @@
 (in-package #:lqn-tests)
 
-(plan 5)
+(plan 6)
 
 (subtest "lqn qry preproc"
   (is (lqn::pre/$$ '(:ccc :ddd "IIUJ" "%@UU" :?@aa :?@bb ("cc" (progn _)) (:+ "ABC" (print _)) (:% "ABC" _) (:kkk "ABC" _)))
@@ -11,7 +11,14 @@
        (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "UU"))) (:? (WHEN (AA :_) :_)) (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
        (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "ABC"))))))
 
-(subtest "modifiers"
+(subtest "lqn qry identities"
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* ($* _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*$ _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (** _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (?map _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* ($$ _)))))
+
+(subtest "top-level modifiers"
   (is (lqn:qry #("abc" "def") [(sub? _ :s@a)]) #("abc") :test #'equalp)
   (is (lqn:qry "abc x def x hij" nil) nil)
   (is (lqn:qry "aa" s@_) "aa")
@@ -20,15 +27,31 @@
   (is (lqn:qry "a" _@sup) "A")
   (is (lqn:qry "a" (progn _@sup)) "A")
   (is (lqn:qry 1 (progn (s@progn _))) "1")
-  (is (lqn:qry "abc x def x hij" ∅) nil)
-  )
+  (is (lqn:qry "abc x def x hij" ∅) nil))
 
-(subtest "lqn qry identities"
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* ($* _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*$ _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (** _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*map _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* ($$ _)))))
+(subtest "env fxns"
+  (is (lqn:ldnout
+        (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 2}, {\"a\": 11, \"b\": 12}]")
+                 #{:a (:b _) (:cnt (cnt)) (:key (key)) (:par (par))}))
+      #(((:A . 1) (:B . 2) (:CNT . 0) (:KEY . "key")
+         (:PAR . #(((:A . 1) (:B . 2)) ((:A . 11) (:B . 12)))))
+        ((:A . 11) (:B . 12) (:CNT . 1) (:KEY . "key")
+         (:PAR . #(((:A . 1) (:B . 2)) ((:A . 11) (:B . 12)))))) :test #'equalp)
+  (is (lqn:ldnout
+        (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 2}, {\"a\": 11, \"b\": 12}]")
+                 #[:a (:b _) (:cnt (cnt)) (:key (key)) (:par (par))]))
+        #(1 2 0 "key"
+            #(((:A . 1) (:B . 2)) ((:A . 11) (:B . 12))) 11 12 1 "key"
+            #(((:A . 1) (:B . 2)) ((:A . 11) (:B . 12)))) :test #'equalp)
+  (is (lqn:ldnout
+        (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 2}")
+                 {:a (:b _) (:cnt (cnt)) (:key (key)) (:par (par))}))
+       '((:A . 1) (:B . 2) (:CNT . 0) (:KEY . "key")
+         (:PAR (:A . 1) (:B . 2))) :test #'equalp)
+  (is (lqn:ldnout
+         (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23}, {\"a\": 11, \"b\": 123}, {\"a\": 11, \"b\": 123} ]")
+                     (?grp (@ :a) (str! (key) (@ :b)))))
+      '((1 . #("123")) (11 . #("11123" "11123"))) :test #'equalp))
 
 (subtest "lqn qry 1"
   (is (lqn:ldnout (lqn:jsnqryf *test-data-fn* (|| #{:_id (:things #[:name :?@extra])})))
@@ -88,7 +111,7 @@
           "[0,10,11,12,31,32]")
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
                           (|| #(#[:things]) (flatn* _ 2) #[:id]
-                              (*fld (list) acc (cons (1+ _) acc)) (reverse _))))
+                              (?fld (list) acc (cons (1+ _) acc)) (reverse _))))
           "[1,11,12,13,32,33]"))
 
 (unless (finalize) (error "error in test-lqn"))

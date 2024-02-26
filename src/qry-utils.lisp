@@ -110,7 +110,9 @@ match. If b is an expression, a is compared to the evaluated value of b."
 
 (defun @@ (a path &optional d) (declare #.*opt*)
   "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
-  (labels ((gkv (a* k) (typecase a* (hash-table (gethash k a*)) (otherwise nil)))
+  (labels ((err (p) (error "@@: unexpected path: ~a" p))
+           (wrn (p) (warn "@@: unexpected path: ~a" p))
+           (gkv (a* k) (typecase a* (hash-table (gethash k a*)) (otherwise nil)))
            (ind (a* k) (if (< k 0) (+ (length a*) k) k))
            (gv (a* k) (when (vec? a*)
                         (let ((kk (ind a* k)))
@@ -130,8 +132,10 @@ match. If b is an expression, a is compared to the evaluated value of b."
                              (t (gkv a* k)))))
                (if (is? v) (rec v kk) (return-from rec d)))))
     (compct
-      (rec a (etypecase path (fixnum (list path)) (character (list path)) (list path)
-                        (string (pre path)) (keyword (pre (str! path))))))))
+      (rec a (typecase path (boolean (wrn path))
+               (fixnum (list path)) (character (list path)) (list path)
+               (string (pre path)) (keyword (pre (str! path)))
+               (otherwise (err path)))))))
 (defun compct (o) (declare #.*opt*)
   "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
   (labels

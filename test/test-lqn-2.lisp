@@ -86,23 +86,28 @@
                (?txpr (msym? _ (progn 'xxx)) :hit))
       #((A BBBXXX :HIT) (A B C) (A B (C :HIT))) :test #'equalp)
 
+  (is (lqn:ldnout (lqn:qry (lqn:new$ :a 1 :b 2 :c 3) #(1+)))
+       '((:A . 2) (:B . 3) (:C . 4)) :test #'equalp)
+  (is (lqn:ldnout (lqn:qry (lqn:new$ :a 1 :b 2 :c 3) #((str! (key) (cnt) _))))
+       '((:A . "a01") (:B . "b12") (:C . "c23")) :test #'equalp)
+
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) (*map (?xpr :a :-@b sup sdwn)))
+        (splt _ :x) (?map (?xpr :a :-@b sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) (*map _ (?xpr :a :-@b sup sdwn)))
+        (splt _ :x) (?map _ (?xpr :a :-@b sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) (*map (?xpr "a" "-@b" sup sdwn)))
+        (splt _ :x) (?map (?xpr "a" "-@b" sup sdwn)))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
         (splt _ :x) (?txpr :a :-@b sup))
       #("AAAYYY" "abc" "def" "uuu" "sss" "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) (*map (?xpr :a :-@b sup nil)))
+        (splt _ :x) (?map (?xpr :a :-@b sup nil)))
       #("AAAYYY" NIL NIL NIL NIL "AUIUU" "AAAAA") :test #'equalp)
   (is (lqn:qry "aaayyy x abc x def x uuu x sss x auiuu x aaaaa"
-        (splt _ :x) (*map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))
+        (splt _ :x) (?map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))
       #("AAAYYYaaayyy" "abc" "def" "uuu" "sss" "AUIUUauiuu" "AAAAAaaaaa") :test #'equalp)
 
   (is (lqn:qry "a b c x def x 27" (splt _ :x) :-@de) #("a b c" "27") :test #'equalp)
@@ -151,13 +156,13 @@
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| (@@ _ "*/things/*/extra"))))
            "[[\"extra99\"],[\"extra1\",\"extra2\"]]")
 
-  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 +)) 109)
-  (is (lqn:ldnout (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*map (new$ :v _ :n (cnt)))))
+  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 0 +)) 109)
+  (is (lqn:ldnout (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?map (new$ :v _ :n (cnt)))))
       #(((:V . 1) (:N . 0)) ((:V . 1) (:N . 1)) ((:V . 7) (:N . 2)) ((:V . 100) (:N . 3))) :test #'equalp)
-  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 (+ _))) 109)
-  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 1000 +)) 1109)
-  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 0 acc (- acc _))) -109)
-  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (*fld 3 acc (- _ acc))) 96)
+  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 0 (+ _))) 109)
+  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 1000 +)) 1109)
+  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 0 acc (- acc _))) -109)
+  (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 3 acc (- _ acc))) 96)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ 7) (tail _ 3)) #(5 6 7) :test #'equalp)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ -6) (tail _ -6)) #(1 2 3 4) :test #'equalp)
   (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x)

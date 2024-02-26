@@ -62,7 +62,7 @@ will output to JSON instead. `-t` does the oposite for `jqn`.
 ```bash
 # split string and sum as integers:
 ❭ echo '1 x 1 x 7 x 100'\
-  | tqn '(splt _ :x) int!? (*fld 0 +)'
+  | tqn '(splt _ :x) int!? (?fld 0 +)'
 ⇒ 109
 
 # split string, search and replace:
@@ -137,9 +137,9 @@ See [bin/ex.lisp](bin/ex.lisp) for more examples.
 
 ## Object Representation
 
-Internally JSON arrays are represented as `vector`.  and JSON objects are
+Internally JSON arrays are represented as `vector`. and JSON objects are
 represented as `hash-table`; `kv` (key/value) is used in the docs for short.
-In `tqn` lines of text are `vectors` of `strings`.  In `lqn` Lisp files are
+In `tqn` lines of text are `vectors` of `strings`. In `lqn` Lisp files are
 read as a `vector` of lisp data.
 
 ## Operators
@@ -148,7 +148,7 @@ The following operators have special behaviour. You can also write generic CL
 code, anywhere you can use an operator. Including the functions further down.
 Note that you can use `_` to refer to the current value.
 
-In the following sections `[d]` represents an optional default value.  E.g. if
+In the following sections `[d]` represents an optional default value. E.g. if
 key/index is missing, or if a functon returns `nil`. `k` is an initial counter
 value. Whereas `..` menans that there can be arbitrary arguments, `Selectors`
 or `exprs`; depending on the context. `expr` denotes any expression or
@@ -166,25 +166,25 @@ surrounds all terminal queries by default.
 
 For convenience, particularly in the terminal, pipe has the following default
 translations:
-  - `fx`: to `(*map (fx _))`: map `fx` across all items.
+  - `fx`: to `(?map (fx _))`: map `fx` across all items.
   - `:word`: to `[(isub? _ "word")]` to filter by `"word"`.
   - `"Word"`: to `[(sub? _ "Word")]` to filter all items by this `string` with
     case.
   - `(..)`: to itself. That is, expressions are not translated.
 
-### Map Operator - `#()`/`*map`
+### Map Operator - `#()`/`?map`
 Map operations over `vector`:
-  - `#(fx)` or `(*map fx)`: map `(fx _)` across all items.
-  - `#(expr ..)` or `(*map expr ..)`: evaluate these expressions
+  - `#(fx)` or `(?map fx)`: map `(fx _)` across all items.
+  - `#(expr ..)` or `(?map expr ..)`: evaluate these expressions
     sequentially on all items in `sequence`.
 
-### Fold Operator - `*fld`
+### Fold Operator - `?fld`
 Reduce `vector`:
-  - `(*fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
+  - `(?fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
     `acc` is inserted as the first argument to `fx`.
-  - `(*fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. The accumulator is
+  - `(?fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. The accumulator is
     inserted as the first argument to `fx`.
-  - `(*fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. Use this
+  - `(?fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. Use this
     if you need to name the accumulator explicity.
 
 ### Filter Operator - `*?`
