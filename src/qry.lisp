@@ -27,8 +27,7 @@
                                               ,(funcall rec (dat/new conf itr) expr)))
                                   finally (return ,kres)))
              (do-vec (expr) `(loop with ,ires = (mav) with ,par = (vec! ,par)
-                                   for ,i from 0
-                                   for ,itr across ,par
+                                   for ,itr across ,par for ,i from 0
                                    do (∈ (:par ,par :cnt ,i :itr ,itr :key ,i)
                                          (vex ,ires ,(funcall rec (dat/new conf itr) expr)))
                                    finally (return ,ires)))
@@ -42,23 +41,35 @@
           (otherwise (error "?map: expected vector or cons. got: ~a." cd)))))))
 
 (defun compile/?fld (rec conf d) ; (?fld ...)
-  (awg (i res itr par)           ; 0 + ; 0 acc (+ acc _)
-    (labels ((do-fld (init acc itr expr)
+  (awg (k i res itr par)         ; 0 + ; 0 acc (+ acc _)
+    (labels ((err () `(error "?fld/rt: bad type. expected hash-table or vector:~%got: ~a." ,par))
+             (do-ht (init acc itr expr)
+               `(loop for ,i from 0
+                      for ,itr being the hash-values of ,par using (hash-key ,k)
+                      do (∈ (:par ,par :cnt ,i :key ,k :itr ,itr)
+                            (setf ,acc ,(funcall rec (dat/new conf itr) expr)))))
+             (do-vec (init acc itr expr)
+               `(loop with ,par = (vec! ,par) ; TODO: this is redundant, and wont work for lists
+                      for ,itr across ,par for ,i from 0
+                      do (∈ (:par ,par :cnt ,i :key ,i :itr ,itr)
+                            (setf ,acc ,(funcall rec (dat/new conf itr) expr)))))
+             (do-fld (init acc itr expr)
                (unless (and (symbolp acc) (symbolp itr))
                        (error "?fld: expected symbols, got: ~a/~a." acc itr))
                (unless (consp expr) (error "?fld: expected cons or got: ~a." expr))
-               `(loop with ,acc = ,init
-                      with ,par = (vec! ,(gk conf :dat))
-                      for ,itr across ,par for ,i from 0
-                      do (∈ (:par ,par :cnt ,i :key ,i :itr ,itr)
-                            (setf ,acc ,(funcall rec (dat/new conf itr) expr)))
-                      finally (return ,acc))))
-      (case (length d) (0 (error "?fld: missing args."))
+               `(let ((,par ,(gk conf :dat))
+                      (,acc ,init))
+                  (typecase ,par (hash-table ,(do-ht init acc itr expr))
+                                 (vector ,(do-vec init acc itr expr))
+                                 (simple-vector ,(do-vec init acc itr expr))
+                                 (otherwise ,(err)))
+                  ,acc)))
+      (case (length d)
         (2 (etypecase (second d)
              (symbol (do-fld (car d) res itr `(,(second d) ,res ,itr)))
              (cons (do-fld (car d) res itr `(,(first (second d)) ,res ,@(cdr (second d)))))))
         (3 (let ((d3 (third d))) (do-fld (car d) (second d) itr d3)))
-        (otherwise (error "?fld: bad args: ~a." d))))))
+        (otherwise (error "?fld: expected 2-3 args. got: ~a." d))))))
 
 (defun compile/$$ (rec conf d) ; {...} ; sel
   (awg (kres par dat)

@@ -72,8 +72,9 @@
 ;    (?fld 0 (list (print _))))))
 
 (print (lqn:ldnout
-         (lqn::qrydb (lqn:jsnloads "[{\"a\": 1, \"b\": 23},
-                                   {\"a\": 11, \"b\": 123},
-                                   {\"a\": 11, \"b\": 123}
-                                   ]")
-                  (?fld 0 (+ (@ :a)) ))))
+         (lqn::qrydb (lqn:jsnloads "{\"a\": 11, \"b\": 123}")
+                     (?fld 0 + ))))
+
+(print (lqn:ldnout
+         (lqn::qrydb (lqn:jsnloads "{\"a\": 11, \"b\": 123}")
+                     (?fld 0 (+ (progn (print (key)) _)) ))))
