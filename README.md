@@ -187,11 +187,6 @@ Reduce `vector`:
   - `(?fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. Use this
     if you need to name the accumulator explicity.
 
-### Filter Operator - `*?`
-Filter and map operations over `vector`:
-  - `(*? test-expr [expr=test])` new `vector` where `expr` has been evaluated
-    for all items where `test-expr` is not `nil`
-
 ### Selector Operators - `{}`/`$$`, `[]`/`**`, `#{}`/`*$`, `#[]`/`$*`, `@`
 Select from on structure into a new data structure. `Selectors` are explained
 below:

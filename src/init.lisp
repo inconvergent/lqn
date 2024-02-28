@@ -2,7 +2,7 @@
 
 (defvar *qmodes* '(:+ :? :- :%))
 (defvar *operators*
-  `(:?map :@ :|| ?rec :*$ :$$ :$* :** :?fld :?* :?xpr :?txpr :?mxpr :?srch :?grp))
+  `(:?map :@ :|| ?rec :*$ :$$ :$* :** :?fld :?xpr :?txpr :?mxpr :?srch :?grp))
 (defvar *opt* '(optimize (speed 3) (safety 1)))
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr

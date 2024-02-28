@@ -165,15 +165,6 @@
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 3 acc (- _ acc))) 96)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ 7) (tail _ 3)) #(5 6 7) :test #'equalp)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ -6) (tail _ -6)) #(1 2 3 4) :test #'equalp)
-  (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x)
-               (*? (isubx? _ "k") (new* _ (trim (itr)))))
-      #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
-  (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x nil)
-               (*? (isubx? _ "k") (new* _ (trim (itr)))))
-      #(#(2 "abk c") #(2 "dkef") #(1 "kkkk1")) :test #'equalp)
-  (is (lqn:qry "abk c x dkef x kkkk1 x uu" (splt _ :x) trim
-               (*? (isubx? _ "k") (new* _ (itr))))
-      #(#(2 "abk c") #(1 "dkef") #(0 "kkkk1")) :test #'equalp)
 
   (is (lqn:qry #(0 1) (?rec (< (@ -1) 10000) (cat* _ (apply* + (tail _ 2))))
                      #((str! "- " (cnt) ": " _)) (join _ " "))

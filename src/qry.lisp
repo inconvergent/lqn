@@ -101,19 +101,6 @@
                  (vex ,ires ($nil ,kvres)))
            finally (return ,ires))))
 
-; TODO: env
-(defun compile/*? (rec conf d &aux (cd (car d)) (sd (second d))) ; (*? test expr) ; filter, map
-  (unless (< 0 (length d) 3) (error "*?: bad args: ~a." d))       ; REWRITE WITH XPR OR **?
-  (awg (i ires itr dat par)
-    `(loop with ,ires of-type vector = (mav)
-       with ,par of-type vector = (vec! ,(gk conf :dat))
-       for ,itr across ,par for ,i from 0
-       for ,dat = ,(funcall rec (dat/new conf itr) (pre/xpr-sel cd itr)) ; HERE
-       if ,dat do (∈ (:par ,par :cnt ,i :itr ,itr)
-                     (vex ,ires ,(if (= (length d) 1) dat
-                                     (funcall rec (dat/new conf dat) (pre/or-all sd)))))
-       finally (return ,ires))))
-
 (defun pre/** (q &optional (mm :?)) (unless q (warn "**: missing args."))
   (labels ((unpack- (o) (dsb (m sk) (unpack-mode o mm) `(,m ,(pre/xpr-sel sk :_)))))
     (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:**)))
@@ -218,7 +205,6 @@
          ((qop? :?map  d) (compile/?map  #'rec conf (pre/?map (cdr d))))
          ((qop? :?xpr  d) (compile/?xpr  #'rec conf (cdr d)))
          ((qop? :@     d) (compile/@     #'rec conf (cdr d)))
-         ((qop? :*?    d) (compile/*?    #'rec conf (cdr d)))
          ((qop? :?fld  d) (compile/?fld  #'rec conf (cdr d)))
          ((qop? :?mxpr d) (compile/?mxpr #'rec conf (cdr d)))
          ((qop? :?txpr d) (compile/?txpr #'rec conf (cdr d)))
