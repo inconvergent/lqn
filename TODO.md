@@ -1,10 +1,18 @@
- - terminal flag to read all input files into the same structure this
-   complicated if we want to conserve filename. there really isn't an intuitive
-   way to do that with the current model?
+- terminal flag to read all input files into the same structure this
+  complicated if we want to conserve filename. there really isn't an intuitive
+  way to do that with the current model?
 
- - document ?rec
+- source generators
 
- - chr? chr! chr!? for characters
+- document ?rec, ?grp, ht in map and fld
 
- - expand ?grp with default behaviours
+- chr? chr! chr!? for characters
+
+- edn input/output (eqn)
+
+- update readme
+
+- modifiers in fld/grp/map
+
+- -@ conditional drop
 

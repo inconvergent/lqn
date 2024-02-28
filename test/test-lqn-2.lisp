@@ -110,6 +110,10 @@
         (splt _ :x) (?map (hld :k _) (?xpr :a :-@b (str! (sup _) (ghv :k)) sdwn)))
       #("AAAYYYaaayyy" "abc" "def" "uuu" "sss" "AUIUUauiuu" "AAAAAaaaaa") :test #'equalp)
 
+  (is (lqn:qry (lqn:jsnloads "[1, 2, 3]") (?map 1+)) #(2 3 4) :test #'equalp)
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 2, \"c\": 3 }") (?map 1+)))
+      '((:A . 2) (:B . 3) (:C . 4)))
+
   (is (lqn:qry "a b c x def x 27" (splt _ :x) :-@de) #("a b c" "27") :test #'equalp)
   (is (lqn:qry "a b c x def x 27" (splt _ :x) "-@de") #("a b c" "27") :test #'equalp)
   (is (lqn:qry "a b c x def x 27" (splt _ :x) [:-@de] ) #("a b c" "27") :test #'equalp)
@@ -163,6 +167,8 @@
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 1000 +)) 1109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 0 acc (- acc _))) -109)
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 3 acc (- _ acc))) 96)
+  (is (lqn:qry (lqn:jsnloads "[1, 2, 3]") (?fld 0 +)) 6)
+  (is (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 2, \"c\": 3 }") (?fld 0 +)) 6)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ 7) (tail _ 3)) #(5 6 7) :test #'equalp)
   (is (lqn:qry #(1 2 3 4 5 6 7 8 9 0) (head _ -6) (tail _ -6)) #(1 2 3 4) :test #'equalp)
 

@@ -51,7 +51,15 @@
   (is (lqn:ldnout
          (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23}, {\"a\": 11, \"b\": 123}, {\"a\": 11, \"b\": 123} ]")
                      (?grp (@ :a) (str! (key) (@ :b)))))
-      '((1 . #("123")) (11 . #("11123" "11123"))) :test #'equalp))
+      '((1 . #("123")) (11 . #("11123" "11123"))) :test #'equalp)
+  (is (lqn:ldnout
+         (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23}, {\"a\": 11, \"b\": 123}, {\"a\": 11, \"b\": 123} ]")
+                     (?grp :a (str! (key) (@ :b)))))
+      '((1 . #("123")) (11 . #("11123" "11123"))) :test #'equalp)
+  (is (lqn:ldnout
+         (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23}, {\"a\": 11, \"b\": 123}, {\"a\": 11, \"b\": 123} ]")
+                     (?grp :a :b)))
+      '((1 . #(23)) (11 . #(123 123))) :test #'equalp))
 
 (subtest "lqn qry 1"
   (is (lqn:ldnout (lqn:jsnqryf *test-data-fn* (|| #{:_id (:things #[:name :?@extra])})))

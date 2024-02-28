@@ -43,12 +43,12 @@
 (defun compile/?fld (rec conf d) ; (?fld ...)
   (awg (k i res itr par)         ; 0 + ; 0 acc (+ acc _)
     (labels ((err () `(error "?fld/rt: bad type. expected hash-table or vector:~%got: ~a." ,par))
-             (do-ht (init acc itr expr)
+             (do-ht (acc itr expr)
                `(loop for ,i from 0
                       for ,itr being the hash-values of ,par using (hash-key ,k)
                       do (∈ (:par ,par :cnt ,i :key ,k :itr ,itr)
                             (setf ,acc ,(funcall rec (dat/new conf itr) expr)))))
-             (do-vec (init acc itr expr)
+             (do-vec (acc itr expr)
                `(loop with ,par = (vec! ,par) ; TODO: this is redundant, and wont work for lists
                       for ,itr across ,par for ,i from 0
                       do (∈ (:par ,par :cnt ,i :key ,i :itr ,itr)
@@ -59,9 +59,9 @@
                (unless (consp expr) (error "?fld: expected cons or got: ~a." expr))
                `(let ((,par ,(gk conf :dat))
                       (,acc ,init))
-                  (typecase ,par (hash-table ,(do-ht init acc itr expr))
-                                 (vector ,(do-vec init acc itr expr))
-                                 (simple-vector ,(do-vec init acc itr expr))
+                  (typecase ,par (hash-table ,(do-ht acc itr expr))
+                                 (vector ,(do-vec acc itr expr))
+                                 (simple-vector ,(do-vec acc itr expr))
                                  (otherwise ,(err)))
                   ,acc)))
       (case (length d)
@@ -108,7 +108,7 @@
                      collect `(let ((,dat (@@ ,itr ,kk)))
                                 (declare (ignorable ,dat))
                                 (∈ (:key ,kk)
-                                ,(compile/$add rec (dat/new conf dat) m kvres kk expr))))
+                                   ,(compile/$add rec (dat/new conf dat) m kvres kk expr))))
                  (vex ,ires ($nil ,kvres)))
            finally (return ,ires))))
 
@@ -169,7 +169,7 @@
          (1 `(with ,(car o)))
          (2 `(for ,(car o) = ,(rec (second o)) then ,(rec (second o))))
          (3 `(for ,(car o) = ,(rec (second o)) then ,(rec (third o))))
-         (otherwise (error "?rec: var init, wanted 1-3 args, got: ~a." o))))))
+         (otherwise (error "?rec: wanted 1-3 args, got: ~a." o))))))
 (defun compile/?rec (rec conf d) ; (?rec (< (inum) 10) (+ _ 1))
   (unless (< 1 (length d) 4) (error "?rec: expected 2-3 arguments. got: ~a." d))
   (awg (i ∇-)
@@ -184,20 +184,21 @@
 
 
 ; TODO: operate on hts too?
-; TODO: smarter selectors? key, index as grpfx; aggfx
 (defun compile/?grp (rec conf d)
   (unless (< 0 (length d) 3) (error "?grp: expected 1 or 2 args. got: ~a." d))
   (awg (i kvres key itr par dat acc)
-    `(loop with ,kvres of-type hash-table = (make$)
-           with ,par of-type vector = (vec! ,(gk conf :dat))
-           for ,itr across ,par for ,i from 0
-           for ,key = ,(funcall rec (dat/new conf itr) (first d))
-           for ,acc = (gethash ,key ,kvres (new*))
-           do (∈ (:par ,par :cnt ,i :itr ,itr :key ,key)
-                 (let ((,dat ,(case (length d) (1 itr)
-                                (2 (funcall rec (dat/new conf itr) (second d))))))
-                  (setf (gethash ,key ,kvres) (psh* ,acc ,dat))))
-           finally (return ,kvres))))
+    (labels ((getter (cd) (funcall rec (dat/new conf itr)
+                            (typecase cd (keyword `(@ ,cd)) (string `(@ ,cd))
+                                         (otherwise cd)))))
+      `(loop with ,kvres of-type hash-table = (make$)
+             with ,par of-type vector = (vec! ,(gk conf :dat))
+             for ,itr across ,par for ,i from 0
+             for ,key =  ,(getter (car d))
+             for ,acc = (gethash ,key ,kvres (new*))
+             do (∈ (:par ,par :cnt ,i :itr ,itr :key ,key)
+                   (let ((,dat ,(case (length d) (1 itr) (2 (getter (second d))))))
+                    (setf (gethash ,key ,kvres) (psh* ,acc ,dat))))
+             finally (return ,kvres)))))
 
 (defun proc-qry (q &optional conf*) "compile lqn query"
   (awg (dat fn fi)
