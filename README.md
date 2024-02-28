@@ -178,16 +178,13 @@ Map operations over `vector`:
   - `#(expr ..)` or `(?map expr ..)`: evaluate these expressions
     sequentially on all items in `sequence`.
 
-### Fold Operator - `?fld`
-Reduce `vector`:
-  - `(?fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
-    `acc` is inserted as the first argument to `fx`.
-  - `(?fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. The accumulator is
-    inserted as the first argument to `fx`.
-  - `(?fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. Use this
-    if you need to name the accumulator explicity.
+### Get Operator - `@`
+select keys, indexes or paths from nested structure:
+ - `(@ k)`: get this key/index/path from current value.
+ - `(@ k [d])`: get this key/index/path from current value.
+ - `(@ o k [d])`: get this key/index/path from `o`.
 
-### Selector Operators - `{}`/`$$`, `[]`/`**`, `#{}`/`*$`, `#[]`/`$*`, `@`
+### Selector Operators - `{}`/`$$`, `#{}`/`*$`, `#[]`/`$*`, `@`
 Select from on structure into a new data structure. `Selectors` are explained
 below:
   - `#{s1 sel ..}` or `(*$ sel ..)`: from `vector` of `kvs` into new `vector`
@@ -196,13 +193,6 @@ below:
     using `KV Selectors`.
   - ` {s1 sel ..}` or `($$ sel ..)`: from `kv` into new `kv` using `KV
     Selectors`.
-  - ` [s1 sel ..]` or `(** sel ..)`: from `vector` into new `vector` using
-    `EXPR Selectors`.
-
-select keys or indexes:
- - `(@ k)`: get this key/index from current value.
- - `(@ k [d])`: get this key/index from current value.
- - `(@ o k [d])`: get this key/index from `o`.
 
 #### KV Selectors
 A `KV Selector` is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
@@ -246,7 +236,11 @@ Selector in parenthesis. If you need eg. case or spaces you can use
 ```
 We use `{}` in the examples but all `KV Selectors` have the same behaviour.
 
-#### EXPR Selectors
+### Filter Operator - `[]`/`**` TODO TODO TODO
+Filter .......
+  - ` [s1 sel ..]` or `(** sel ..)`: from `vector` into new `vector` using
+    `EXPR Selectors`.
+
 `EXPR Selectors` serve a similar purpose as `KV Selectors`, but they are used
 with `[]`, `?srch`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a
 little differently:
@@ -273,6 +267,18 @@ CL boolen operators. Here are some examples:
 [(or (fx1 _) (fx2 _))] ; ...
 ```
 
+### Fold Operator - `?fld`
+Reduce `vector`:
+  - `(?fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
+    `acc` is inserted as the first argument to `fx`.
+  - `(?fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. The accumulator is
+    inserted as the first argument to `fx`.
+  - `(?fld init acc (fx .. acc .. nxt))`: fold `(fx .. acc .. nxt)`. Use this
+    if you need to name the accumulator explicity.
+
+### Group by Operator - `?grp`
+  TODO
+
 ### Recursion Operator - `?rec`
 Repeat the same expression while something is true:
  - `(?rec test-expr expr)`: repeat `expr` while `test-expr`. `_` refers to the
@@ -280,8 +286,11 @@ Repeat the same expression while something is true:
    get the number of the current iteration. `(par)` always refers to the input
    value.
 
-### Group by Operator - `?grp`
-  TODO
+### Search Operator - `?srch`
+Iterate a datastructure (as if with `?txpr`) and collect the matches in a new
+`vector`:
+  - `(?srch sel)`: collect `_` whenever the `Selector` matches.
+  - `(?srch sel .. expr)`: collect `expr` whenever the `Selector` matches.
 
 ### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
 Perform operation on when pattern or condition is satisfied:
@@ -301,13 +310,7 @@ a new value for each match:
   - `(?mxpr (sel .. tx-expr) .. (sel .. tx-expr))`: one or more matches and
     transforms.  Performs the transform of the first match only.
 
-### Search Operator - `?srch`
-Iterate a datastructure (as if with `?txpr`) and collect the matches in a new
-`vector`:
-  - `(?srch sel)`: collect `_` whenever the `Selector` matches.
-  - `(?srch sel .. expr)`: collect `expr` whenever the `Selector` matches.
-
-## Query Utility Functions
+## Query Utilities
 
 The internal representation of in `lqn` means you can use the regular CL
 utilities such as `gethash`, `aref`, `subseq`, `length` etc.  But for
