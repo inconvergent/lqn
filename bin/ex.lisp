@@ -15,13 +15,13 @@
        (new$ :in (par)                            ; new kv with input
              :len (pnum)                          ; input length
              :items #((new$ :s _ :len (inum)))))) ; and substr lengths
-;; { "in": "abc x def x gehiil x iiii",
-;;   "len": 25,
-;;   "items": [ { "s": "abc", "len": 3 },    { "s": "def", "len": 3 },
-;;              { "s": "gehiil", "len": 6 }, { "s": "iiii", "len": 4 } ] }
+; { "in": "abc x def x gehiil x iiii",
+;   "len": 25,
+;   "items": [ { "s": "abc", "len": 3 },    { "s": "def", "len": 3 },
+;              { "s": "gehiil", "len": 6 }, { "s": "iiii", "len": 4 } ] }
 
 (print (ldnout (qry #("1 x 1 x 7 x 100" "3 x 8 x 30")
-                    #((splt _ :x) int!? ; for each row, split and parse as int
+                    #((splt _ :x) #(int!?) ; for each row, split and parse as int
                       (?fld 0 +)))))    ; sum each row
 ;; #(109 41)
 
@@ -62,3 +62,13 @@
 ;; - 5: 5
 ;; ...
 
+(print (lqn:ldnout (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23},
+                                            {\"a\": 11, \"b\": 123},
+                                            {\"a\": 11, \"b\": 123} ]")
+                            (?grp :a (str! (key) "-" (@ :b))))))
+;; ((1  . #("1-23"))
+;;  (11 . #("11-123" "11-123")))
+(print :-----------------)
+
+(print (lqn:ldnout (lqn::qrydb (lqn:jsnloads "{\"a\": 1, \"b\": 23}")
+                            (?grp _ (key)))))

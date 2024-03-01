@@ -17,42 +17,41 @@
 (defun compile/?map (rec conf d) ; (?map ...)
   (when (zerop (length d)) (error "?map: missing args."))
   (awg (k i kres ires itr par)
-    (labels ((err () `(error "?map/rt: bad type. expected hash-table or vector:~%got: ~a." ,par))
-             (do-ht (expr) `(loop with ,kres = (new$)
-                                  for ,i from 0
-                                  for ,itr being the hash-values of ,par
-                                                 using (hash-key ,k)
-                                  do (∈ (:par ,par :cnt ,i :itr ,itr :key ,k)
-                                        (setf (gethash ,k ,kres)
-                                              ,(funcall rec (dat/new conf itr) expr)))
-                                  finally (return ,kres)))
-             (do-vec (expr) `(loop with ,ires = (mav) with ,par = (vec! ,par)
-                                   for ,itr across ,par for ,i from 0
-                                   do (∈ (:par ,par :cnt ,i :itr ,itr :key ,i)
-                                         (vex ,ires ,(funcall rec (dat/new conf itr) expr)))
-                                   finally (return ,ires)))
-             (do-map (expr) `(let ((,par ,(gk conf :dat)))
-                               (typecase ,par (hash-table ,(do-ht expr))
-                                              (vector ,(do-vec expr))
-                                              (simple-vector ,(do-vec expr))
-                                              (otherwise ,(err))))))
+    (labels ((do-ht (expr)
+               `(loop with ,kres = (new$)
+                  for ,i from 0
+                  for ,itr being the hash-values of ,par using (hash-key ,k)
+                  do (∈ (:par ,par :cnt ,i :itr ,itr :key ,k)
+                        (setf (gethash ,k ,kres)
+                              ,(funcall rec (dat/new conf itr) expr)))
+                  finally (return ,kres)))
+             (do-vec (expr)
+               `(loop with ,ires = (mav) with ,par = (vec! ,par)
+                  for ,itr across ,par for ,i from 0
+                  do (∈ (:par ,par :cnt ,i :itr ,itr :key ,i)
+                        (vex ,ires ,(funcall rec (dat/new conf itr) expr)))
+                  finally (return ,ires)))
+             (do-map (expr)
+               `(let ((,par ,(gk conf :dat)))
+                  (typecase ,par
+                    (hash-table ,(do-ht expr)) (vector ,(do-vec expr)) (simple-vector ,(do-vec expr))
+                    (otherwise (error "RT: ?map: bad type. expected hash-table or vector:~%got: ~a." ,par))))))
       (let ((cd (car d)))
         (typecase cd (list (do-map cd)) (vector (do-map cd))
           (otherwise (error "?map: expected vector or cons. got: ~a." cd)))))))
 
 (defun compile/?fld (rec conf d) ; (?fld ...)
   (awg (k i res itr par)         ; 0 + ; 0 acc (+ acc _)
-    (labels ((err () `(error "?fld/rt: bad type. expected hash-table or vector:~%got: ~a." ,par))
-             (do-ht (acc itr expr)
+    (labels ((do-ht (acc itr expr)
                `(loop for ,i from 0
-                      for ,itr being the hash-values of ,par using (hash-key ,k)
-                      do (∈ (:par ,par :cnt ,i :key ,k :itr ,itr)
-                            (setf ,acc ,(funcall rec (dat/new conf itr) expr)))))
+                  for ,itr being the hash-values of ,par using (hash-key ,k)
+                  do (∈ (:par ,par :cnt ,i :key ,k :itr ,itr)
+                        (setf ,acc ,(funcall rec (dat/new conf itr) expr)))))
              (do-vec (acc itr expr)
                `(loop with ,par = (vec! ,par) ; TODO: this is redundant, and wont work for lists
-                      for ,itr across ,par for ,i from 0
-                      do (∈ (:par ,par :cnt ,i :key ,i :itr ,itr)
-                            (setf ,acc ,(funcall rec (dat/new conf itr) expr)))))
+                  for ,itr across ,par for ,i from 0
+                  do (∈ (:par ,par :cnt ,i :key ,i :itr ,itr)
+                        (setf ,acc ,(funcall rec (dat/new conf itr) expr)))))
              (do-fld (init acc itr expr)
                (unless (and (symbolp acc) (symbolp itr))
                        (error "?fld: expected symbols, got: ~a/~a." acc itr))
@@ -62,7 +61,8 @@
                   (typecase ,par (hash-table ,(do-ht acc itr expr))
                                  (vector ,(do-vec acc itr expr))
                                  (simple-vector ,(do-vec acc itr expr))
-                                 (otherwise ,(err)))
+                                 (null ,acc)
+                                 (otherwise (error "RT: ?fld: bad type. expected hash-table or vector:~%got: ~a." ,par)))
                   ,acc)))
       (case (length d)
         (2 (etypecase (second d)
@@ -71,16 +71,42 @@
         (3 (let ((d3 (third d))) (do-fld (car d) (second d) itr d3)))
         (otherwise (error "?fld: expected 2-3 args. got: ~a." d))))))
 
+
+(defun compile/?grp (rec conf d)
+  (unless (< 0 (length d) 3) (error "?grp: expected 1 or 2 args. got: ~a." d))
+  (awg (i k kvres key itr par dat acc)
+    (labels ((getter (cd) (funcall rec (dat/new conf itr)
+                            (typecase cd (keyword `(@ ,cd)) (string `(@ ,cd)) (otherwise cd))))
+             (do-vec ()
+               `(loop for ,i from 0 for ,itr across ,par
+                      for ,key =  ,(getter (car d))
+                      for ,acc = (gethash ,key ,kvres (new*))
+                  do (∈ (:cnt ,i :itr ,itr :key ,key)
+                        (let ((,dat ,(case (length d) (1 itr) (2 (getter (second d))))))
+                         (setf (gethash ,key ,kvres) (psh* ,acc ,dat))))))
+             (do-ht () ; TODO: tests
+               `(loop for ,i from 0
+                      for ,itr being the hash-values of ,par using (hash-key ,k)
+                      for ,key =  ,(getter (car d))
+                      for ,acc = (gethash ,key ,kvres (new*))
+                  do (∈ (:cnt ,i :itr ,itr :key ,k)
+                        (let ((,dat ,(case (length d) (1 itr) (2 (getter (second d))))))
+                          (setf (gethash ,key ,kvres) (psh* ,acc ,dat)))))))
+      `(let ((,par ,(gk conf :dat)) (,kvres (make$)))
+         (∈ (:par ,par)
+            (typecase ,par (hash-table ,(do-ht))
+                           (vector ,(do-vec)) (simple-vector ,(do-vec))
+                           (otherwise (error "RT: ?grp bad type. expected hash-table or vector:~%got: ~a." ,par)))
+            ,kvres)))))
+
 (defun compile/$$ (rec conf d) ; {...} ; sel
   (awg (kres par dat)
-    `(let* ((,par ,(gk conf :dat))
-            (,kres ,(if (car- dat? d) `(make$ ,par) `(make$))))
+    `(let* ((,par ,(gk conf :dat)) (,kres ,(if (car- dat? d) `(make$ ,par) `(make$))))
        (∈ (:par ,par)
           ,@(loop for (m kk expr) in (strip-all d) collect
               `(let ((,dat (@@ ,par ,kk)))
                  (declare (ignorable ,dat))
-                 (∈ (:key ,kk)
-                    ,(compile/$add rec (dat/new conf dat) m kres kk expr)))))
+                 (∈ (:key ,kk) ,(compile/$add rec (dat/new conf dat) m kres kk expr)))))
        ($nil ,kres))))
 
 (defun compile/$* (rec conf d) ; #[...] ; sel
@@ -93,8 +119,7 @@
                  ,@(loop for (m kk expr) in (strip-all d) collect
                      `(let ((,dat (@@ ,itr ,kk)))
                         (declare (ignorable ,dat))
-                        (∈ (:key ,kk)
-                           ,(compile/*add rec (dat/new conf dat) m ires expr)))))
+                        (∈ (:key ,kk) ,(compile/*add rec (dat/new conf dat) m ires expr)))))
            finally (return ,ires))))
 
 (defun compile/*$ (rec conf d) ; #{...} ; sel
@@ -107,8 +132,7 @@
                  ,@(loop for (m kk expr) in (strip-all d)
                      collect `(let ((,dat (@@ ,itr ,kk)))
                                 (declare (ignorable ,dat))
-                                (∈ (:key ,kk)
-                                   ,(compile/$add rec (dat/new conf dat) m kvres kk expr))))
+                                (∈ (:key ,kk) ,(compile/$add rec (dat/new conf dat) m kvres kk expr))))
                  (vex ,ires ($nil ,kvres)))
            finally (return ,ires))))
 
@@ -182,24 +206,6 @@
                                          (third d)) ,i (+ ,i 1))))
          (values ,∇- ,i)))))
 
-
-; TODO: operate on hts too?
-(defun compile/?grp (rec conf d)
-  (unless (< 0 (length d) 3) (error "?grp: expected 1 or 2 args. got: ~a." d))
-  (awg (i kvres key itr par dat acc)
-    (labels ((getter (cd) (funcall rec (dat/new conf itr)
-                            (typecase cd (keyword `(@ ,cd)) (string `(@ ,cd))
-                                         (otherwise cd)))))
-      `(loop with ,kvres of-type hash-table = (make$)
-             with ,par of-type vector = (vec! ,(gk conf :dat))
-             for ,itr across ,par for ,i from 0
-             for ,key =  ,(getter (car d))
-             for ,acc = (gethash ,key ,kvres (new*))
-             do (∈ (:par ,par :cnt ,i :itr ,itr :key ,key)
-                   (let ((,dat ,(case (length d) (1 itr) (2 (getter (second d))))))
-                    (setf (gethash ,key ,kvres) (psh* ,acc ,dat))))
-             finally (return ,kvres)))))
-
 (defun proc-qry (q &optional conf*) "compile lqn query"
   (awg (dat fn fi)
   (labels
@@ -242,7 +248,7 @@
     `(funcall ,cq ,dat ":internal:" 0)))
 (defmacro qry (dat &rest rest) "query data. rest is wrapped in the pipe operator."
   `(qryd ,dat (|| ,@rest)))
-(abbrev @q qry)
+(abbrev ?q qry)
 (defmacro qrydb (dat &rest rest) "query data. rest is wrapped in the pipe operator."
   `(qryd ,dat (|| ,@rest) :db t))
 (defun qryl (dat q &key db) "compile lqn query and run on dat"
