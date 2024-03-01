@@ -1,18 +1,19 @@
 # LQN - Lisp Query Notation
 
-LQN is a compiler for a query language (DSL), with terminal utilities to query
-and transform LISP data (`LDN`), JSON and TXT files.  The terminal utilities
-will parse the input data to internal lisp strucutres according to the mode.
-Then the `lqn` language can be used for queries and transformations.
+LQN is a Common Lisp libarry, query language and terminal utility to query and
+transform text files such as `JSON` and `CSV`, as well as Lisp data (`LDN`), The
+terminal utilities will parse the input data to internal lisp strucutres
+according to the mode. Then the `lqn` query language can be used for queries
+and transformations.
+
+`LQN` consists of three terminal commands: `lqn`, `jqn` and `tqn`. For lisp
+data, `JSON` and text files respectively.
 
 See this post for a small tutorial: https://inconvergent.net/2024/lisp-query-notation/
 
-`lqn` consists of three terminal commands `lqn`, `jqn` and `tqn`. Some examples
-below.
+## `jqn` Example (`JSON` files)
 
-## JQN Example (JSON)
-
-Here is a full example where we select and transform some parts of a JSON
+Here is a full example where we select and transform some parts of a `JSON`
 object:
 ```bash
 ❭ echo '
@@ -52,12 +53,12 @@ more examples of usage in the terminal.
 
 ![asemic writing](/img/20180115-210522.png)
 
-## TQN Example (TXT)
+## `tqn` Example (text files)
 
-the `tqn` mode is for reading lines of text into a `vector` (i.e. JSON array).
+the `tqn` mode is for reading lines of text into a `vector` (i.e. `JSON` array).
 `tqn` has slightly different default behaviour to `jqn`. Notably, it ignores
 `nil` in the output. `tqn` defaults to printing the `vector` as rows, but `-j`
-will output to JSON instead. `-t` does the oposite for `jqn`.
+will output to `JSON` instead. `-t` does the oposite for `jqn`.
 
 ```bash
 # split string and sum as integers:
@@ -77,7 +78,7 @@ will output to JSON instead. `-t` does the oposite for `jqn`.
   33
 ```
 
-## LQN Example (LDN)
+## LQN Example (`LDN`)
 You can also read CL code from pipe or file:
 ```bash
 # find small items, insert symbol, flatten
@@ -137,7 +138,7 @@ See [bin/ex.lisp](bin/ex.lisp) for more examples.
 
 ## Object Representation
 
-Internally JSON arrays are represented as `vector`. and JSON objects are
+Internally `JSON` arrays are represented as `vector`. and `JSON` objects are
 represented as `hash-table`; `kv` (key/value) is used in the docs for short.
 In `tqn` lines of text are `vectors` of `strings`. In `lqn` Lisp files are
 read as a `vector` of lisp data.
@@ -160,20 +161,18 @@ lowercase `strings`. This is useful in the terminal to avoid escaping strings.
 Particularly when using `Selector` operators.
 
 ### Pipe Operator - `||`
-`(|| expr ..)` pipes the results from the first clause/expression into the
-second etc.  Returns the result of the last clause. Pipe is the operator that
+`(|| expr ..)` pipes the results from the first clause/expression to the
+second, and so on.  Returns the result of the last clause. Pipe is the operator that
 surrounds all terminal queries by default.
 
-For convenience, particularly in the terminal, pipe has the following default
-translations:
+For convenience the pipe has the following default translations:
   - `fx`: to `(?map (fx _))`: map `fx` across all items.
   - `:word`: to `[(isub? _ "word")]` to filter by `"word"`.
-  - `"Word"`: to `[(sub? _ "Word")]` to filter all items by this `string` with
-    case.
+  - `"Word"`: to `[(sub? _ "Word")]` to filter by `Word`, case sensitive.
   - `(..)`: to itself. That is, expressions are not translated.
 
 ### Map Operator - `#()`/`?map`
-Map operations over `vector`:
+Map operations over `vector` or `kv`:
   - `#(fx)` or `(?map fx)`: map `(fx _)` across all items.
   - `#(expr ..)` or `(?map expr ..)`: evaluate these expressions
     sequentially on all items in `sequence`.
@@ -185,21 +184,15 @@ select keys, indexes or paths from nested structure:
  - `(@ o k [d])`: get this key/index/path from `o`.
 
 ### Selector Operators - `{}`/`$$`, `#{}`/`*$`, `#[]`/`$*`, `@`
-Select from on structure into a new data structure. `Selectors` are explained
-below:
+Select from on structure into a new data structure. using selectors:
+  - ` {s1 sel ..}` or `($$ sel ..)`: from `kv` into new `kv`.
   - `#{s1 sel ..}` or `(*$ sel ..)`: from `vector` of `kvs` into new `vector`
-    of `kvs` using `KV Selectors`.
-  - `#[s1 sel ..]` or `($* sel ..)`: from `vector` of `kvs` into new `vector`
-    using `KV Selectors`.
-  - ` {s1 sel ..}` or `($$ sel ..)`: from `kv` into new `kv` using `KV
-    Selectors`.
+    of `kvs`.
+  - `#[s1 sel ..]` or `($* sel ..)`: from `vector` of `kvs` into new `vector`.
 
-#### KV Selectors
-A `KV Selector` is a triple `(mode key expr)`. And are used in `{}`, `#[]` and
-`#{}`.  Only the key is required. If `expr` is not provided the `expr` is `_`,
-that is: the value of the `key`.
-
-The modes are:
+A selector is a triple `(mode key expr)`. Only key is required. If `expr` is
+not provided the `expr` is `_`, that is: the value of the `key`. The modes are
+as follows:
   - `+`: always include this `expr`. [default]
   - `?`: include `expr` if the key is present and not `nil`.
   - `%`: include Selector if `expr` is not `nil`.
@@ -207,11 +200,12 @@ The modes are:
     `#[]` E.g. `{_ -@key3}` to select all keys except `key3`. `expr` is
     ignored.
 
-`KV Selectors` can either be written out in full, or they can be be written in
-short form depending on what you want to achieve. Note that the `@` in the
-following examples is used to append a mode to a key without having to wrap the
-Selector in parenthesis. If you need eg. case or spaces you can use
-`"strings"`:
+Selectors can either be written out in full, or they can be be written in short
+form depending on what you want to achieve. The `@` in the following examples
+is used to append a mode to a key without having to wrap the Selector in
+parenthesis. If you need eg. case or spaces you can use `"strings"`. Here are
+some examples using `{}`. It behaves the  same for the other Selector
+operators:
 ```lisp
 {_}               ; select all keys.
 {_ :-@key1}       ; select all keys except "key1".
@@ -226,7 +220,7 @@ Selector in parenthesis. If you need eg. case or spaces you can use
 
 ; Use `_` in `expr` to refer to the value of the selected key:
 {(:key1 sup))          ; convert value of "key1" to uppercase
- (:key3 (or _ "That")) ; select the value of "key3" or literally "That".
+ (:key3 (or _ "That")) ; select the value of "key3", or literally "That".
  (:key2 (+ 33 _))}     ; add 33 to value of "key2"
 
 ; override and drop keys:
@@ -330,11 +324,12 @@ Defined in the query scope:
 ### Operator Context Fxs
 Defined in all operators:
  - `_`: the current value.
+ - `(cnt)`: counts from `0` in the enclosing `Selector`.
+ - `(key)`: the current `key` if the current value is a `kv`. Otherwise `(cnt)`.
  - `(itr)`: the current object in the iteration of the enclosing `Selector`.
  - `(par)`: the object containing `(itr)`.
  - `(psize)`: number of items in `(par)`.
  - `(isize)`: number of items in `(itr)`.
- - `(cnt [k=0])`: counts from `k` in the enclosing `Selector`.
 
 ### Generic Utilities
 General utilities:
@@ -346,9 +341,9 @@ General utilities:
    returns `nil`.
  - `(out s)`: output printed representation of `s` to `*standard-output*`.
    returns `nil`.
- - `(msym? a b)`: compare `symbol` `a` to `b`. if `b` is a `keyword` or `symbol`
-   a perfect match is required. if `b` is a `string` it performs a substring
-   match. If `b` is an expression, `a` is compared to the evaluated value of
+ - `(msym? a b)`: compare `symbol` `a` to `b`; if `b` is a `keyword` or `symbol`
+   a perfect match is required; if `b` is a `string` it performs a substring
+   match; if `b` is an expression, `a` is compared to the evaluated value of
    `b`.
  - `(noop ..)`: do nothing, return `nil`.
 
@@ -356,7 +351,10 @@ General utilities:
 For all `sequences` and `kvs`:
  - `(@* o d i ..)`: pick these indices/keys from `sequence`/`kv` into new
    `vector`.
- - `(size? o [d])`: length of `sequence` or number of keys in `kv`
+ - `(size? o [d])`: length of `sequence` or number of keys in `kv`.
+ - `(all? o [empty])`: are all items in `sequence` something? or `empty`.
+ - `(some? o [empty])`: are some items in `sequence` something? or `emtpy`.
+ - `(empty? o [d])`: is `sequence` or `kv` empty?.
  - `(compct o)`: Remove `nil`, empty `vectors`, empty `kvs` and keys with empty
    `kvs`.
 
@@ -397,7 +395,7 @@ String maniuplation:
  - `(strcat s ..)`: concatenate these `strings`, or all `strings` in one or
    more `sequences` of `strings`.
 
-### Type Tests
+### Type Coercion and Tests
 `(is? o [d])` returns `o` if not `nil`, empty `sequence`, or empty `kv`; or `d`.
 
 These functions return the argument if the argument is the corresponding type:
@@ -407,10 +405,8 @@ These functions return the argument parsed as the corresponding type if
 possible; otherwise they return the optional second argument: `int!?`, `flt!?`,
 `num!?`, `str!?`, `vec!?`, `seq!?`.
 
-### Type Coercion
- - `(str! s ..)`: coerce everything to a `string`.
- - `(vec! a)`: coerce `sequence` to `vector`; or return `(new* a)`.
- - `(sym! a ..)`: do `str!`, `sdwn`, and make new `symbol`.
+The following functions will coerce the argument, or fail if the coercion is not supported:
+`str!`, `int!`, `flt!`, `lst!` `sym!`,
 
 ## Install
 `lqn` requires [SBCL](https://www.sbcl.org/). And is pretty easy to install via
@@ -425,7 +421,7 @@ alias jqn="sbcl --script ~/path/to/lqn/bin/jqn-sh.lisp"
 alias tqn="sbcl --script ~/path/to/lqn/bin/tqn-sh.lisp"
 alias lqn="sbcl --script ~/path/to/lqn/bin/lqn-sh.lisp"
 ```
-Unfortunately this will tend to have a high startup tim. To make it run faster
+Unfortunately this will tend to have a high startup time. To make it run faster
 you can create an SBCL image/core that has `lqn` preloaded and dump it using
 `sb-ext:save-lisp-and-die`. Then use the core in the alias instead of SBCL.
 

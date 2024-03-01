@@ -13,6 +13,19 @@
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
 
+#### LQN:?Q
+
+```
+:missing:todo:
+
+ ; LQN:?Q
+ ;   [symbol]
+ ; 
+ ; ?Q names a macro:
+ ;   Lambda-list: (&REST ARGS)
+ ;   Source file: /data/x/lqn/src/qry.lisp
+```
+
 #### LQN:@\*
 
 ```
@@ -172,15 +185,6 @@
  ;   Documentation:
  ;     run terminal command
  ;   Source file: /data/x/lqn/src/sh.lisp
-```
-
-#### LQN:CNT
-
-```
-:missing:todo:
-
- ; LQN:CNT
- ;   [symbol]
 ```
 
 #### LQN:COMPCT
@@ -437,21 +441,6 @@
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
 
-#### LQN:GRP
-
-```
-:missing:todo:
-
- ; LQN:GRP
- ;   [symbol]
- ; 
- ; GRP names a compiled function:
- ;   Lambda-list: (V KEYFX &OPTIONAL (VALFX (FUNCTION IDENTITY)))
- ;   Derived type: (FUNCTION (SEQUENCE FUNCTION &OPTIONAL FUNCTION)
- ;                  (VALUES HASH-TABLE &OPTIONAL))
- ;   Source file: /data/x/lqn/src/qry-utils.lisp
-```
-
 #### LQN:HEAD
 
 ```
@@ -525,15 +514,6 @@
  ;   Documentation:
  ;     i if int; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
-```
-
-#### LQN:INUM
-
-```
-:missing:todo:
-
- ; LQN:INUM
- ;   [symbol]
 ```
 
 #### LQN:IPREF?
@@ -1001,15 +981,6 @@
  ;   Documentation:
  ;     does this path exist?
  ;   Source file: /data/x/lqn/src/sh.lisp
-```
-
-#### LQN:PNUM
-
-```
-:missing:todo:
-
- ; LQN:PNUM
- ;   [symbol]
 ```
 
 #### LQN:POP\*
