@@ -78,21 +78,20 @@
     (labels ((getter (cd) (funcall rec (dat/new conf itr)
                             (typecase cd (keyword `(@ ,cd)) (string `(@ ,cd)) (otherwise cd))))
              (do-vec ()
-               `(loop for ,itr across ,par for ,i from 0
-                  for ,key =  ,(getter (car d))
-                  for ,acc = (gethash ,key ,kvres (new*))
+               `(loop for ,i from 0 for ,itr across ,par
+                      for ,key =  ,(getter (car d))
+                      for ,acc = (gethash ,key ,kvres (new*))
                   do (∈ (:cnt ,i :itr ,itr :key ,key)
                         (let ((,dat ,(case (length d) (1 itr) (2 (getter (second d))))))
                          (setf (gethash ,key ,kvres) (psh* ,acc ,dat))))))
-             (do-ht () ; TODO: operate on hts too?
-               `(error "?grp: hash-table support is not implemented.")
-               ; (loop for ,i from 0
-               ;       for ,itr being the hash-values of ,par using (hash-key ,k)
-               ;       for ,acc = (gethash ,key ,kvres (new*))
-               ;       do (∈ (:cnt ,i :itr ,itr :key ,key)
-               ;             (let ((,dat ,(case (length d) (1 itr) (2 (getter (second d))))))
-               ;              (setf (gethash ,key ,kvres) (psh* ,acc ,dat)))))
-                    ))
+             (do-ht () ; TODO: tests
+               `(loop for ,i from 0
+                      for ,itr being the hash-values of ,par using (hash-key ,k)
+                      for ,key =  ,(getter (car d))
+                      for ,acc = (gethash ,key ,kvres (new*))
+                  do (∈ (:cnt ,i :itr ,itr :key ,k)
+                        (let ((,dat ,(case (length d) (1 itr) (2 (getter (second d))))))
+                          (setf (gethash ,key ,kvres) (psh* ,acc ,dat)))))))
       `(let ((,par ,(gk conf :dat)) (,kvres (make$)))
          (∈ (:par ,par)
             (typecase ,par (hash-table ,(do-ht))

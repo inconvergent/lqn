@@ -70,5 +70,5 @@
 ;;  (11 . #("11-123" "11-123")))
 (print :-----------------)
 
-(print (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}")
-                            (?grp :a (str! (key) "-" (@ :b))))))
+(print (lqn:ldnout (lqn::qrydb (lqn:jsnloads "{\"a\": 1, \"b\": 23}")
+                            (?grp _ (key)))))
