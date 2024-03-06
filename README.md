@@ -1,6 +1,6 @@
 # LQN - Lisp Query Notation
 
-LQN is a Common Lisp libarry, query language and terminal utility to query and
+LQN is a Common Lisp libary, query language and terminal utility to query and
 transform text files such as `JSON` and `CSV`, as well as Lisp data (`LDN`), The
 terminal utilities will parse the input data to internal lisp strucutres
 according to the mode. Then the `lqn` query language can be used for queries
@@ -9,132 +9,12 @@ and transformations.
 `LQN` consists of three terminal commands: `lqn`, `jqn` and `tqn`. For lisp
 data, `JSON` and text files respectively.
 
-See this post for a small tutorial: https://inconvergent.net/2024/lisp-query-notation/
-
-## `jqn` Example (`JSON` files)
-
-Here is a full example where we select and transform some parts of a `JSON`
-object:
-```bash
-❭ echo '
-       [{ "_id": "65679", "msg": "HAI!",
-          "things": [{ "id": 10, "name": "Win", "extra": "ex1" },
-                     { "id": 12, "name": "Kle" }] },
-        { "_id": "6AABB", "msg": "NIH!",
-          "things": [{ "id": 32, "name": "Bal" },
-                     { "id": 31, "name": "Sta", "extra": null}] }]'\
-  | jqn '#{ :_id
-         (:things #[:name :?@extra])
-         (:msg (sup _))}'
-⇒ [{ "_id": "65679", "msg": "HAI!",
-     "things": ["Win", "ex1", "Hai", "ex2", "Kle"] },
-   { "_id": "CAABB", "msg": "NIH!",
-     "things": ["Sta", "Bal"] }]
-```
-In general `jqn` can be used in the terminal like this:
-```bash
-❭ jqn -h
-⇒ Usage:
-    jqn [options] <qry> [files ...]
-    cat sample.json | jqn [options] <qry>
-
-  Options:
-    -v prints the full compiled qry to stdout before the result
-    -j output as JSON [default]
-    -l output to readable lisp data (LDN)
-    -t output as TXT
-    -m minified json. indented is default.
-    -h show this message.
-
-    options can be written as -i -v or -iv.
-```
-The other terminal commands have the same syntax and options. Below are some
-more examples of usage in the terminal.
-
-![asemic writing](/img/20180115-210522.png)
-
-## `tqn` Example (text files)
-
-the `tqn` mode is for reading lines of text into a `vector` (i.e. `JSON` array).
-`tqn` has slightly different default behaviour to `jqn`. Notably, it ignores
-`nil` in the output. `tqn` defaults to printing the `vector` as rows, but `-j`
-will output to `JSON` instead. `-t` does the oposite for `jqn`.
-
-```bash
-# split string and sum as integers:
-❭ echo '1 x 1 x 7 x 100'\
-  | tqn '(splt _ :x) int!? (?fld 0 +)'
-⇒ 109
-
-# split string, search and replace:
-❭ echo 'abk c x dkef x ttuuxx x ttxx33'\
-  | tqn '(splt _ :x)
-         (?txpr +@str!? :+@tt :+@uu
-                 (str! _ :-hit))'
-⇒ abk c
-  dkef
-  ttuu-hit
-  tt
-  33
-```
-
-## LQN Example (`LDN`)
-You can also read CL code from pipe or file:
-```bash
-# find small items, insert symbol, flatten
-❭ echo '#(1 2 3 4 5 6 7 8)'\
-  | lqn '#((?txpr (< _ 3) (new* :xx _))) (flatall* _ t)'
-⇒ #(:XX 1 :XX 2 3 4 5 6 7 8)
-
-# or search for defmacro symbol in several source code files:
-❭ lqn -t '#((?srch (msym? _ defmacro)
-                   (new$ :fn (fn) :hit (head (itr) 3))))
-          [is?] (flatall* _)' src/*lisp
-⇒ ((:FN . "src/docs.lisp") (:HIT DEFMACRO PCKGS (PKG)))
-  ((:FN . "src/init.lisp") (:HIT DEFMACRO PRETTY-JSON (V)))
-  ((:FN . "src/qry.lisp") (:HIT DEFMACRO JSNQRYF (FN Q &KEY DB)))
-  ...
-```
-
-## Why??
-
-`lqn` started as an experiment and programming exercise. But it has turned into
-a little language I think I will use in the future. Both in the terminal, and
-more interestingly, as a meta language for writing macros in CL.
-
-The main purpose of the design is to make something that is intuitive, terse,
-yet flexible enough that you can write generic CL if you need to. I also wanted
-to make something that requres a relatively simple compiler.  I have written
-about similar approaches to making small DSLs in these blog posts:
-
- - https://inconvergent.net/2023/vectors-and-symbols/
- - https://inconvergent.net/2023/lets-write-a-dsl/
- - https://inconvergent.net/2023/a-vector-dsl/
-
-There are several parts of the design that i'm not entirely happy with, so
-things might change in the future.
+Here is a small tutorial: https://inconvergent.net/2024/lisp-query-notation/
 
 You can find some more termianl documentation and examples in
 [bin/lqn-sh.lisp](lqn), [bin/jqn-sh.lisp](jqn), and [bin/tqn-sh.lisp](tqn).
 
 See [docs/lqn.md](docs/lqn.md) for symbol documentation.
-
-## Lisp Example
-Using the `lqn` compiler in lisp looks like this.
-```lisp
-(pretty-json
-  (qry #("1 x 1 x 7 x 100" "3 x 8 x 30")
-       #((splt _ :x) int!? ; for each row, split and parse as int
-         ($new :num (num)  ; new nested dict for each row
-               :items #(($new :v _ :i (cnt)))))))
-⇒ [{ "num": 4,
-     "items": [ { "v": 1, "i": 0 }, { "v": 1, "i": 1 },
-                { "v": 7, "i": 2 }, { "v": 100, "i": 3 } ]},
-   { "num": 3,
-     "items": [ { "v": 3, "i": 0 }, { "v": 8, "i": 1 },
-                { "v": 30, "i": 2 } ] }]
-```
-See [bin/ex.lisp](bin/ex.lisp) for more examples.
 
 ## Object Representation
 
