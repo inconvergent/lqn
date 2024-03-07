@@ -29,7 +29,7 @@
   (is (lqn:qry 1 (progn (s@progn _))) "1")
   (is (lqn:qry "abc x def x hij" ∅) nil))
 
-(subtest "env fxns"
+(subtest "env fxns, ?grp"
   (is (lqn:ldnout
         (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 2}, {\"a\": 11, \"b\": 12}]")
                  #{:a (:b _) (:cnt (cnt)) (:key (key)) (:par (par))}))
@@ -59,7 +59,14 @@
   (is (lqn:ldnout
          (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23}, {\"a\": 11, \"b\": 123}, {\"a\": 11, \"b\": 123} ]")
                      (?grp :a :b)))
-      '((1 . #(23)) (11 . #(123 123))) :test #'equalp))
+      '((1 . #(23)) (11 . #(123 123))) :test #'equalp)
+
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}") (?grp _ (key))))
+      '((1 . #(1)) (23 . #(23))) :test #'equalp)
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}") (?grp (key) _)))
+      '((:A . #(1)) (:B . #(23))) :test #'equalp)
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}") (?grp _ _)))
+      '((1 . #(1)) (23 . #(23))) :test #'equalp))
 
 (subtest "lqn qry 1"
   (is (lqn:ldnout (lqn:jsnqryf *test-data-fn* (|| #{:_id (:things #[:name :?@extra])})))
