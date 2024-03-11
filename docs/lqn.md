@@ -9,21 +9,8 @@
  ; ?? names a macro:
  ;   Lambda-list: (A EXPR &OPTIONAL RES)
  ;   Documentation:
- ;     evaluate expr only iff a is not nil. returns the result of expr or res; or nil.
+ ;     evaluate expr only if a is not nil. returns the result of expr or res; or nil.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
-```
-
-#### LQN:?Q
-
-```
-:missing:todo:
-
- ; LQN:?Q
- ;   [symbol]
- ; 
- ; ?Q names a macro:
- ;   Lambda-list: (&REST ARGS)
- ;   Source file: /data/x/lqn/src/qry.lisp
 ```
 
 #### LQN:@\*
@@ -656,7 +643,7 @@
  ;   Lambda-list: (FN Q &KEY DB)
  ;   Documentation:
  ;     run lqn query on json file, fn
- ;   Source file: /data/x/lqn/src/qry.lisp
+ ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
 
 #### LQN:JSNSTR
@@ -1022,7 +1009,7 @@
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES CONS &OPTIONAL))
  ;   Documentation:
  ;     compile lqn query
- ;   Source file: /data/x/lqn/src/qry.lisp
+ ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
 
 #### LQN:PSH\*
@@ -1048,7 +1035,7 @@
  ;   Lambda-list: (DAT &REST REST)
  ;   Documentation:
  ;     query data. rest is wrapped in the pipe operator.
- ;   Source file: /data/x/lqn/src/qry.lisp
+ ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
 
 #### LQN:QRYD
@@ -1061,7 +1048,20 @@
  ;   Lambda-list: (DAT Q &KEY DB)
  ;   Documentation:
  ;     run lqn query on dat
- ;   Source file: /data/x/lqn/src/qry.lisp
+ ;   Source file: /data/x/lqn/src/qry-operators.lisp
+```
+
+#### LQN:QRYDB
+
+```
+ ; LQN:QRYDB
+ ;   [symbol]
+ ; 
+ ; QRYDB names a macro:
+ ;   Lambda-list: (DAT &REST REST)
+ ;   Documentation:
+ ;     query data. rest is wrapped in the pipe operator.
+ ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
 
 #### LQN:QRYL
@@ -1075,7 +1075,7 @@
  ;   Derived type: (FUNCTION (T T &KEY (:DB T)) *)
  ;   Documentation:
  ;     compile lqn query and run on dat
- ;   Source file: /data/x/lqn/src/qry.lisp
+ ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
 
 #### LQN:RANGE

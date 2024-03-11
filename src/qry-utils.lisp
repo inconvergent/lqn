@@ -105,7 +105,7 @@ match. If b is an expression, a is compared to the evaluated value of b."
                (otherwise d)))
 
 (defmacro ?? (a expr &optional res) (declare (symbol a)) ; TODO: dont require sym?
-  "evaluate expr only iff a is not nil. returns the result of expr or res; or nil."
+  "evaluate expr only if a is not nil. returns the result of expr or res; or nil."
   `(and ,a ,expr ,@(if res `(,res))))
 
 (defun @@ (a path &optional d) (declare #.*opt*)
