@@ -40,7 +40,7 @@ next symb: ~a" char (peek-char t stream t nil t))))
   (let ((*readtable* (copy-readtable)))
     (loop for o = (read-next-object #\Space #\] stream)
           while o collect o into objects
-          finally (return `(** ,@objects)))))
+          finally (return `(?filter ,@objects)))))
 
 (set-dispatch-macro-character #\# #\{ ; #{} ; sel
   (lambda (stream subchar arg)

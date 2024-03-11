@@ -13,9 +13,9 @@
                (:file "docs" :depends-on ("qry-utils"))
                (:file "io" :depends-on ("docs"))
                (:file "pre-qry" :depends-on ("io" "qry-utils" "docs"))
-               (:file "qry" :depends-on ("pre-qry"))
-               (:file "sh" :depends-on ("qry"))
-               (:file "qry-extra" :depends-on ("qry"))))
+               (:file "qry-operators" :depends-on ("pre-qry"))
+               (:file "sh" :depends-on ("qry-operators"))
+               (:file "qry-extra" :depends-on ("qry-operators"))))
 
 (asdf:defsystem #:lqn/tests
   :depends-on (#:lqn #:prove #:uiop #:asdf)

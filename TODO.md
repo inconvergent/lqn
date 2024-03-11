@@ -14,5 +14,6 @@
 
 - modifiers in fld/grp/map
 
-- -@ conditional drop
+- -@ conditional drop? (in selectors)
+
 

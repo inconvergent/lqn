@@ -89,11 +89,11 @@ r=`echo '{"_id": 1}' | sbcl --script ./jqn-sh.lisp -jm '{:_id}'`; check;
 a='((:_ID . 1))'
 r=`echo '{"_id": 1}' | sbcl --script ./jqn-sh.lisp -lm '{:_id}'`; check;
 
-a='[{"_id":"65679","things":[{"id":10}]}]
-[{"_id":"6AABB"}]'
+a='{"_id":"65679","things":[{"id":10}]}
+{"_id":"6AABB"}'
 r=`echo '{ "_id": "65679", "things": [ { "id": 10 } ] }
          { "_id": "6AABB" }' |\
-    sbcl --script ./jqn-sh.lisp -m '#{:_id :?@things}'`; check;
+    sbcl --script ./jqn-sh.lisp -m '{:_id :?@things}'`; check;
 
 echo '## done! all clear!'
 

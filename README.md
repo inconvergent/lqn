@@ -51,24 +51,22 @@ For convenience the pipe has the following default translations:
   - `"Word"`: to `[(sub? _ "Word")]` to filter by `Word`, case sensitive.
   - `(..)`: to itself. That is, expressions are not translated.
 
-### Map Operator - `#()`/`?map`
-Map operations over `vector` or `kv`:
-  - `#(fx)` or `(?map fx)`: map `(fx _)` across all items.
-  - `#(expr ..)` or `(?map expr ..)`: evaluate these expressions
-    sequentially on all items in `sequence`.
-
 ### Get Operator - `@`
 select keys, indexes or paths from nested structure:
  - `(@ k)`: get this key/index/path from current value.
  - `(@ k [d])`: get this key/index/path from current value.
  - `(@ o k [d])`: get this key/index/path from `o`.
 
-### Selector Operators - `{}`/`$$`, `#{}`/`*$`, `#[]`/`$*`, `@`
+### Map Operator - `#()`
+Map operations over `vector` or `kv`:
+  - `#(fx)`: map `(fx _)` across all items.
+  - `#(expr ..)`: evaluate these expressions sequentially on all items in `sequence`.
+
+### Selector Operators - `{}`, `#{}`, `#[]`
 Select from on structure into a new data structure. using selectors:
-  - ` {s1 sel ..}` or `($$ sel ..)`: from `kv` into new `kv`.
-  - `#{s1 sel ..}` or `(*$ sel ..)`: from `vector` of `kvs` into new `vector`
-    of `kvs`.
-  - `#[s1 sel ..]` or `($* sel ..)`: from `vector` of `kvs` into new `vector`.
+  - ` {s1 sel ..}`: from `kv` into new `kv`.
+  - `#{s1 sel ..}`: from `vector` of `kvs` into new `vector` of `kvs`.
+  - `#[s1 sel ..]`: from `vector` of `kvs` into new `vector`.
 
 A selector is a triple `(mode key expr)`. Only key is required. If `expr` is
 not provided the `expr` is `_`, that is: the value of the `key`. The modes are
@@ -108,17 +106,16 @@ operators:
  (:key2 (sdwn _)) ; lowercase the value of "key2"
   :-@key3}        ; drop "key3"
 ```
-We use `{}` in the examples but all `KV Selectors` have the same behaviour.
+We use `{}` in the examples but all Selector operators have the same behaviour.
 
-### Filter Operator - `[]`/`**` TODO TODO TODO
+### Filter Operator - `[]` TODO TODO TODO
 Filter .......
-  - ` [s1 sel ..]` or `(** sel ..)`: from `vector` into new `vector` using
-    `EXPR Selectors`.
+  - ` [s1 sel ..]`: from `vector` into new `vector`
 
-`EXPR Selectors` serve a similar purpose as `KV Selectors`, but they are used
+The filter operator behaves somewhat similar to the Selector operators. they are used
 with `[]`, `?srch`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a
 little differently:
-  - `+`: if there are multiple `Selectors` with `+` mode, requires ALL
+  - `+`: if there are multiple expressions with `+` mode, requires ALL
     of them to be `t`.
   - `?`: if there are any clauses with `?` mode, it will select items where
     either of these clauses is `t`

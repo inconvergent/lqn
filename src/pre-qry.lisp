@@ -70,7 +70,7 @@
   (etypecase ty (number `(when-equal ,k ,ty))
                 (keyword `(and (str? ,k) (isub? ,k ,(ct/kw/str ty))))
                 (string `(and (str? ,k) (sub? ,k ,ty)))
-                (symbol `(when (,ty ,k) ,k))
+                (symbol `(when (,ty ,k) ,k)) ; TODO: attempt to parse as float, int?
                 (cons ty) (boolean `(when-equal ,ty ,k))))
 
 (defun pre/scan-clause (q &optional (full t))
@@ -92,7 +92,7 @@
   (loop for q in (pre/scan-clauses qq '#:pipe) collect
     (if (dat? q) (kw q)
       (typecase q (cons q) (boolean q)
-                  (keyword `(** ,q)) (string `(** ,q))
+                  (keyword `(?filter ,q)) (string `(?filter ,q))
                   (symbol `(?map ,q)) (vector `(?map ,@(coerce q 'list)))
                   (otherwise q)))))
 

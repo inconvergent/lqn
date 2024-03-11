@@ -2,8 +2,8 @@
   (:use #:common-lisp)
   (:nicknames #:cl-lqn)
   (:export #:d? #:v?
-    #:qry #:qryd #:jsnqryf #:qryl #:proc-qry
-    #:jsnloads #:jsnloadf #:jsnout #:ldnout #:ldnload #:fmt #:out #:jsnstr #:?q #:@* #:@@ #:??
+    #:qry #:qrydb #:qryd #:jsnqryf #:qryl #:proc-qry
+    #:jsnloads #:jsnloadf #:jsnout #:ldnout #:ldnload #:fmt #:out #:jsnstr #:@* #:@@ #:??
     #:read? #:some? #:none? #:all? #:empty? #:size? #:is?
     #:path? #:subdir #:subfiles #:ls #:dir? #:file? #:cwd #:now #:cmd
     #:some? #:all? #:none? #:cd #:keys?

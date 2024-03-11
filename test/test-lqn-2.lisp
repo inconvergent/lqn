@@ -122,6 +122,10 @@
   (is (lqn:qry "a b c x def x 27" (splt _ :x) [_ -@int!?]) #("a b c" "def") :test #'equalp)
   (is (lqn:qry "a b c x def x 27" (splt _ :x) [-@int!?]) #("a b c" "def") :test #'equalp)
 
+  (is (lqn:qry "a b c x def x 27" (splt _ :x) [-@int!?]) #("a b c" "def") :test #'equalp)
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}") [_ (-@= _ 1)])) '((:B . 23)))
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}") [(equal (key) "a")])) '((:A . 1)))
+
   (is (lqn:qry "1 xx x 2 3" (splt _ :x t))     #("1" "" "" "2 3") :test #'equalp)
   (is (lqn:qry "1 xx x 2 3" (splt _ :x t t))   #("1" "2 3") :test #'equalp)
   (is (lqn:qry "1 xx x 2 3" (splt _ :x nil))   #("1 " "" " " " 2 3") :test #'equalp)
