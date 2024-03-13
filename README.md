@@ -19,7 +19,7 @@ See [docs/lqn.md](docs/lqn.md) for symbol documentation.
 ## Object Representation
 
 Internally `JSON` arrays are represented as `vector`. and `JSON` objects are
-represented as `hash-table`; `kv` (key/value) is used in the docs for short.
+represented as `hash-table`; `ht` (key/value) is used in the docs for short.
 In `tqn` lines of text are `vectors` of `strings`. In `lqn` Lisp files are
 read as a `vector` of lisp data.
 
@@ -58,15 +58,15 @@ select keys, indexes or paths from nested structure:
  - `(@ o k [d])`: get this key/index/path from `o`.
 
 ### Map Operator - `#()`
-Map operations over `vector` or `kv`:
+Map operations over `vector` or `ht`:
   - `#(fx)`: map `(fx _)` across all items.
   - `#(expr ..)`: evaluate these expressions sequentially on all items in `sequence`.
 
 ### Selector Operators - `{}`, `#{}`, `#[]`
 Select from on structure into a new data structure. using selectors:
-  - ` {s1 sel ..}`: from `kv` into new `kv`.
-  - `#{s1 sel ..}`: from `vector` of `kvs` into new `vector` of `kvs`.
-  - `#[s1 sel ..]`: from `vector` of `kvs` into new `vector`.
+  - ` {s1 sel ..}`: from `ht` into new `ht`.
+  - `#{s1 sel ..}`: from `vector` of `hts` into new `vector` of `hts`.
+  - `#[s1 sel ..]`: from `vector` of `hts` into new `vector`.
 
 A selector is a triple `(mode key expr)`. Only key is required. If `expr` is
 not provided the `expr` is `_`, that is: the value of the `key`. The modes are
@@ -173,11 +173,11 @@ Perform operation on when pattern or condition is satisfied:
     selectors`.  Evaluate `hit-expr` if not `nil`; else evaluate `miss-expr`.
     `_` is the matching item.
 
-Recursively traverse a structure of `sequences` and `kvs` and return
+Recursively traverse a structure of `sequences` and `hts` and return
 a new value for each match:
   - `(?txpr sel .. tx-expr)`: recursively traverse current value and replace
     matches with `tx-expr`. `tx-expr` can be a function name or expression.
-    Also traverses vectors and `kv` values.
+    Also traverses vectors and `ht` values.
   - `(?mxpr (sel .. tx-expr) .. (sel .. tx-expr))`: one or more matches and
     transforms.  Performs the transform of the first match only.
 
@@ -202,7 +202,7 @@ Defined in the query scope:
 Defined in all operators:
  - `_`: the current value.
  - `(cnt)`: counts from `0` in the enclosing `Selector`.
- - `(key)`: the current `key` if the current value is a `kv`. Otherwise `(cnt)`.
+ - `(key)`: the current `key` if the current value is a `ht`. Otherwise `(cnt)`.
  - `(itr)`: the current object in the iteration of the enclosing `Selector`.
  - `(par)`: the object containing `(itr)`.
  - `(psize)`: number of items in `(par)`.
@@ -224,20 +224,19 @@ General utilities:
    `b`.
  - `(noop ..)`: do nothing, return `nil`.
 
-### KV / Strings / Vectors / Sequences
-For all `sequences` and `kvs`:
- - `(@* o d i ..)`: pick these indices/keys from `sequence`/`kv` into new
+### Hash-table / Strings / Vectors / Sequences
+For all `sequences` and `hts`:
+ - `(@* o d i ..)`: pick these indices/keys from `sequence`/`ht` into new
    `vector`.
- - `(size? o [d])`: length of `sequence` or number of keys in `kv`.
+ - `(size? o [d])`: length of `sequence` or number of keys in `ht`.
  - `(all? o [empty])`: are all items in `sequence` something? or `empty`.
  - `(some? o [empty])`: are some items in `sequence` something? or `emtpy`.
- - `(empty? o [d])`: is `sequence` or `kv` empty?.
- - `(compct o)`: Remove `nil`, empty `vectors`, empty `kvs` and keys with empty
-   `kvs`.
+ - `(empty? o [d])`: is `sequence` or `ht` empty?.
+ - `(compct o)`: Remove `nil`, empty `vectors`, empty `hts` and keys with empty `hts`.
 
-Make or join `kvs`:
- - `(cat$ ..)`: add all keys from these `kvs` to a new `kv`. left to right.
- - `(new$ :k1 expr1 ..)`: new `kv` with these keys and expressions.
+Make or join `hts`:
+ - `(cat$ ..)`: add all keys from these `hts` to a new `ht`. left to right.
+ - `(new$ :k1 expr1 ..)`: new `ht` with these keys and expressions.
 
 Primarily for `sequences` (`string`, `vector`, `list`):
  - `(new* ..)`: new `vector` with these elements.
@@ -252,7 +251,7 @@ Primarily for `sequences` (`string`, `vector`, `list`):
  - `(flatall* s [str=nil])`: flatten all `sequences` (except `strings`) into
    new `vector`. Use `t` as the second argument to flatten `strings` to
    individual chars as well.
- - `(flatn$ s n)`: flatten `kv` into vector `(new* k0 v0 k1 v1 ..)`
+ - `(flatn$ s n)`: flatten `ht` into vector `(new* k0 v0 k1 v1 ..)`
 
 Primarily for `string` searching. `[i]` means case insensitive:
  - `([i]pref? s pref [d])`: `s` if `pref` is a prefix of `s`; or `d`.
@@ -273,10 +272,10 @@ String maniuplation:
    more `sequences` of `strings`.
 
 ### Type Coercion and Tests
-`(is? o [d])` returns `o` if not `nil`, empty `sequence`, or empty `kv`; or `d`.
+`(is? o [d])` returns `o` if not `nil`, empty `sequence`, or empty `ht`; or `d`.
 
 These functions return the argument if the argument is the corresponding type:
-`flt?`, `int?`, `kv?`, `lst?`, `num?`, `str?`, `vec?`, `seq?`.
+`flt?`, `int?`, `ht?`, `lst?`, `num?`, `str?`, `vec?`, `seq?`.
 
 These functions return the argument parsed as the corresponding type if
 possible; otherwise they return the optional second argument: `int!?`, `flt!?`,

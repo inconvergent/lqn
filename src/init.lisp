@@ -1,7 +1,13 @@
 (in-package :lqn)
 
 (defvar *qmodes* '(:+ :? :- :%))
-(defvar *operators* '(:?map :@ :|| ?rec :*$ :$$ :$* :?filter :?fld :?xpr :?txpr :?mxpr :?srch :?grp))
+(defvar *operators* '(:|| :@
+                      :?select
+                      :?map :?filter :?fld
+                      :*$ :$*
+                      :?srch :?grp
+                      :?xpr :?txpr :?mxpr
+                      ?rec))
 (defvar *opt* '(optimize (speed 3) (safety 1)))
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr

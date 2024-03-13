@@ -3,7 +3,7 @@
 (plan 6)
 
 (subtest "lqn qry preproc"
-  (is (lqn::pre/$$ '(:ccc :ddd "IIUJ" "%@UU" :?@aa :?@bb ("cc" (progn _)) (:+ "ABC" (print _)) (:% "ABC" _) (:kkk "ABC" _)))
+  (is (lqn::pre/?select '(:ccc :ddd "IIUJ" "%@UU" :?@aa :?@bb ("cc" (progn _)) (:+ "ABC" (print _)) (:% "ABC" _) (:kkk "ABC" _)))
       '((:+ "ccc" :_) (:+ "ddd" :_) (:+ "IIUJ" :_) (:% "UU" :_) (:? "aa" :_) (:? "bb" :_)
         (:+ "cc" (PROGN _)) (:+ "ABC" (PRINT _)) (:% "ABC" :_) (:+ "kkk" "ABC")))
   (is (lqn::pre/?filter '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _)) (% "ABC" (print _)) (:% "ABC")))
@@ -16,7 +16,7 @@
   (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*$ _))))
   (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (?filter _))))
   (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (?map _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* ($$ _)))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* (?select _)))))
 
 (subtest "top-level modifiers"
   (is (lqn:qry #("abc" "def") [(sub? _ :s@a)]) #("abc") :test #'equalp)

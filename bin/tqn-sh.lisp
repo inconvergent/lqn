@@ -40,7 +40,7 @@ Options:
 
 ██ options can be write as -i -v or -iv.
 ██
-██ when outputing in TXT, internal vectors or kvs are printed in LDN
+██ when outputing in TXT, internal vectors or hts are printed in LDN
 ██ mode. use -tj and -tl to output to JSON or LDN respectively.
 ██ use -tjm to print a resulting vector as (minified) lines of json.
 ██
