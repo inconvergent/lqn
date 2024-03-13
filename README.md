@@ -18,55 +18,61 @@ See [docs/lqn.md](docs/lqn.md) for symbol documentation.
 
 ## Object Representation
 
-Internally `JSON` arrays are represented as `vector`. and `JSON` objects are
-represented as `hash-table`; `ht` (key/value) is used in the docs for short.
-In `tqn` lines of text are `vectors` of `strings`. In `lqn` Lisp files are
-read as a `vector` of lisp data.
+Internally `JSON` arrays/lists are represented as `vectors`. and `JSON`
+objects/dicts are represented as `hash-tables` (`ht`). Thus a text file is a
+`vector` of `strings`.We use `object` in the context of Operators and other
+`LQN` utilities to refer to either a `vector` or a `ht`. Lisp data is read
+directly.
 
 ## Operators
 
 The following operators have special behaviour. You can also write generic CL
-code, anywhere you can use an operator. Including the functions further down.
-Note that you can use `_` to refer to the current value.
+code in almost all contexts, as we demonstrate soon. In operators we use `_` to
+refer to the current value.
 
 In the following sections `[d]` represents an optional default value. E.g. if
-key/index is missing, or if a functon returns `nil`. `k` is an initial counter
-value. Whereas `..` menans that there can be arbitrary arguments, `Selectors`
-or `exprs`; depending on the context. `expr` denotes any expression or
-operator, like `(+ 1 _)` or `#[:id]`.
+key/index is missing, or if a functon would otherwise return `nil`.
+`k` is an initial counter
+value. Whereas `..` means that there can be arbitrary arguments/`expr`.
+`expr` denotes any expression or operator; like `(+ 1 _)` or `#[:id]`.
 
 ### Strings and :keywords
-In operators, and many functions, `:keywords` can be used to represent
+In operators, and several functions, `:keywords` can be used to represent
 lowercase `strings`. This is useful in the terminal to avoid escaping strings.
-Particularly when using `Selector` operators.
+Particularly when using `Selector` operators. You can use `"Strings"` instead,
+if you need case or whitespace.
 
 ### Pipe Operator - `||`
-`(|| expr ..)` pipes the results from the first clause/expression to the
-second, and so on.  Returns the result of the last clause. Pipe is the operator that
-surrounds all terminal queries by default.
+`(|| expr ..)` pipes the results from the first `expr` to the second, and so
+on.  Returns the result of the last `expr`. The Pipe operator surrounds all
+queries by default. So it is usually not neccessary to use it explicitly.
 
 For convenience the pipe has the following default translations:
   - `fx`: to `(?map (fx _))`: map `fx` across all items.
   - `:word`: to `[(isub? _ "word")]` to filter by `"word"`.
   - `"Word"`: to `[(sub? _ "Word")]` to filter by `Word`, case sensitive.
   - `(..)`: to itself. That is, expressions are not translated.
+so this is the default transalation for top level expressions in any query.
 
 ### Get Operator - `@`
-select keys, indexes or paths from nested structure:
+Select `:keys`, indexes or paths from nested structure:
  - `(@ k)`: get this key/index/path from current value.
  - `(@ k [d])`: get this key/index/path from current value.
  - `(@ o k [d])`: get this key/index/path from `o`.
 
+Paths support wildcards (`*`) and numerical indices for nested structures. E.g. this
+is a valid path: `:*/0/things`.
+
 ### Map Operator - `#()`
-Map operations over `vector` or `ht`:
+Map operations over `vector`; or over the values of a `ht`:
   - `#(fx)`: map `(fx _)` across all items.
   - `#(expr ..)`: evaluate these expressions sequentially on all items in `sequence`.
 
 ### Selector Operators - `{}`, `#{}`, `#[]`
 Select from on structure into a new data structure. using selectors:
-  - ` {s1 sel ..}`: from `ht` into new `ht`.
-  - `#{s1 sel ..}`: from `vector` of `hts` into new `vector` of `hts`.
-  - `#[s1 sel ..]`: from `vector` of `hts` into new `vector`.
+  - ` {s1 sel ..}`: from `object` into new `ht`.
+  - `#{s1 sel ..}`: from `vector` of `objects` into new `vector` of `objects`.
+  - `#[s1 sel ..]`: from `vector` of `objects` into new `vector`.
 
 A selector is a triple `(mode key expr)`. Only key is required. If `expr` is
 not provided the `expr` is `_`, that is: the value of the `key`. The modes are
@@ -109,26 +115,26 @@ operators:
 We use `{}` in the examples but all Selector operators have the same behaviour.
 
 ### Filter Operator - `[]` TODO TODO TODO
-Filter .......
-  - ` [s1 sel ..]`: from `vector` into new `vector`
+Filter `vector`; or the values of a `ht`:
+  - ` [expr1 .. exprn]` to keep any object or value that satisfies the expressions.
 
-The filter operator behaves somewhat similar to the Selector operators. they are used
-with `[]`, `?srch`, `?xpr`, `?txpr`, `?mxpr` operators, and the modes behave a
-little differently:
-  - `+`: if there are multiple expressions with `+` mode, requires ALL
-    of them to be `t`.
+The filter operator behaves somewhat similar to the Selector operators. They are used
+with `[]`, `?srch`, `?xpr`, `?txpr`, `?mxpr` operators. The modes behave
+like this:
+  - `+`: if there are multiple expressions with `+` mode, require ALL
+    of them to be satisfies.
   - `?`: if there are any clauses with `?` mode, it will select items where
-    either of these clauses is `t`
-  - `-`: items that match any clause with `-` mode will ALWAYS be ignored.
+    either of these clauses is satisfied
+  - `-`: items that match any clause with `-` mode will ALWAYS be dropped.
 
 If this is not what you need, you can compose boolean expressions with regular
 CL boolen operators. Here are some examples:
 
 ```lisp
 [:hello]               ; strings containing "hello".
-[:hi "Hello"]          ; strings containing either "Hello" or "hi".
-[:+@hi :+@hello]       ; strings containing "hi" and "hello".
-[:+@hi :+@hello "OH"]  ; strings containing ("hi" and "hello") or "OH".
+[:hi "Hello"]          ; strings containing either "Hello" OR "hi".
+[:+@hi :+@hello]       ; strings containing "hi" AND "hello".
+[:+@hi :+@hello "OH"]  ; strings containing ("hi" AND "hello") OR "OH".
 [int!?]                ; items that can be parsed as int.
 [(> _ 3)]              ; numbers larger than 3.
 [_ :-@hi]              ; strings except those that contain "hi".
@@ -139,7 +145,7 @@ CL boolen operators. Here are some examples:
 ```
 
 ### Fold Operator - `?fld`
-Reduce `vector`:
+Reduce `vector`; or the values of a `ht`:
   - `(?fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
     `acc` is inserted as the first argument to `fx`.
   - `(?fld init (fx .. _ ..))`: fold `(fx acc .. _ ..)`. The accumulator is
