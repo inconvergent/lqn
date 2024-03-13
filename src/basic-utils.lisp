@@ -49,7 +49,8 @@
 (defun int?  (i &optional d) "i if int; or d"
   (typecase i (integer (coerce i 'fixnum)) (fixnum i) (otherwise d)))
 
-(defun kv? (k &optional d) "k if kv; or d"            (typecase k (hash-table k) (otherwise d)))
+; TODO: rename kv!
+(defun kv? (k &optional d) "k if ht; or d"            (typecase k (hash-table k) (otherwise d)))
 (defun kw? (k &optional d) "k if kw; or d"            (typecase k (keyword k) (otherwise d)))
 (defun sym? (s &optional d) "s if sym; or d"          (typecase s (symbol s) (otherwise d)))
 (defun ssym? (s &optional d) "s if sym, not kw; or d" (if (and (sym? s) (not (kw? s))) s d))
@@ -106,14 +107,14 @@
 (defun lst! (v &optional d) "coerce v to list if v; else d"
   (etypecase v (list v) (string d) (vector (coerce v 'list)) (t d)))
 
-(defun size? (l &optional d) "length of sequence/number of keys in kv."
+(defun size? (l &optional d) "length of sequence/number of keys in ht."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
 (defun empty? (l &optional d &aux (n (size? l))) (if (int? n) (< n 1) d))
 
 (defun uniq (s &optional (fx #'equal)) (declare (function fx)) "remove duplicates from sequence"
   (remove-duplicates s :test fx))
 
-; TODO: extend to check kvs?
+; TODO: extend to check hts?
 (defun all? (v &optional empty) (declare (sequence v)) "check if all; or empty."
   (if (empty? v) empty (loop for k across (vec? v) always (is? k))))
 (defun none? (v &optional (empty t)) (declare (sequence v)) "check if none; or empty."

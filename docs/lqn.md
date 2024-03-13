@@ -685,7 +685,7 @@
  ;   Lambda-list: (K &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     k if kv; or d
+ ;     k if ht; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -1218,7 +1218,7 @@
  ;   Lambda-list: (L &OPTIONAL D)
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     length of sequence/number of keys in kv.
+ ;     length of sequence/number of keys in ht.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 

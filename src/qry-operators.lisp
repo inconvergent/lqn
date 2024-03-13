@@ -79,7 +79,7 @@
   (labels ((do-dat () (case (length d) (1 itr) (2 (do-key (second d)))))
            (do-key (cd) (funcall rec (dat/new conf itr)
                           (typecase cd (keyword `(@ ,cd)) (string `(@ ,cd)) (otherwise cd)))))
-    `(let ((,par ,(gk conf :dat)) (,kvres (make$)))
+    `(let ((,par ,(gk conf :dat)) (,kvres (new$)))
        (labels ((do-vec ()
                   (loop with ,par = (vec! ,par)
                         for ,i from 0 for ,itr across ,par
@@ -100,10 +100,14 @@
            (otherwise (error "RT: ?grp bad type. expected hash-table or vector:~%got: ~a." ,par))))
        ,kvres))))
 
-(defun compile/$$ (rec conf d) ; {...} ; sel ; select keys/exprs from ht to new ht
+; TODO: nil input should not just return nil.
+; remember xqn, or eg. {:missing-key }
+
+; TODO: ?sel
+(defun compile/?select (rec conf d) ; {...} ; sel ; select keys/exprs from ht to new ht
   (awg (kres par dat)
   `(let* ((,par ,(gk conf :dat)))
-     (labels ((do-ht (&aux (,kres ,(if (car- dat? d) `(make$ ,par) `(make$))))
+     (labels ((do-ht (&aux (,kres ,(if (car- dat? d) `(make$ ,par) `(new$))))
                 (∈ (:par ,par)
                    ,@(loop for (m kk expr) in (strip-all d)
                        collect `(let ((,dat (@@ ,par ,kk)))
@@ -119,8 +123,29 @@
          (vector (do-vec)) (simple-vector (do-vec))
          (otherwise (error "RT: {..} bad type. expected hash-table or vector.~%got: ~a." ,par)))))))
 
+; TODO: ?mapsel
+(defun compile/*$ (rec conf d) ; #{...} ; sel ; select from vec of hts to vec of hts
+  (awg (i vres kvres itr dat par)
+  `(let ((,par ,(gk conf :dat)))
+     (labels ((do-vec (&aux (,vres (mav)))
+                (loop with ,par of-type vector = (vec! ,par)
+                   for ,itr of-type hash-table across ,par for ,i from 0
+                   for ,kvres of-type hash-table = ,(if (car- dat? d) `(make$ ,itr) `(new$))
+                   do (∈ (:par ,par :cnt ,i :itr ,itr)
+                         ,@(loop for (m kk expr) in (strip-all d)
+                             collect `(let ((,dat (@@ ,itr ,kk)))
+                                        (declare (ignorable ,dat))
+                                        (∈ (:key ,kk) ,(compile/$add rec
+                                                         (dat/new conf dat) m kvres kk expr))))
+                         (vex ,vres ($nil ,kvres))))
+                ,vres))
+       (typecase ,par (null nil)
+         (vector (do-vec)) (simple-vector (do-vec)) (list (do-vec))
+         (otherwise (error "RT: #{..} bad type. expected vector, got: ~a." ,par)))))))
+
 ; TODO: vec! does the wrong thing for non-sequence
 
+; TODO: map select flat, something something
 ; rename this to (?@ ) or something?
 ; change to select from vec of objects? it kinda is alread??
 (defun compile/$* (rec conf d) ; #[...] ; sel ; select from vec of hts to vec
@@ -140,25 +165,6 @@
        (typecase ,par ; TODO: support hts
         (null nil) (vector (do-vec)) (simple-vector (do-vec)) (list (do-vec))
         (otherwise (error "RT: #[..] bad type. expected vector, got: ~a." ,par)))))))
-
-(defun compile/*$ (rec conf d) ; #{...} ; sel ; select from vec of hts to vec of hts
-  (awg (i vres kvres itr dat par)
-  `(let ((,par ,(gk conf :dat)))
-     (labels ((do-vec (&aux (,vres (mav)))
-                (loop with ,par of-type vector = (vec! ,par)
-                   for ,itr of-type hash-table across ,par for ,i from 0
-                   for ,kvres of-type hash-table = ,(if (car- dat? d) `(make$ ,itr) `(make$))
-                   do (∈ (:par ,par :cnt ,i :itr ,itr)
-                         ,@(loop for (m kk expr) in (strip-all d)
-                             collect `(let ((,dat (@@ ,itr ,kk)))
-                                        (declare (ignorable ,dat))
-                                        (∈ (:key ,kk) ,(compile/$add rec
-                                                         (dat/new conf dat) m kvres kk expr))))
-                         (vex ,vres ($nil ,kvres))))
-                ,vres))
-       (typecase ,par (null nil)
-         (vector (do-vec)) (simple-vector (do-vec)) (list (do-vec))
-         (otherwise (error "RT: #{..} bad type. expected vector, got: ~a." ,par)))))))
 
 (defun pre/?filter (q &optional (mm :?)) (unless q (warn "?filter: missing args."))
   (labels ((unpack- (o) (dsb (m sk) (unpack-mode o mm) `(,m ,(pre/xpr-sel sk :_)))))
@@ -257,9 +263,9 @@
              ((vectorp d)    (rec conf `(?map ,@(coerce d 'list))))
              ((atom d)       d)
              ((qop? :||      d) (compile/||      #'rec conf (pre/||      (cdr d))))
-             ((qop? :$*      d) (compile/$*      #'rec conf (pre/$$      (cdr d))))
-             ((qop? :*$      d) (compile/*$      #'rec conf (pre/$$      (cdr d))))
-             ((qop? :$$      d) (compile/$$      #'rec conf (pre/$$      (cdr d))))
+             ((qop? :$*      d) (compile/$*      #'rec conf (pre/?select (cdr d))))
+             ((qop? :*$      d) (compile/*$      #'rec conf (pre/?select (cdr d))))
+             ((qop? :?select d) (compile/?select #'rec conf (pre/?select (cdr d))))
              ((qop? :?map    d) (compile/?map    #'rec conf (pre/?map    (cdr d))))
              ((qop? :?filter d) (compile/?filter #'rec conf (pre/?filter (cdr d))))
              ((qop? :?xpr    d) (compile/?xpr    #'rec conf (cdr d)))

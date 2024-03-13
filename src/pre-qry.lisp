@@ -106,14 +106,14 @@
            (allres (if (= (length q) (length q*)) res (cons `(lit :_) res))))
       (if (< (length allres) 2) allres `((|| ,@allres))))))
 
-(defun pre/$$ (q &optional (m :+)) (unless q (warn "$$: missing args."))
+(defun pre/?select (q &optional (m :+)) (unless q (warn "?select: missing args."))
   (labels ; TODO: how to handle selecting only keys with -@?
     ((tx- (a b c)
       `(,a ,(typecase b (keyword (sdwn (mkstr b))) (string b)
               (symbol (when (symbol-package b)
-                            (error "$$: got intered symbol. use #:~a or :~a instead" b b))
+                            (error "?select: got intered symbol. use #:~a or :~a instead" b b))
                       (sdwn (mkstr b)))
-              (otherwise (error "$$: expected string/:keyword/uninterned symbol. got: ~a." b)))
+              (otherwise (error "?select: expected string/:keyword/uninterned symbol. got: ~a." b)))
            ,(typecase c (keyword c) (boolean c)
                         (symbol (if (dat? c) :_ `(,c :_))) ; TODO: fix: #{(:aa #:aa)}
                         (otherwise c))))
@@ -123,7 +123,7 @@
        (apply #'tx- (etypecase (second k)
                       (symbol (repack- k)) (string (repack- k))
                       (cons (repack-cons ck k))))))
-    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:$$)))
+    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:?select)))
            (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 
