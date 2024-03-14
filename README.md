@@ -1,20 +1,31 @@
 # LQN - Lisp Query Notation
 
+## About
+
 LQN is a Common Lisp libary, query language and terminal utility to query and
 transform text files such as `JSON` and `CSV`, as well as Lisp data (`LDN`), The
-terminal utilities will parse the input data to internal lisp strucutres
-according to the mode. Then the `lqn` query language can be used for queries
+terminal utilities will parse the input data to internal lisp structures
+according to the input mode. Then the `lqn` query language can be used for queries
 and transformations.
 
-`LQN` consists of three terminal commands: `lqn`, `jqn` and `tqn`. For lisp
-data, `JSON` and text files respectively.
+`lqn` started as an experiment and programming exercise. But it has turned into
+a little language i find rather useful. Both in the terminal, and
+more interestingly, as a meta language for writing macros in CL. The main
+purpose of the design is to make something that is intuitive, terse, yet
+flexible enough that you can write generic CL if you need to. I also wanted to
+make something that requres a relatively simple compiler.
 
-Here is a small tutorial: https://inconvergent.net/2024/lisp-query-notation/
+Here is a small tutorial: https://inconvergent.net/2024/lisp-query-notation/.
 
-You can find some more termianl documentation and examples in
+An expanded version of the tutorial can be seen in this paper:
+https://zenodo.org/records/11001584
+
+When using `LQN` on the terminal there are three terminal commands, or input
+modes: `jqn`, `tqn` and `lqn`. For `JSON`, text and lisp data respectively.
+(For installation see below.) You can find some terminal command examples in
 [bin/lqn-sh.lisp](lqn), [bin/jqn-sh.lisp](jqn), and [bin/tqn-sh.lisp](tqn).
 
-See [docs/lqn.md](docs/lqn.md) for symbol documentation.
+Symbol documentation can be seen in [docs/lqn.md](docs/lqn.md).
 
 ## Object Representation
 
@@ -37,12 +48,14 @@ value. Whereas `..` means that there can be arbitrary arguments/`expr`.
 `expr` denotes any expression or operator; like `(+ 1 _)` or `#[:id]`.
 
 ### Strings and :keywords
+
 In operators, and several functions, `:keywords` can be used to represent
 lowercase `strings`. This is useful in the terminal to avoid escaping strings.
 Particularly when using `Selector` operators. You can use `"Strings"` instead,
 if you need case or whitespace.
 
 ### Pipe Operator - `||`
+
 `(|| expr ..)` pipes the results from the first `expr` to the second, and so
 on.  Returns the result of the last `expr`. The Pipe operator surrounds all
 queries by default. So it is usually not neccessary to use it explicitly.
@@ -55,6 +68,7 @@ For convenience the pipe has the following default translations:
 so this is the default transalation for top level expressions in any query.
 
 ### Get Operator - `@`
+
 Select `:keys`, indexes or paths from nested structure:
  - `(@ k)`: get this key/index/path from current value.
  - `(@ k [d])`: get this key/index/path from current value.
@@ -64,15 +78,17 @@ Paths support wildcards (`*`) and numerical indices for nested structures. E.g. 
 is a valid path: `:*/0/things`.
 
 ### Map Operator - `#()`
+
 Map operations over `vector`; or over the values of a `ht`:
   - `#(fx)`: map `(fx _)` across all items.
   - `#(expr ..)`: evaluate these expressions sequentially on all items in `sequence`.
 
 ### Selector Operators - `{}`, `#{}`, `#[]`
-Select from on structure into a new data structure. using selectors:
-  - ` {s1 sel ..}`: from `object` into new `ht`.
-  - `#{s1 sel ..}`: from `vector` of `objects` into new `vector` of `objects`.
-  - `#[s1 sel ..]`: from `vector` of `objects` into new `vector`.
+
+Select from one structure into a new data structure. using selectors:
+  - ` {s1 sel ..}`: from `ht` into new `ht`.
+  - `#{s1 sel ..}`: from `vector` of `hts` into new `vector` of `hts`.
+  - `#[s1 sel ..]`: from `vector` of `hts` into new `vector`.
 
 A selector is a triple `(mode key expr)`. Only key is required. If `expr` is
 not provided the `expr` is `_`, that is: the value of the `key`. The modes are
@@ -115,6 +131,7 @@ operators:
 We use `{}` in the examples but all Selector operators have the same behaviour.
 
 ### Filter Operator - `[]` TODO TODO TODO
+
 Filter `vector`; or the values of a `ht`:
   - ` [expr1 .. exprn]` to keep any object or value that satisfies the expressions.
 
@@ -145,6 +162,7 @@ CL boolen operators. Here are some examples:
 ```
 
 ### Fold Operator - `?fld`
+
 Reduce `vector`; or the values of a `ht`:
   - `(?fld init fx)`: fold `(fx acc _)` with `init` as the first `acc` value.
     `acc` is inserted as the first argument to `fx`.
@@ -154,9 +172,13 @@ Reduce `vector`; or the values of a `ht`:
     if you need to name the accumulator explicity.
 
 ### Group by Operator - `?grp`
-  TODO
+
+Group input into a new `ht`:
+  - `(?grp expr [tx-expr])`: keys are given by `expr`, and values are given by
+    `tx-expr` (or `_`).
 
 ### Recursion Operator - `?rec`
+
 Repeat the same expression while something is true:
  - `(?rec test-expr expr)`: repeat `expr` while `test-expr`. `_` refers to the
    input value, then to the most recent evaluation of `expr`. Use `(cnt)` to
@@ -164,12 +186,14 @@ Repeat the same expression while something is true:
    value.
 
 ### Search Operator - `?srch`
+
 Iterate a datastructure (as if with `?txpr`) and collect the matches in a new
 `vector`:
   - `(?srch sel)`: collect `_` whenever the `Selector` matches.
   - `(?srch sel .. expr)`: collect `expr` whenever the `Selector` matches.
 
 ### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
+
 Perform operation on when pattern or condition is satisfied:
   - `(?xpr sel)`: match current value against `EXPR Selector`. Return the
     result if not `nil`.
@@ -195,6 +219,7 @@ convenience there are some utility functions/macros in defined in `lqn`. Some
 of them are described below. There are more in the documentation.
 
 ### Global Query Context Fxs
+
 Defined in the query scope:
  - `(fi [k=0])`: counts files from `k`.
  - `(fn)`: name of the current file; or `":internal:"`, `"pipe"`.
@@ -205,6 +230,7 @@ Defined in the query scope:
  - `(wrn [msg])`: raise `warn` with `msg`.
 
 ### Operator Context Fxs
+
 Defined in all operators:
  - `_`: the current value.
  - `(cnt)`: counts from `0` in the enclosing `Selector`.
@@ -215,6 +241,7 @@ Defined in all operators:
  - `(isize)`: number of items in `(itr)`.
 
 ### Generic Utilities
+
 General utilities:
  - `(?? a expr [res=expr])`: execute `expr` only if `a` is not `nil`. if `expr`
    is not nil it returns `expr` or `res`; otherwise `nil`.
@@ -231,6 +258,7 @@ General utilities:
  - `(noop ..)`: do nothing, return `nil`.
 
 ### Hash-table / Strings / Vectors / Sequences
+
 For all `sequences` and `hts`:
  - `(@* o d i ..)`: pick these indices/keys from `sequence`/`ht` into new
    `vector`.
@@ -253,7 +281,7 @@ Primarily for `sequences` (`string`, `vector`, `list`):
  - `(tail s [n=10])`: last `n` items of `sequence`.
  - `(cat* s ..)`: concatenate these `sequences` to a `vector`.
  - `(flatn* s [n=1] [str=nil])`: flatten `sequence` `n` times into a `vector`.
-   if `str=t` strings are flattened into individual chars as well.
+   If `str=t` strings are flattened into individual chars as well.
  - `(flatall* s [str=nil])`: flatten all `sequences` (except `strings`) into
    new `vector`. Use `t` as the second argument to flatten `strings` to
    individual chars as well.
@@ -278,6 +306,7 @@ String maniuplation:
    more `sequences` of `strings`.
 
 ### Type Coercion and Tests
+
 `(is? o [d])` returns `o` if not `nil`, empty `sequence`, or empty `ht`; or `d`.
 
 These functions return the argument if the argument is the corresponding type:
@@ -287,10 +316,11 @@ These functions return the argument parsed as the corresponding type if
 possible; otherwise they return the optional second argument: `int!?`, `flt!?`,
 `num!?`, `str!?`, `vec!?`, `seq!?`.
 
-The following functions will coerce the argument, or fail if the coercion is not supported:
-`str!`, `int!`, `flt!`, `lst!` `sym!`,
+The following functions will coerce the argument, or fail if the coercion is
+not supported: `str!`, `int!`, `flt!`, `lst!` `sym!`,
 
 ## Install
+
 `lqn` requires [SBCL](https://www.sbcl.org/). And is pretty easy to install via
 `quicklisp`. SBCL is available in most package managers. And you can get
 quicklisp at https://www.quicklisp.org/beta/. Make sure `lqn` is available in
@@ -307,18 +337,7 @@ Unfortunately this will tend to have a high startup time. To make it run faster
 you can create an SBCL image/core that has `lqn` preloaded and dump it using
 `sb-ext:save-lisp-and-die`. Then use the core in the alias instead of SBCL.
 
-Below is an example script for creating your own core. You can also preload
+ is an example script for creating your own core. You can also preload
 your own libraries which will be available to `lqn`.
-```bash
-#!/bin/bash
-sbcl --quit \
-     --eval '(ql:quickload :sb-introspect)'\
-     --eval '(load "/path/to/quicklisp/setup.lisp")'\
-     --eval '(ql:quickload :lqn)'\ # add more evals to load your own pkg
-     --eval '(save-lisp-and-die "/path/to/lsp.core"
-               :executable t :compression nil
-               :purify t     :save-runtime-options t)'
 
-# Then make aliases like this:
-alias lqn="/path/to/lsp.core --script ~/path/to/lqn/bin/lqn-sh.lisp"
-```
+You can see an example bash script for making your own core here[bin/core.sh](here)

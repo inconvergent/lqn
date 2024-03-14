@@ -1,4 +1,4 @@
-# Lisp Query Notation Symbol Documentation (2.0.0)
+# Lisp Query Notation Symbol Documentation (2.0.1)
 
 #### LQN:??
 
@@ -383,7 +383,7 @@
  ;   Lambda-list: (F)
  ;   Derived type: (FUNCTION (T) (VALUES (NOT NULL) &OPTIONAL))
  ;   Documentation:
- ;     f as int; or fail.
+ ;     f as float; or fail.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -783,10 +783,10 @@
  ;   [symbol]
  ; 
  ; LST! names a compiled function:
- ;   Lambda-list: (V &OPTIONAL D)
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (L)
+ ;   Derived type: (FUNCTION (T) (VALUES LIST &OPTIONAL))
  ;   Documentation:
- ;     coerce v to list if v; else d
+ ;     coerce l to list if l
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
@@ -1575,10 +1575,10 @@
  ;   [symbol]
  ; 
  ; VEC! names a compiled function:
- ;   Lambda-list: (V &OPTIONAL (D `#(,V)))
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (V)
+ ;   Derived type: (FUNCTION (T) (VALUES VECTOR &OPTIONAL))
  ;   Documentation:
- ;     coerce v to vector. if v is not a vector, list, string it returns d
+ ;     coerce v to vector. if v is not a string, vector
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 

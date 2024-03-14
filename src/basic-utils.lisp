@@ -20,12 +20,12 @@
                           (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
                                            (nreverse (cons l acc))))))
     (if l (rec l nil) nil)))
-(defun mkstr (&rest args) "coerce all arguments to a string."
+(defun mkstr (&rest args) (declare #.*opt*) "coerce all arguments to a string."
   (with-output-to-string (s) (dolist (a args) (princ a s))))
-(defun kw (s) "mkstr, upcase, keyword."
+(defun kw (s) (declare #.*opt*) "mkstr, upcase, keyword."
   (intern (string-upcase (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
           :keyword))
-(defun ct/kw/str (a)
+(defun ct/kw/str (a) (declare #.*opt*)
   (typecase a (string a) (keyword (string-downcase (mkstr a))) (otherwise a)))
 (defun symb (&rest args) "mkstr, make symbol." (values (intern (sup (apply #'mkstr args)))))
 (defun psymb (&optional (pkg 'lqn) &rest args) ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
@@ -44,68 +44,81 @@
        (> (length (symbol-name d)) (length m))))
 
 ; IS TYPE?
-(defun flt?  (f &optional d) "f if float; or d"
+(defun flt?  (f &optional d) (declare #.*opt*) "f if float; or d"
   (typecase f (double-float (coerce f 'single-float)) (single-float f) (otherwise d)))
-(defun int?  (i &optional d) "i if int; or d"
+(defun int?  (i &optional d) (declare #.*opt*) "i if int; or d"
   (typecase i (integer (coerce i 'fixnum)) (fixnum i) (otherwise d)))
 
-; TODO: rename kv!
-(defun kv? (k &optional d) "k if ht; or d"            (typecase k (hash-table k) (otherwise d)))
-(defun kw? (k &optional d) "k if kw; or d"            (typecase k (keyword k) (otherwise d)))
-(defun sym? (s &optional d) "s if sym; or d"          (typecase s (symbol s) (otherwise d)))
-(defun ssym? (s &optional d) "s if sym, not kw; or d" (if (and (sym? s) (not (kw? s))) s d))
+; TODO: rename kv function!
+(defun kv? (k &optional d) (declare #.*opt*) "k if ht; or d"
+  (typecase k (hash-table k) (otherwise d)))
+(defun kw? (k &optional d) (declare #.*opt*) "k if kw; or d"
+  (typecase k (keyword k) (otherwise d)))
+(defun sym? (s &optional d) (declare #.*opt*) "s if sym; or d"
+  (typecase s (symbol s) (otherwise d)))
+(defun ssym? (s &optional d) (declare #.*opt*) "s if sym, not kw; or d"
+  (if (and (sym? s) (not (kw? s))) s d))
 
-(defun num? (n &optional d) "n if number; or d"   (typecase n (number n) (otherwise d)))
-(defun str? (s &optional d) "s if string; or d"   (typecase s (string s) (otherwise d)))
-(defun vec? (v &optional d) "v if vector; or d"   (typecase v (vector v) (otherwise d)))
-(defun lst? (l &optional d) "l if list; or d"     (typecase l (list l) (otherwise d)))
-(defun seq? (s &optional d) "s if sequence; or d" (typecase s (sequence s) (otherwise d)))
+(defun num? (n &optional d) (declare #.*opt*) "n if number; or d"
+  (typecase n (number n) (otherwise d)))
+(defun str? (s &optional d) (declare #.*opt*) "s if string; or d"
+  (typecase s (string s) (otherwise d)))
+(defun vec? (v &optional d) (declare #.*opt*) "v if vector; or d"
+  (typecase v (vector v) (otherwise d)))
+(defun lst? (l &optional d) (declare #.*opt*) "l if list; or d"
+  (typecase l (list l) (otherwise d)))
+(defun seq? (s &optional d) (declare #.*opt*) "s if sequence; or d"
+  (typecase s (sequence s) (otherwise d)))
 
 ; PARSE AS TYPE OR DEFAULT
-(defun read? (s &optional d &rest rest) "read from string; or d"
+(defun read? (s &optional d &rest rest) (declare #.*opt*) "read from string; or d"
   (typecase s (string (apply #'read-from-string s rest)) (otherwise d)))
 
 ; this is messy, but it works (i think)
-(defun int!? (i &optional d strict) "i as int if it is or can be parsed or coerced as int; or d"
+(defun int!? (i &optional d strict) (declare #.*opt*)
+  "i as int if it is or can be parsed or coerced as int; or d"
   (handler-case (or (int? i) (int? (read? i))
                     (and (not strict) (floor (or (flt? i) (flt? (read? i)) d)))
                     d)
                 (error () d)))
-(defun flt!? (f &optional d strict) "f as flt if it is or can be parsed or coerced as flt; or d"
+(defun flt!? (f &optional d strict) (declare #.*opt*)
+  "f as flt if it is or can be parsed or coerced as flt; or d"
   (handler-case (or (flt? f) (flt? (read? f))
                     (and (not strict) (coerce (or (int? f) (int? (read? f)) d) 'single-float))
                     d)
                 (error () d)))
 
-(defun num!? (n &optional d) "n as number if it is or can be parsed as num; or d"
+(defun num!? (n &optional d) (declare #.*opt*)
+  "n as number if it is or can be parsed as num; or d"
   (handler-case (or (num? n) (num? (read? n)) d) (error () d)))
 
-(defun str!? (s &optional d) "s as str if it or can be parsed as str; or d"
+(defun str!? (s &optional d) (declare #.*opt*)
+  "s as str if it or can be parsed as str; or d"
   (handler-case (or (str? (read? s)) (str? s)  d) (error () d)))
 ; (defun vec!? (v &optional d) "v as vector if it is vec; or d"
 ;   (handler-case (or (vec? v) (vec? (read? v)) d) (error () d)))
 ; (defun seq!? (s &optional d) "s as seq if it can be parsed; or d"
 ;   (handler-case (or (seq? s) (seq? (read? s)) d) (error () d)))
-(defun lst!? (l &optional d) "v as list if it can be a list; or d"
+(defun lst!? (l &optional d) (declare #.*opt*) "v as list if it can be a list; or d"
   (labels ((cnv (a) (when (vec? a) (coerce a 'list))))
     (handler-case (or (cnv l) (cnv (read? l)) d) (error () d))))
 
 ; COERCE TO TYPE
-(defun sym! (&rest rest) "stringify, make symbol" (apply #'symb rest))
-(defun kw! (&rest rest) "stringify, make keyword" (apply #'psymb :keyword rest))
-(defun str! (&rest rest) "coerce to string"
+(defun sym! (&rest rest) (declare #.*opt*) "stringify, make symbol" (apply #'symb rest))
+(defun kw! (&rest rest) (declare #.*opt*) "stringify, make keyword" (apply #'psymb :keyword rest))
+(defun str! (&rest rest) (declare #.*opt*) "coerce to string"
   (apply #'mkstr (loop for s in rest collect (typecase s (string s) (symbol (string-downcase s)) (t (mkstr s))))))
-; TODO: d is deprecated
-(defun vec! (v &optional (d `#(,v))) "coerce v to vector. if v is not a vector, list, string it returns d"
-  (etypecase v (vector v) (list (coerce v 'vector)) (t d)))
-
-(defun int! (i) "i as int; or fail." ; remember to use strict
+(defun vec! (v) (declare #.*opt*) "coerce v to vector. if v is not a string, vector"
+  (typecase v (vector v) (list (coerce v 'vector)) ; this is a bit silly
+              (otherwise (error "unable to force ~a to vec" v))))
+(defun int! (i) (declare #.*opt*) "i as int; or fail." ; NOTE: remember to use strict
   (or (int!? i nil t) (error "unable to force ~a to int" i)))
-(defun flt! (f)  "f as int; or fail."
-  (or (flt!? f nil t) (error "unable to force ~a to flt" f)))
+(defun flt! (f) (declare #.*opt*) "f as float; or fail." ; strict!
+  (or (flt!? f nil t) (error "unable to force ~a to float" f)))
 
-(defun lst! (v &optional d) "coerce v to list if v; else d"
-  (etypecase v (list v) (string d) (vector (coerce v 'list)) (t d)))
+(defun lst! (l) (declare #.*opt*) "coerce l to list if l" ; TODO: make ensure list/vec with default
+  (typecase l (list l) (vector (coerce l 'list))
+              (t (error "unable to coerce ~a to list" l))))
 
 (defun size? (l &optional d) "length of sequence/number of keys in ht."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
