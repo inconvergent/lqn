@@ -69,10 +69,10 @@ Map operations over `vector`; or over the values of a `ht`:
   - `#(expr ..)`: evaluate these expressions sequentially on all items in `sequence`.
 
 ### Selector Operators - `{}`, `#{}`, `#[]`
-Select from on structure into a new data structure. using selectors:
-  - ` {s1 sel ..}`: from `object` into new `ht`.
-  - `#{s1 sel ..}`: from `vector` of `objects` into new `vector` of `objects`.
-  - `#[s1 sel ..]`: from `vector` of `objects` into new `vector`.
+Select from one structure into a new data structure. using selectors:
+  - ` {s1 sel ..}`: from `ht` into new `ht`.
+  - `#{s1 sel ..}`: from `vector` of `hts` into new `vector` of `hts`.
+  - `#[s1 sel ..]`: from `vector` of `hts` into new `vector`.
 
 A selector is a triple `(mode key expr)`. Only key is required. If `expr` is
 not provided the `expr` is `_`, that is: the value of the `key`. The modes are

@@ -249,7 +249,10 @@ ranges are lists that behave like arguments to seq."
          using (hash-value v) do (setf (gethash k res) (gethash k kv))))
   res)
 (defun cat* (&rest rest) "concatenate sequences in rest to vector"
-  (apply #'concatenate 'vector (mapcar #'vec! rest))) ; inefficient
+  (labels ((to-vec (v)
+             (typecase v (string v) (vector v) (simple-vector v)
+                         (list v) (otherwise (list v)))))
+   (apply #'concatenate 'vector (mapcar #'to-vec rest)))) ; inefficient
 
 (defun flatall* (x &optional (str nil))
   "flatten all sequences into new vector. if str is t strings will become
