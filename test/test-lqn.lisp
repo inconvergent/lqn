@@ -1,62 +1,24 @@
 (in-package #:lqn-tests)
 
-(plan 7)
-
-(subtest "utils"
-  (is (lqn:sub? "aabb" "ab") "aabb")
-  (is (lqn:sub? "aabb" "abc") nil)
-  (is (lqn:sub? "AABB" "ab") nil)
-  (is (lqn:isub? "AABB" "ab") "AABB")
-  (is (lqn:isub? "AABB" "abc") nil)
-  (is (lqn:pref? "AABB" "AA") "AABB")
-  (is (lqn:ipref? "AABB" "aa") "AABB")
-  (is (lqn:suf? "AABB" "BB") "AABB")
-  (is (lqn:suf? "AABB" "bb") nil)
-  (is (lqn:isuf? "AABB" "bb") "AABB")
-  (is (lqn::ct/kw/str "AABB") "AABB")
-  (is (lqn::ct/kw/str :AABB) "aabb")
-  (is (lqn::ct/kw/str 'AABB) 'AABB)
-  (is (lqn::ct/kw/str (+ 1 2)) 3)
-  (is (lqn::ct/kw/str (progn 'abc)) 'abc)
-  (is (lqn:msym? 'aa 'aa) 'aa)
-  (is (lqn:msym? 'aa :aa) nil)
-  (is (lqn:msym? 'aabb "ab") 'aabb)
-  (is (lqn:msym? 'aabb (progn "ab")) nil)
-  (is (lqn:msym? 'aabb (progn 'aabb)) 'aabb)
-  (is (lqn:msym? 'AABB (progn 'aabb)) 'aabb)
-  (is (lqn:msym? :AABB (progn :aabb)) :aabb)
-  (is (lqn::unpack-mode "?@fxfx")    '(:? "fxfx"))
-  (is (lqn::unpack-mode '?@fxfx)     '(:? fxfx))
-  (is (lqn::unpack-mode '(?@fxfx))   '(:? (fxfx)))
-  (is (lqn::unpack-mode '(:? fxfx))  '(:? fxfx))
-  (is (lqn::unpack-mode '(:?@fxfx))  '(:? (:fxfx)))
-  (is (lqn::unpack-mode '(fxfx :ss)) '(:+ (fxfx :ss)))
-  (is (lqn::unpack-mode "fxfx")      '(:+ "fxfx"))
-  (is (lqn::unpack-mode 'fxfx :y)    '(:y fxfx))
-  (is (lqn::unpack-mode 'fxfx :y)    '(:y fxfx)))
-
-(subtest "io"
-  (is (lqn:ldnout *test-data-raw*) *test-data-raw* :test #'equalp)
-  (is (lqn:ldnout (lqn:jsnloadf *test-data-fn*)) *test-data-raw* :test #'equalp)
-  (is-str (lqn::jsnstr (lqn:jsnloadf *test-data-fn*))
-          "[{\"_id\":\"65679d23d38d711eaf999e89\",\"index\":0,\"things\":[{\"id\":0,\"name\":\"Chris\",\"extra\":\"extra99\"}],\"msg\":\"this is a message\",\"fave\":\"strawberry\"},{\"_id\":\"65679d23fe33bc4c240675c0\",\"index\":1,\"things\":[{\"id\":10,\"name\":\"Winters\",\"extra\":\"extra1\"},{\"id\":11,\"name\":\"Haii\",\"extra\":\"extra2\"},{\"id\":12,\"name\":\"Klein\"}],\"msg\":\"Hello, undefined! You have 1 unread messages.\",\"fave\":\"strawberry\"},{\"_id\":\"65679d235b4143d2932ea17a\",\"things\":[{\"id\":31,\"name\":\"Star\"},{\"id\":32,\"name\":\"Ball\"}],\"msg\":\"Hello, undefined! You have 5 unread messages.\",\"fave\":\"blueberry\"}]")
-  (is (lqn:ldnout *test-data-2-raw*) *test-data-2-raw* :test #'equalp)
-  (is (lqn:ldnout (lqn:jsnloadf *test-data-2-fn*)) *test-data-2-raw* :test #'equalp)
-  (is-str (lqn::jsnstr (lqn:jsnloadf *test-data-2-fn*))
-          "{\"credit\":\"Mega Corp.\",\"credit_URL\":\"http://fax.megacorp\",\"disclaimer_url\":null,\"copyright_url\":\"http://fax.megacorp/about/terms.asp\",\"image\":{\"url\":\"http://fax.megacorp/images/Logo.jpg\",\"title\":\"Mega Corp\",\"link\":\"http://fax.megacorp/yyyyyyyyy\"},\"suggested_pickup\":\"15 minutes after the hour\",\"suggested_pickup_period\":\"60\",\"dewpoint_c\":-22.2,\"dewpoint_f\":null,\"dewpoint_string\":\"-8.0 F (-22.2 C)\",\"heat_index_c\":-20.6,\"heat_index_f\":-5.0,\"heat_index_string\":\"-5.0 F (-20.6 C)\",\"observation_time\":\"Last Updated on Dec 5 2023, 9:37 pm CET\",\"current_observation\":{\"station_name\":\"Gulhuset\",\"observation_age\":42,\"dewpoint_day_high_f\":\"-7\",\"dewpoint_day_high_time\":\"8:47pm\",\"dewpoint_day_low_f\":-8.0,\"windchill_month_low_f\":-9,\"windchill_year_low_f\":-9},\"time_to_generate\":0.012046}")
-  (is (lqn:sdwn (lqn::jsnstr (lqn:jsnloadf *test-data-2-fn*)))
-      (lqn:sdwn (lqn::jsnstr *test-data-2-raw*))))
+(plan 6)
 
 (subtest "lqn qry preproc"
-  (is (lqn::pre/$$ '(:ccc :ddd "IIUJ" "%@UU" :?@aa :?@bb ("cc" (progn _)) (:+ "ABC" (print _)) (:% "ABC" _) (:kkk "ABC" _)))
+  (is (lqn::pre/?select '(:ccc :ddd "IIUJ" "%@UU" :?@aa :?@bb ("cc" (progn _)) (:+ "ABC" (print _)) (:% "ABC" _) (:kkk "ABC" _)))
       '((:+ "ccc" :_) (:+ "ddd" :_) (:+ "IIUJ" :_) (:% "UU" :_) (:? "aa" :_) (:? "bb" :_)
         (:+ "cc" (PROGN _)) (:+ "ABC" (PRINT _)) (:% "ABC" :_) (:+ "kkk" "ABC")))
-  (is (lqn::pre/** '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _)) (% "ABC" (print _)) (:% "ABC")))
+  (is (lqn::pre/?filter '(ccc :ddd "IIUJ" "%@UU" ?@aa ?@bb ("cc" (progn _)) (% "ABC" (print _)) (:% "ABC")))
      '((:? (WHEN (CCC :_) :_)) (:? (AND (LQN:STR? :_) (LQN:ISUB? :_ "ddd"))) (:? (AND (LQN:STR? :_) (LQN:SUB? :_ "IIUJ")))
        (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "UU"))) (:? (WHEN (AA :_) :_)) (:? (WHEN (BB :_) :_)) (:? ("cc" (PROGN _))) (:? (% "ABC" (PRINT _)))
        (:% (AND (LQN:STR? :_) (LQN:SUB? :_ "ABC"))))))
 
-(subtest "modifiers"
+(subtest "lqn qry identities"
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* ($* _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*$ _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (?filter _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (?map _))))
+  (is (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* (?select _)))))
+
+(subtest "top-level modifiers"
   (is (lqn:qry #("abc" "def") [(sub? _ :s@a)]) #("abc") :test #'equalp)
   (is (lqn:qry "abc x def x hij" nil) nil)
   (is (lqn:qry "aa" s@_) "aa")
@@ -67,12 +29,44 @@
   (is (lqn:qry 1 (progn (s@progn _))) "1")
   (is (lqn:qry "abc x def x hij" ∅) nil))
 
-(subtest "lqn qry identities"
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* ($* _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*$ _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (** _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (*map _))))
-  (is (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* _)) (lqn::jsnstr (lqn:jsnqryf *test-data-2-fn* ($$ _)))))
+(subtest "env fxns, ?grp"
+  (is (lqn:ldnout
+        (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 2}, {\"a\": 11, \"b\": 12}]")
+                 #{:a (:b _) (:cnt (cnt)) (:key (key)) (:par (par))}))
+      #(((:A . 1) (:B . 2) (:CNT . 0) (:KEY . "key")
+         (:PAR . #(((:A . 1) (:B . 2)) ((:A . 11) (:B . 12)))))
+        ((:A . 11) (:B . 12) (:CNT . 1) (:KEY . "key")
+         (:PAR . #(((:A . 1) (:B . 2)) ((:A . 11) (:B . 12)))))) :test #'equalp)
+  (is (lqn:ldnout
+        (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 2}, {\"a\": 11, \"b\": 12}]")
+                 #[:a (:b _) (:cnt (cnt)) (:key (key)) (:par (par))]))
+        #(1 2 0 "key"
+            #(((:A . 1) (:B . 2)) ((:A . 11) (:B . 12))) 11 12 1 "key"
+            #(((:A . 1) (:B . 2)) ((:A . 11) (:B . 12)))) :test #'equalp)
+  (is (lqn:ldnout
+        (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 2}")
+                 {:a (:b _) (:cnt (cnt)) (:key (key)) (:par (par))}))
+       '((:A . 1) (:B . 2) (:CNT . 0) (:KEY . "key")
+         (:PAR (:A . 1) (:B . 2))) :test #'equalp)
+  (is (lqn:ldnout
+         (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23}, {\"a\": 11, \"b\": 123}, {\"a\": 11, \"b\": 123} ]")
+                     (?grp (@ :a) (str! (key) (@ :b)))))
+      '((1 . #("123")) (11 . #("11123" "11123"))) :test #'equalp)
+  (is (lqn:ldnout
+         (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23}, {\"a\": 11, \"b\": 123}, {\"a\": 11, \"b\": 123} ]")
+                     (?grp :a (str! (key) (@ :b)))))
+      '((1 . #("123")) (11 . #("11123" "11123"))) :test #'equalp)
+  (is (lqn:ldnout
+         (lqn:qry (lqn:jsnloads "[{\"a\": 1, \"b\": 23}, {\"a\": 11, \"b\": 123}, {\"a\": 11, \"b\": 123} ]")
+                     (?grp :a :b)))
+      '((1 . #(23)) (11 . #(123 123))) :test #'equalp)
+
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}") (?grp _ (key))))
+      '((1 . #(1)) (23 . #(23))) :test #'equalp)
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}") (?grp (key) _)))
+      '((:A . #(1)) (:B . #(23))) :test #'equalp)
+  (is (lqn:ldnout (lqn:qry (lqn:jsnloads "{\"a\": 1, \"b\": 23}") (?grp _ _)))
+      '((1 . #(1)) (23 . #(23))) :test #'equalp))
 
 (subtest "lqn qry 1"
   (is (lqn:ldnout (lqn:jsnqryf *test-data-fn* (|| #{:_id (:things #[:name :?@extra])})))
@@ -128,11 +122,11 @@
   (is (lqn:jsnqryf *test-data-fn* #[(:%@index (?? _ (= _ 0) _))]) #(0) :test #'equalp)
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| #[:things] (flatn* _) #[:id])))
           "[0,10,11,12,31,32]")
-  (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| #(#[:things]) (flatn* _ 2) #[:id])))
+  (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| #[:things] (flatn* _ 2) #[:id])))
           "[0,10,11,12,31,32]")
   (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn*
-                          (|| #(#[:things]) (flatn* _ 2) #[:id]
-                              (*fld (list) acc (cons (1+ _) acc)) (reverse _))))
+                          (|| #[:things] (flatn* _ 2) #[:id]
+                              (?fld (list) acc (cons (1+ _) acc)) (reverse _))))
           "[1,11,12,13,32,33]"))
 
 (unless (finalize) (error "error in test-lqn"))

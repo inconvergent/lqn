@@ -40,7 +40,7 @@ Options:
 
 ██ options can be write as -i -v or -iv.
 ██
-██ when outputing in TXT, internal vectors or kvs are printed in LDN
+██ when outputing in TXT, internal vectors or hts are printed in LDN
 ██ mode. use -tj and -tl to output to JSON or LDN respectively.
 ██ use -tjm to print a resulting vector as (minified) lines of json.
 ██
@@ -54,7 +54,7 @@ Examples:
 
 # split string and sum as integers:
 ❭ echo '1 x 1 x 7 x 100'\
-❭ | tqn '(splt _ :x) int!? (*fld 0 +)'
+❭ | tqn '(splt _ :x) int!? (?fld 0 +)'
 
 # split string and make a new JSON structure:
 ❭ echo '1 x 1 x 7 x 100'\

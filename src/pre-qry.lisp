@@ -23,9 +23,9 @@
 (defun dat/new (conf dat) `((:dat . ,dat) ,@conf))
 (defun strip-all (d) (declare (list d)) (if (car- dat? d) (cdr d) d))
 
-; CONTEXTS
+; CONTEXTS ; envs
 
-(defmacro //fxs/qry ((dat fn fi) &body body)
+(defmacro q∈ ((dat fn fi) &body body)
   (declare (symbol dat fn fi))
   (awg (nope meta)
     `(let ((,meta (make-hash-table :test #'eq)))
@@ -41,17 +41,18 @@
                 (wrn (&optional a) (warn "qry wrn: ~a." a))
                 (par () ,dat)
                 (pnum (&optional d) (size? (par) d))
-                (itr () (wrn "no (itr) in qry scope."))
-                (inum () (wrn "no (inum) in qry scope.")))
+                (itr () (wrn "no (itr) in this scope."))
+                (key () (wrn "no (key) in this scope."))
+                (inum () (wrn "no (inum) in this scope.")))
          ,@body)))))
 
-(defmacro ∈ ((par &optional i itr) &body body)
-  (declare (symbol par itr))
+(defmacro ∈ ((&key par cnt itr key) &body body)
+  (declare (symbol par cnt itr))
   `(labels (,@(when par `((par () ,par) (pnum () (size? ,par))))
             ,@(when itr `((itr () ,itr) (inum () (size? ,itr))))
-            ,@(when i `((cnt (&optional (k 0)) (+ ,i k)))))
+            ,@(when cnt `((cnt (&optional (k 0)) (+ ,cnt k))))
+            ,@(when key `((key () ,key))))
      ,@body))
-
 
 ; PRE PROCESSORS
 
@@ -69,7 +70,7 @@
   (etypecase ty (number `(when-equal ,k ,ty))
                 (keyword `(and (str? ,k) (isub? ,k ,(ct/kw/str ty))))
                 (string `(and (str? ,k) (sub? ,k ,ty)))
-                (symbol `(when (,ty ,k) ,k))
+                (symbol `(when (,ty ,k) ,k)) ; TODO: attempt to parse as float, int?
                 (cons ty) (boolean `(when-equal ,ty ,k))))
 
 (defun pre/scan-clause (q &optional (full t))
@@ -90,28 +91,29 @@
 (defun pre/|| (qq) (unless qq (warn "||: missing args.")) ; pipe
   (loop for q in (pre/scan-clauses qq '#:pipe) collect
     (if (dat? q) (kw q)
-      (typecase q (cons q) (keyword `(** ,q)) (symbol `(*map ,q))
-                  (string `(** ,q))           (vector `(*map ,@(coerce q 'list)))
+      (typecase q (cons q) (boolean q)
+                  (keyword `(?filter ,q)) (string `(?filter ,q))
+                  (symbol `(?map ,q)) (vector `(?map ,@(coerce q 'list)))
                   (otherwise q)))))
 
-(defun pre/*map (q &optional (mm :+)) (unless q (warn "*map: missing args."))
+(defun pre/?map (q &optional (mm :+)) (unless q (warn "?map: missing args."))
   (labels ((unpack- (o) ; NOTE: can we use modes here?
              (dsb (m sk) (unpack-mode o mm)
-               (unless (eq m :+) (error "*map: expected mode :+, got: ~a." m))
+               (unless (eq m :+) (error "?map: expected mode :+, got: ~a." m))
                (etypecase sk (sequence sk) (keyword sk) (symbol `(,sk :_))))))
-    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:*map)))
+    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:?map)))
            (res (mapcar #'unpack- q*))
            (allres (if (= (length q) (length q*)) res (cons `(lit :_) res))))
       (if (< (length allres) 2) allres `((|| ,@allres))))))
 
-(defun pre/$$ (q &optional (m :+)) (unless q (warn "$$: missing args."))
+(defun pre/?select (q &optional (m :+)) (unless q (warn "?select: missing args."))
   (labels ; TODO: how to handle selecting only keys with -@?
     ((tx- (a b c)
       `(,a ,(typecase b (keyword (sdwn (mkstr b))) (string b)
               (symbol (when (symbol-package b)
-                            (error "$$: got intered symbol. use #:~a or :~a instead" b b))
+                            (error "?select: got intered symbol. use #:~a or :~a instead" b b))
                       (sdwn (mkstr b)))
-              (otherwise (error "$$: expected string/:keyword/uninterned symbol. got: ~a." b)))
+              (otherwise (error "?select: expected string/:keyword/uninterned symbol. got: ~a." b)))
            ,(typecase c (keyword c) (boolean c)
                         (symbol (if (dat? c) :_ `(,c :_))) ; TODO: fix: #{(:aa #:aa)}
                         (otherwise c))))
@@ -121,7 +123,7 @@
        (apply #'tx- (etypecase (second k)
                       (symbol (repack- k)) (string (repack- k))
                       (cons (repack-cons ck k))))))
-    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:$$)))
+    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:?select)))
            (res (mapcar #'unpack- q*)))
       (if (= (length q) (length q*)) res (cons :_ res)))))
 

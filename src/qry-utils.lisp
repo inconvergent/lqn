@@ -105,12 +105,14 @@ match. If b is an expression, a is compared to the evaluated value of b."
                (otherwise d)))
 
 (defmacro ?? (a expr &optional res) (declare (symbol a)) ; TODO: dont require sym?
-  "evaluate expr only iff a is not nil. returns the result of expr or res; or nil."
+  "evaluate expr only if a is not nil. returns the result of expr or res; or nil."
   `(and ,a ,expr ,@(if res `(,res))))
 
 (defun @@ (a path &optional d) (declare #.*opt*)
   "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
-  (labels ((gkv (a* k) (typecase a* (hash-table (gethash k a*)) (otherwise nil)))
+  (labels ((err (p) (error "@@: unexpected path: ~a" p))
+           (wrn (p) (warn "@@: unexpected path: ~a" p))
+           (gkv (a* k) (typecase a* (hash-table (gethash k a*)) (otherwise nil)))
            (ind (a* k) (if (< k 0) (+ (length a*) k) k))
            (gv (a* k) (when (vec? a*)
                         (let ((kk (ind a* k)))
@@ -130,8 +132,10 @@ match. If b is an expression, a is compared to the evaluated value of b."
                              (t (gkv a* k)))))
                (if (is? v) (rec v kk) (return-from rec d)))))
     (compct
-      (rec a (etypecase path (fixnum (list path)) (character (list path)) (list path)
-                        (string (pre path)) (keyword (pre (str! path))))))))
+      (rec a (typecase path (boolean (wrn path))
+               (fixnum (list path)) (character (list path)) (list path)
+               (string (pre path)) (keyword (pre (str! path)))
+               (otherwise (err path)))))))
 (defun compct (o) (declare #.*opt*)
   "remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`."
   (labels
@@ -143,15 +147,6 @@ match. If b is an expression, a is compared to the evaluated value of b."
                  (sequence (remove-if-not (λ (o*) (smth? o* t)) o*))
                  (otherwise o*))))
     (rec o)))
-
-(defun grp (v keyfx &optional (valfx #'identity))
-  (declare (sequence v) (function keyfx valfx))
-  (loop with res = (make-hash-table :test #'equal)
-        for o across (vec! v)
-        for k = (funcall keyfx o)
-        for acc = (gethash k res (new*))
-        do (setf (gethash k res) (psh* acc (funcall valfx o)))
-        finally (return res)))
 
 (defun @* (a d &rest rest &aux l) (declare #.*opt*) ; TODO: use @@ for all
   "pick these indices/keys from sequence/hash-table into new vector."
@@ -254,7 +249,10 @@ ranges are lists that behave like arguments to seq."
          using (hash-value v) do (setf (gethash k res) (gethash k kv))))
   res)
 (defun cat* (&rest rest) "concatenate sequences in rest to vector"
-  (apply #'concatenate 'vector (mapcar #'vec! rest))) ; inefficient
+  (labels ((to-vec (v)
+             (typecase v (string v) (vector v) (simple-vector v)
+                         (list v) (otherwise (list v)))))
+   (apply #'concatenate 'vector (mapcar #'to-vec rest)))) ; inefficient
 
 (defun flatall* (x &optional (str nil))
   "flatten all sequences into new vector. if str is t strings will become

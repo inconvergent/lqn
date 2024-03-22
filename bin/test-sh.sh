@@ -54,7 +54,7 @@ r=`echo '1
 
 a='109'
 r=`echo '1 x 1 x 7 x 100' |\
-    sbcl --script ./tqn-sh.lisp '(splt _ :x) int!? (*fld 0 +)'`; check;
+    sbcl --script ./tqn-sh.lisp '(splt _ :x) int!? (?fld 0 +)'`; check;
 
 a='[{"v":1},{"v":1},{"v":7},{"v":100}]'
 r=`echo '1 x 1 x 7 x 100' |\
@@ -89,11 +89,11 @@ r=`echo '{"_id": 1}' | sbcl --script ./jqn-sh.lisp -jm '{:_id}'`; check;
 a='((:_ID . 1))'
 r=`echo '{"_id": 1}' | sbcl --script ./jqn-sh.lisp -lm '{:_id}'`; check;
 
-a='[{"_id":"65679","things":[{"id":10}]}]
-[{"_id":"6AABB"}]'
+a='{"_id":"65679","things":[{"id":10}]}
+{"_id":"6AABB"}'
 r=`echo '{ "_id": "65679", "things": [ { "id": 10 } ] }
          { "_id": "6AABB" }' |\
-    sbcl --script ./jqn-sh.lisp -m '#{:_id :?@things}'`; check;
+    sbcl --script ./jqn-sh.lisp -m '{:_id :?@things}'`; check;
 
 echo '## done! all clear!'
 

@@ -18,6 +18,7 @@
                         (internal-path (mkstr "docs/" (repl pkg "/" "-") ".md")))))
              (format t "~&~a~%" fn)
              (with-open-file (f fn :direction :output :if-exists :supersede)
+               (format f "# Lisp Query Notation Symbol Documentation (~a)~%~%" (v? t))
                (format f (with-output-to-string (*standard-output*)
                            (ext-symbols? pkg :pretty)))))))
 (make-docs)
