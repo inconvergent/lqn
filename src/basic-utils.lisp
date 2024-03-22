@@ -113,7 +113,7 @@
               (otherwise (error "unable to force ~a to vec" v))))
 (defun int! (i) (declare #.*opt*) "i as int; or fail." ; NOTE: remember to use strict
   (or (int!? i nil t) (error "unable to force ~a to int" i)))
-(defun flt! (f) (declare #.*opt*) "f as int; or fail." ; strict!
+(defun flt! (f) (declare #.*opt*) "f as float; or fail." ; strict!
   (or (flt!? f nil t) (error "unable to force ~a to float" f)))
 
 (defun lst! (l) (declare #.*opt*) "coerce l to list if l" ; TODO: make ensure list/vec with default

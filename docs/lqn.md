@@ -383,7 +383,7 @@
  ;   Lambda-list: (F)
  ;   Derived type: (FUNCTION (T) (VALUES (NOT NULL) &OPTIONAL))
  ;   Documentation:
- ;     f as int; or fail.
+ ;     f as float; or fail.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 
