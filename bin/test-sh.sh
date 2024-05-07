@@ -60,12 +60,12 @@ a='[{"v":1},{"v":1},{"v":7},{"v":100}]'
 r=`echo '1 x 1 x 7 x 100' |\
     sbcl --script ./tqn-sh.lisp -jm '(splt _ :x) int!? #((new$ :v _))'`; check;
 
-a='((:V . 1))
-((:V . 3))'
+a='((:v . 1))
+((:v . 3))'
 r=`echo '1 x 3 x ' |\
     sbcl --script ./tqn-sh.lisp '(splt _ :x) int!? [is?] #((new$ :v _))'`; check;
 
-a='#(((:V . 1)) ((:V . 1)) ((:V . 7)) ((:V . 100)))'
+a='#(((:v . 1)) ((:v . 1)) ((:v . 7)) ((:v . 100)))'
 r=`echo '1 x 1 x 7 x 100' |\
     sbcl --script ./tqn-sh.lisp -lm '(splt _ :x) int!? #((new$ :v _))'`; check;
 
@@ -86,7 +86,7 @@ r=`echo '1 2' | sbcl --script ./jqn-sh.lisp -t '_'`; check;
 a='{"_id":1}'
 r=`echo '{"_id": 1}' | sbcl --script ./jqn-sh.lisp -jm '{:_id}'`; check;
 
-a='((:_ID . 1))'
+a='((:_id . 1))'
 r=`echo '{"_id": 1}' | sbcl --script ./jqn-sh.lisp -lm '{:_id}'`; check;
 
 a='{"_id":"65679","things":[{"id":10}]}

@@ -21,7 +21,7 @@
                                            (nreverse (cons l acc))))))
     (if l (rec l nil) nil)))
 (defun mkstr (&rest args) (declare #.*opt*) "coerce all arguments to a string."
-  (with-output-to-string (s) (dolist (a args) (princ a s))))
+  (with-output-to-string (s) (dolist (a args) (prtcomp (princ a s)))))
 (defun kw (s) (declare #.*opt*) "mkstr, upcase, keyword."
   (intern (string-upcase (etypecase s (string s) (symbol (symbol-name s)) (number (mkstr s))))
           :keyword))
@@ -76,24 +76,24 @@
 
 ; this is messy, but it works (i think)
 (defun int!? (i &optional d strict) (declare #.*opt*)
-  "i as int if it is or can be parsed or coerced as int; or d"
+  "i as int if it is int or can be parsed or coerced as int; or d"
   (handler-case (or (int? i) (int? (read? i))
                     (and (not strict) (floor (or (flt? i) (flt? (read? i)) d)))
                     d)
                 (error () d)))
 (defun flt!? (f &optional d strict) (declare #.*opt*)
-  "f as flt if it is or can be parsed or coerced as flt; or d"
+  "f as flt if it is flt or can be parsed or coerced as flt; or d"
   (handler-case (or (flt? f) (flt? (read? f))
                     (and (not strict) (coerce (or (int? f) (int? (read? f)) d) 'single-float))
                     d)
                 (error () d)))
 
 (defun num!? (n &optional d) (declare #.*opt*)
-  "n as number if it is or can be parsed as num; or d"
+  "n as number if it is num or can be parsed as num; or d"
   (handler-case (or (num? n) (num? (read? n)) d) (error () d)))
 
 (defun str!? (s &optional d) (declare #.*opt*)
-  "s as str if it or can be parsed as str; or d"
+  "s as str if it is str or can be parsed as str; or d"
   (handler-case (or (str? (read? s)) (str? s)  d) (error () d)))
 ; (defun vec!? (v &optional d) "v as vector if it is vec; or d"
 ;   (handler-case (or (vec? v) (vec? (read? v)) d) (error () d)))
@@ -122,7 +122,8 @@
 
 (defun size? (l &optional d) "length of sequence/number of keys in ht."
   (typecase l (sequence (length l)) (hash-table (hash-table-count l)) (otherwise d)))
-(defun empty? (l &optional d &aux (n (size? l))) (if (int? n) (< n 1) d))
+(defun empty? (l &optional d &aux (n (size? l))) "t if l is empty; or d"
+  (if (int? n) (< n 1) d))
 
 (defun uniq (s &optional (fx #'equal)) (declare (function fx)) "remove duplicates from sequence"
   (remove-duplicates s :test fx))

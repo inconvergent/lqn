@@ -32,7 +32,7 @@
 (defun sh/is-query (q ex) (or q (sh/exit-msg 5 "MISSING query!~%~%~a~&" ex)))
 (defun sh/parse-query (q) (declare #.*opt*)
   (handler-case (let ((rd (read-all-str q)))
-                 `(|| ,@(if rd rd '(nil))))
+                 `(?pipe ,@(if rd rd '(nil))))
     (error (e) (sh/exit-msg 10 "failed to PARSE qry:~%~%~a~&" e))))
 
 (defun sh/compile-query (qq) (declare #.*opt*)
@@ -64,6 +64,7 @@
 
 (defun sh/out (d opts res &optional (s *standard-output*) (zeros (opt/nils? opts)))
   (declare (optimize speed (safety 2)))
+  (prtcomp
   (labels
     ((prtxt (res*) (format s "~&~a~%" res*))
      (prldn (res*) (handler-case (format s "~&~s~&" (ldnout res*))
@@ -86,7 +87,7 @@
                       (hash-table (if (opt/jsnopt? opts) (prjsn res*) (prldn res*)))
                       (list       (prldn res*))
                       (otherwise  (prtxt res*)))))
-   (ecase (opt/outfmt? opts d) (:json (prjsn res)) (:ldn (prldn res)) (:txt (dotxt res)))))
+   (ecase (opt/outfmt? opts d) (:json (prjsn res)) (:ldn (prldn res)) (:txt (dotxt res))))))
 
 ; TODO: auto split args, handle errors
 (defun cmd (fx &rest args) (declare (string fx)) "run terminal command"

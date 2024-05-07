@@ -1,13 +1,9 @@
 (in-package :lqn)
 
 (defvar *qmodes* '(:+ :? :- :%))
-(defvar *operators* '(:|| :@
-                      :?select
-                      :?map :?filter :?fld
-                      :*$ :$*
-                      :?srch :?grp
+(defvar *operators* '(:|| :?pipe :?select :@ :?map :?filter :*$ :$*
                       :?xpr :?txpr :?mxpr
-                      ?rec))
+                      :?fld :?srch :?grp :?rec))
 (defvar *opt* '(optimize (speed 3) (safety 1)))
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr
@@ -34,6 +30,8 @@
   #+abcl (ext:quit:status status) #+allegro (excl:exit status :quiet t)
   #+gcl (common-lisp-user::bye status) #+ecl (ext:quit status))
 
+(defmacro prtcomp (&rest o) ; (*print-readably* t) (*print-escape* t)
+  `(let ((*print-case* :downcase) (*print-gensym* nil)) (progn ,@o)))
 (defmacro with-struct ((name . fields) struct &body body)
   (let ((gs (gensym)))
     `(let ((,gs ,struct))
@@ -41,7 +39,6 @@
                          `(,f (,(psymb (symbol-package name) name f) ,gs)))
                      fields)
          ,@body))))
-
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s)))) syms) ,@body))
 

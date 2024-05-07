@@ -13,7 +13,7 @@
 (defun make-docs ()
   (loop for (o . rest) in (import-all (internal-path "src/packages"))
         if (eq o 'defpackage)
-        do (let* ((pkg (mkstr (car rest)))
+        do (let* ((pkg (sup (mkstr (car rest))))
                   (fn (string-downcase
                         (internal-path (mkstr "docs/" (repl pkg "/" "-") ".md")))))
              (format t "~&~a~%" fn)

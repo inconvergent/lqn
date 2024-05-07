@@ -45,8 +45,7 @@ use :pretty to print verbose output to stdout in a readable form."
       (:pretty
         `(loop for (,str ,sym) in (pckgs ,pkg)
                do (mvb (,doc ,skip) (select-docs ,sym)
-                       (unless ,skip (format t "~&#### ~a:~a~%~%~a~&~%"
-                                       (mkstr ,pkg) (-md-sanitize ,str) ,doc)))))
+                       (unless ,skip (format t "~&~a~&~%" ,doc)))))
       (:pairs `(loop for (,str ,sym) in (pckgs ,pkg)
                      collect (list ,str (select-docs ,sym))))
       (otherwise `(loop for (,str ,sym) in (pckgs ,pkg) collect ,str)))))

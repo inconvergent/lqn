@@ -194,7 +194,7 @@ Iterate a datastructure (as if with `?txpr`) and collect the matches in a new
 
 ### Transformer Operators - `?xpr`, `?txpr`, `?mxpr`
 
-Perform operation on when pattern or condition is satisfied:
+Perform operation when pattern or condition is satisfied:
   - `(?xpr sel)`: match current value against `EXPR Selector`. Return the
     result if not `nil`.
   - `(?xpr sel hit-expr)`: match current value against `EXPR Selector`.
@@ -203,8 +203,8 @@ Perform operation on when pattern or condition is satisfied:
     selectors`.  Evaluate `hit-expr` if not `nil`; else evaluate `miss-expr`.
     `_` is the matching item.
 
-Recursively traverse a structure of `sequences` and `hts` and return
-a new value for each match:
+Recursively traverse a nested structure of `sequences` and `hts` and return a
+new value for each match:
   - `(?txpr sel .. tx-expr)`: recursively traverse current value and replace
     matches with `tx-expr`. `tx-expr` can be a function name or expression.
     Also traverses vectors and `ht` values.

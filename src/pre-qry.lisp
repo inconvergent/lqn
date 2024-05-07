@@ -1,5 +1,7 @@
 (in-package :lqn)
 
+(defun opstr (op &optional (fx #'identity))
+  (prtcomp (format nil "██ op: ~s ██" (funcall fx op))))
 (defun unpack-mode (o &optional (default :+) merciful)
   (labels ((valid-mode (m) (member m *qmodes* :test #'eq))
            (repack- (s s*) (etypecase s (symbol (psymb (symbol-package s) (subseq s* 2)))
@@ -18,14 +20,13 @@
                 (atom `(default ,o))
       (otherwise (error "lqn: bad thing to have mode: ~a" o)))))
 
-
 (defun ct/path/key (pp) (first (last (str-split pp "/"))))
 (defun dat/new (conf dat) `((:dat . ,dat) ,@conf))
 (defun strip-all (d) (declare (list d)) (if (car- dat? d) (cdr d) d))
 
 ; CONTEXTS ; envs
 
-(defmacro q∈ ((dat fn fi) &body body)
+(defmacro ██q∈ ((dat fn fi) &body body)
   (declare (symbol dat fn fi))
   (awg (nope meta)
     `(let ((,meta (make-hash-table :test #'eq)))
@@ -46,7 +47,7 @@
                 (inum () (wrn "no (inum) in this scope.")))
          ,@body)))))
 
-(defmacro ∈ ((&key par cnt itr key) &body body)
+(defmacro ██∈ ((&key par cnt itr key) &body body)
   (declare (symbol par cnt itr))
   `(labels (,@(when par `((par () ,par) (pnum () (size? ,par))))
             ,@(when itr `((itr () ,itr) (inum () (size? ,itr))))
@@ -82,14 +83,17 @@
            (do-cons (s) (cond ((not full) s) ((car- s@? s)  (compile/s@ s)) (t s))))
    (typecase q (cons (do-cons q)) (symbol (do-sym q)) (otherwise q))))
 
-(defun pre/scan-clauses (qq &optional (ctx "pre-compile"))
+(defun pre/scan-clauses (qq &optional (ctx "pre-compile") ign)
   (declare (list qq))
-  (let ((isect (intersection (mapcar (λ (k) (kw (ssym? k))) qq) *operators* :test #'equal)))
-    (when isect (error "~a: unexpected bare operator(s) ~a~%in: ~a." ctx isect qq)))
+  (let ((isect (intersection (mapcar (λ (k) (kw (ssym? k))) qq)
+                             (set-difference *operators* ign)
+                             :test #'equal)))
+    (when isect (error "~a: unexpected bare operator(s) ~a~%in: ~a."
+                       ctx isect qq)))
   (loop for q in qq collect (pre/scan-clause q)))
 
-(defun pre/|| (qq) (unless qq (warn "||: missing args.")) ; pipe
-  (loop for q in (pre/scan-clauses qq '#:pipe) collect
+(defun pre/?pipe (qq) (unless qq (warn "?pipe: missing args.")) ; pipe
+  (loop for q in (pre/scan-clauses qq '#:?pipe '(:@)) collect
     (if (dat? q) (kw q)
       (typecase q (cons q) (boolean q)
                   (keyword `(?filter ,q)) (string `(?filter ,q))
@@ -97,14 +101,17 @@
                   (otherwise q)))))
 
 (defun pre/?map (q &optional (mm :+)) (unless q (warn "?map: missing args."))
-  (labels ((unpack- (o) ; NOTE: can we use modes here?
+  (labels ((do-symbol (sk) (case sk ('@ '(@ 0)) (otherwise `(,sk :_))))
+           (unpack- (o) ; NOTE: can we use modes here?
              (dsb (m sk) (unpack-mode o mm)
-               (unless (eq m :+) (error "?map: expected mode :+, got: ~a." m))
-               (etypecase sk (sequence sk) (keyword sk) (symbol `(,sk :_))))))
-    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:?map)))
+               (unless (eq m :+) (error "?map: expected mode :+, got: ~a. in: ~a" m q))
+               (etypecase sk (sequence sk)
+                             (keyword sk)
+                             (symbol (do-symbol sk))))))
+    (let* ((q* (remove-if #'dat? (pre/scan-clauses q '#:?map '(:@))))
            (res (mapcar #'unpack- q*))
            (allres (if (= (length q) (length q*)) res (cons `(lit :_) res))))
-      (if (< (length allres) 2) allres `((|| ,@allres))))))
+      (if (< (length allres) 2) allres `((?pipe ,@allres))))))
 
 (defun pre/?select (q &optional (m :+)) (unless q (warn "?select: missing args."))
   (labels ; TODO: how to handle selecting only keys with -@?
