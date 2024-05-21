@@ -135,5 +135,5 @@ as alists. see ldnload."
                   0.7332 0.7602 0.7834 0.8037 0.9999)))
     (loop with s = (clmp s) for i from 0 for v across dens
           if (>= v s) do (return-from ascii (aref chars i)))
-    (@@ chars -1 nil)))
+    (@get chars -1 nil)))
 

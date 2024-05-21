@@ -7,7 +7,7 @@
 (defvar *opt* '(optimize (speed 3) (safety 1)))
 (defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr
-                 :fn :fi :ctx  :par :itr :key :val :compct :?? :@@ :@*
+                 :fn :fi :ctx  :par :itr :key :val :compct :?? :@get :@*
                  :read? :some? :all? :none? :smth? :size?
                  :new* :new$ :cat* :cat$
                  :ind* :sel :seq :apply* :grp :uniq

@@ -25,7 +25,7 @@
 
   (is (lqn:uniq (lqn:new* 5 1 1 1 2 3 3 4 5)) #(1 2 3 4 5) :test #'equalp))
 
-(subtest "lqn qry @@/@"
+(subtest "lqn qry @get/@"
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ "a") (@ "b"))) 3)
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ "a") (@ "b"))) 3)
   (is (lqn:qryd (lqn:jsnloads "{\"a\": {\"b\": 3, \"c\": 7}}") (|| (@ :a) (@ :b))) 3)
@@ -161,7 +161,7 @@
                     (|| #[:things] (flatn* _) #((cat$ {:id} {:?@extra})))))
       #(((:ID . 0) (:EXTRA . "extra99")) ((:ID . 10) (:EXTRA . "extra1"))
         ((:ID . 11) (:EXTRA . "extra2")) ((:ID . 12)) ((:ID . 31)) ((:ID . 32))) :test #'equalp)
-  (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| (@@ _ "*/things/*/extra"))))
+  (is-str (lqn::jsnstr (lqn:jsnqryf *test-data-fn* (|| (@get _ "*/things/*/extra"))))
            "[[\"extra99\"],[\"extra1\",\"extra2\"]]")
 
   (is (lqn:qry "1 x 1 x 7 x 100" (splt _ :x) int!? (?fld 0 +)) 109)

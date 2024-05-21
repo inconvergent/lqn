@@ -25,10 +25,10 @@
 ```
 
 ```
- ; LQN:@@
+ ; LQN:@GET
  ;   [symbol]
  ; 
- ; @@ names a compiled function:
+ ; @GET names a compiled function:
  ;   Lambda-list: (A PATH &OPTIONAL D)
  ;   Derived type: (FUNCTION (T T &OPTIONAL T) *)
  ;   Documentation:

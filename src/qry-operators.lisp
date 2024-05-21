@@ -10,10 +10,10 @@
        ,∇-))))
 
 (defun compile/@ (rec conf d &aux (dat (gk conf :dat)))
-  (case (length d) (0 `(@@ ,dat 0 nil))
-                   (1 `(@@ ,dat ,(funcall rec conf (car d))))
-                   (2 `(@@ ,dat ,@(funcall rec conf d)))
-                   (3 `(@@ ,@(funcall rec conf d)))
+  (case (length d) (0 `(@get ,dat 0 nil))
+                   (1 `(@get ,dat ,(funcall rec conf (car d))))
+                   (2 `(@get ,dat ,@(funcall rec conf d)))
+                   (3 `(@get ,@(funcall rec conf d)))
                    (otherwise (error "@: expected 0-3 arguments. got:~%~a." d))))
 
 (defun compile/?map (rec conf d) ; #(...) ; do this sequence of expressions on each item
@@ -111,7 +111,7 @@
      (labels ((select-do-ht (&aux (,kres ,(if (car- dat? d) `(make$ ,par) `(new$)))) ,(opstr d)
                 (██∈ (:par ,par)
                    ,@(loop for (m kk expr) in (strip-all d)
-                       collect `(let ((,dat (@@ ,par ,kk)))
+                       collect `(let ((,dat (@get ,par ,kk)))
                                   (declare (ignorable ,dat))
                                   (██∈ (:key ,kk)
                                      ,(compile/$add rec
@@ -131,7 +131,7 @@
                    for ,kvres of-type hash-table = ,(if (car- dat? d) `(make$ ,itr) `(new$))
                    do (██∈ (:par ,par :cnt ,i :itr ,itr)
                          ,@(loop for (m kk expr) in (strip-all d)
-                             collect `(let ((,dat (@@ ,itr ,kk)))
+                             collect `(let ((,dat (@get ,itr ,kk)))
                                         (declare (ignorable ,dat))
                                         (██∈ (:key ,kk) ,(compile/$add rec
                                                          (dat/new conf dat) m kvres kk expr))))
@@ -155,7 +155,7 @@
                    do (██∈ (:par ,par :cnt ,i :itr ,itr)
                          ,(when (car- dat? d) (compile/*add rec conf :+ vres itr))
                          ,@(loop for (m kk expr) in (strip-all d) collect
-                             `(let ((,dat (@@ ,itr ,kk)))
+                             `(let ((,dat (@get ,itr ,kk)))
                                 (declare (ignorable ,dat))
                                 (██∈ (:key ,kk) ,(compile/*add rec
                                                  (dat/new conf dat) m vres expr))))))

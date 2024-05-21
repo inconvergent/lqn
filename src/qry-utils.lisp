@@ -108,10 +108,10 @@ match. If b is an expression, a is compared to the evaluated value of b."
   "evaluate expr only if a is not nil. returns the result of expr or res; or nil."
   `(and ,a ,expr ,@(if res `(,res))))
 
-(defun @@ (a path &optional d) (declare #.*opt*)
+(defun @get (a path &optional d) (declare #.*opt*)
   "get nested key (e.g. aa/2/bb) from nested structure of kv/vec"
-  (labels ((err (p) (error "@@: unexpected path: ~a" p))
-           (wrn (p) (warn "@@: unexpected path: ~a" p))
+  (labels ((err (p) (error "@get: unexpected path: ~a" p))
+           (wrn (p) (warn "@get: unexpected path: ~a" p))
            (gkv (a* k) (typecase a* (hash-table (gethash k a*)) (otherwise nil)))
            (ind (a* k) (if (< k 0) (+ (length a*) k) k))
            (gv (a* k) (when (vec? a*)
@@ -148,10 +148,10 @@ match. If b is an expression, a is compared to the evaluated value of b."
                  (otherwise o*))))
     (rec o)))
 
-(defun @* (a d &rest rest &aux l) (declare #.*opt*) ; TODO: use @@ for all
+(defun @* (a d &rest rest &aux l) (declare #.*opt*) ; TODO: use @get for all
   "pick these indices/keys from sequence/hash-table into new vector."
   (labels ((lt (l) (or (nth l a) d))
-           (kv (k) (@@ a k d))
+           (kv (k) (@get a k d))
            (gt (i) (if (< i l) (aref a i) d)))
     (typecase a (vector (setf l (length a)) (map 'vector #'gt rest))
                 (hash-table (map 'vector #'kv rest))
