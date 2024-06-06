@@ -2,8 +2,7 @@
 ; YASON DOCS https://phmarek.github.io/yason/
 ; (setf (readtable-case *readtable*) :preserve)
 
-(defun read-all-str (s &aux (pos 0))
-  (declare #.*opt*)
+(defun read-all-str (s &aux (pos 0)) (declare #.*opt*)
   (loop for (l new-pos) = (mvl (read-from-string s nil 'lqn::eof :start pos))
         while (not (eq l 'lqn::eof)) do (setf pos new-pos) collect l))
 
@@ -47,8 +46,7 @@
                                   do (vex res j) finally (return res))
                 (end-of-file () res)))
             (yason:parse s))))
-(defun jsnloadf (fn)
-  (declare #.*opt* (string fn)) "parse json from file, fn"
+(defun jsnloadf (fn) (declare #.*opt* (string fn)) "parse json from file, fn"
   (with-open-file (f fn :direction :input)
     (handler-case (jsnloads f) (end-of-file () (warn "empty file: ~a" fn)))))
 

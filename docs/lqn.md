@@ -10,7 +10,6 @@
  ;     evaluate expr only if a is not nil. returns the result of expr or res; or nil.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:@*
  ;   [symbol]
@@ -23,7 +22,6 @@
  ;     pick these indices/keys from sequence/hash-table into new vector.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:@GET
  ;   [symbol]
@@ -35,7 +33,6 @@
  ;     get nested key (e.g. aa/2/bb) from nested structure of kv/vec
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:ALL?
  ;   [symbol]
@@ -47,7 +44,6 @@
  ;     check if all; or empty.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:APPLY*
  ;   [symbol]
@@ -58,7 +54,6 @@
  ;     apply, but for sequences.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:ASCII
  ;   [symbol]
@@ -70,7 +65,6 @@
  ;     ascii char with this density.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:BAR
  ;   [symbol]
@@ -83,7 +77,6 @@
  ;     draw progress bar
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:CAT$
  ;   [symbol]
@@ -96,7 +89,6 @@
  ;     add all keys from all hash tables in rest. left to right.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:CAT*
  ;   [symbol]
@@ -112,7 +104,6 @@
  ;     concatenate sequences in rest to vector
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:CD
  ;   [symbol]
@@ -124,7 +115,6 @@
  ;     change dir.
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:CLMP
  ;   [symbol]
@@ -137,7 +127,6 @@
  ;     clamp to range (a b).
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:CMD
  ;   [symbol]
@@ -149,7 +138,6 @@
  ;     run terminal command
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:COMPCT
  ;   [symbol]
@@ -161,7 +149,6 @@
  ;     remove none/nil, emtpy arrays, empty objects, empty keys and empty lists from `a`.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:CWD
  ;   [symbol]
@@ -173,7 +160,6 @@
  ;     current working dir.
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:D?
  ;   [symbol]
@@ -185,7 +171,6 @@
  ;     describe symbol.
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
-
 ```
  ; LQN:DAT-EXPORT
  ;   [symbol]
@@ -198,7 +183,6 @@
  ;     write o to file. see dat-read-file
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:DAT-READ-FILE
  ;   [symbol]
@@ -210,7 +194,6 @@
  ;     read lisp data from file into vector. see dat-export.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:DAT-READ-FILES
  ;   [symbol]
@@ -222,7 +205,6 @@
  ;     read lisp data from these paths (via lqn:ls) or this list of files as one large vector.
  ;   Source file: /data/x/lqn/src/qry-extra.lisp
 ```
-
 ```
  ; LQN:DAT-READ-ONE
  ;   [symbol]
@@ -234,7 +216,6 @@
  ;     read lisp one object from file. see dat-export.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:DAT-READ-STREAM
  ;   [symbol]
@@ -246,7 +227,6 @@
  ;     read lisp data from stream into vector.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:DIR?
  ;   [symbol]
@@ -258,7 +238,6 @@
  ;     does this dir exist?
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:EMPTY?
  ;   [symbol]
@@ -270,7 +249,6 @@
  ;     t if l is empty; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:FILE?
  ;   [symbol]
@@ -282,7 +260,6 @@
  ;     does this file exist?
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:FLATALL*
  ;   [symbol]
@@ -295,7 +272,6 @@
  ;       individual chars.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:FLATN$
  ;   [symbol]
@@ -307,7 +283,6 @@
  ;     flatten ht to vector: k0 v0 k1 v1 ...
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:FLATN*
  ;   [symbol]
@@ -320,7 +295,6 @@
  ;     flatten n times
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:FLT!
  ;   [symbol]
@@ -332,7 +306,6 @@
  ;     f as float; or fail.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:FLT!?
  ;   [symbol]
@@ -344,7 +317,6 @@
  ;     f as flt if it is flt or can be parsed or coerced as flt; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:FLT?
  ;   [symbol]
@@ -356,7 +328,6 @@
  ;     f if float; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:FMT
  ;   [symbol]
@@ -367,7 +338,6 @@
  ;     format to string.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:HEAD
  ;   [symbol]
@@ -383,7 +353,6 @@
  ;     first ±n elements
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:IND*
  ;   [symbol]
@@ -396,7 +365,6 @@
  ;     get index.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:INT!
  ;   [symbol]
@@ -408,7 +376,6 @@
  ;     i as int; or fail.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:INT!?
  ;   [symbol]
@@ -420,7 +387,6 @@
  ;     i as int if it is int or can be parsed or coerced as int; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:INT?
  ;   [symbol]
@@ -432,7 +398,6 @@
  ;     i if int; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:IPREF?
  ;   [symbol]
@@ -444,7 +409,6 @@
  ;     ignore case pref?
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:IS?
  ;   [symbol]
@@ -456,7 +420,6 @@
  ;     k if k is not nil, empty sequence, or empty hash-table; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:ISUB?
  ;   [symbol]
@@ -469,7 +432,6 @@
  ;     ignore case sub?
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:ISUBX?
  ;   [symbol]
@@ -483,7 +445,6 @@
  ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:ISUF?
  ;   [symbol]
@@ -496,7 +457,6 @@
  ;     ignore case suf?
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:JOIN
  ;   [symbol]
@@ -507,7 +467,6 @@
  ;     join sequence v with s into new string.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:JSNLOADF
  ;   [symbol]
@@ -519,7 +478,6 @@
  ;     parse json from file, fn
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:JSNLOADS
  ;   [symbol]
@@ -531,7 +489,6 @@
  ;     parse json from stream; or *standard-input*
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:JSNOUT
  ;   [symbol]
@@ -544,7 +501,6 @@
  ;     stream serialized json from o to s; or *standard-output*
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:JSNQRYF
  ;   [symbol]
@@ -555,7 +511,6 @@
  ;     run lqn query on json file.
  ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
-
 ```
  ; LQN:JSNSTR
  ;   [symbol]
@@ -568,7 +523,6 @@
  ;     serialize o as json to string
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:KEYS?
  ;   [symbol]
@@ -580,7 +534,6 @@
  ;     vector with keys from kv; or d
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:KV?
  ;   [symbol]
@@ -592,7 +545,6 @@
  ;     k if ht; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:KW?
  ;   [symbol]
@@ -604,7 +556,6 @@
  ;     k if kw; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:LDNLOAD
  ;   [symbol]
@@ -616,7 +567,6 @@
  ;     read serialized data. reverse of ldnout.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:LDNOUT
  ;   [symbol]
@@ -630,7 +580,6 @@
  ;     as alists. see ldnload.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:LINSPACE
  ;   [symbol]
@@ -643,7 +592,6 @@
  ;     n floats from a to b.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:LPAD
  ;   [symbol]
@@ -655,7 +603,6 @@
  ;     left pad to length n. always of length n.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:LS
  ;   [symbol]
@@ -667,7 +614,6 @@
  ;     list dir contents at this pattern.
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:LST!
  ;   [symbol]
@@ -679,7 +625,6 @@
  ;     coerce l to list if l
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:LST!?
  ;   [symbol]
@@ -691,7 +636,6 @@
  ;     v as list if it can be a list; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:LST?
  ;   [symbol]
@@ -703,7 +647,6 @@
  ;     l if list; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:MSYM?
  ;   [symbol]
@@ -716,7 +659,6 @@
  ;     match. If b is an expression, a is compared to the evaluated value of b.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:NEW$
  ;   [symbol]
@@ -727,7 +669,6 @@
  ;     new kv/hash-table from these (k v) pairs
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:NEW*
  ;   [symbol]
@@ -738,7 +679,6 @@
  ;     new vector with these elements
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:NONE?
  ;   [symbol]
@@ -750,7 +690,6 @@
  ;     check if none; or empty.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:NOOP
  ;   [symbol]
@@ -761,7 +700,6 @@
  ;     do nothing. return nil.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:NOW
  ;   [symbol]
@@ -773,7 +711,6 @@
  ;     timestamp.
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:NSTR
  ;   [symbol]
@@ -786,7 +723,6 @@
  ;     str of length n, filled with c
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:NUM!?
  ;   [symbol]
@@ -798,7 +734,6 @@
  ;     n as number if it is num or can be parsed as num; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:NUM?
  ;   [symbol]
@@ -810,7 +745,6 @@
  ;     n if number; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:OUT
  ;   [symbol]
@@ -821,7 +755,6 @@
  ;     print to standard out
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:PATH?
  ;   [symbol]
@@ -833,7 +766,6 @@
  ;     does this path exist?
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:POP*
  ;   [symbol]
@@ -844,7 +776,6 @@
  ;     remove element from end of a. return last element. destructive.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:PREF?
  ;   [symbol]
@@ -857,7 +788,6 @@
  ;     s if s starts with pref; or d
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:PROC-QRY
  ;   [symbol]
@@ -869,7 +799,6 @@
  ;     compile lqn query
  ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
-
 ```
  ; LQN:PSH*
  ;   [symbol]
@@ -880,7 +809,6 @@
  ;     extend a with o. return a. destructive.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:QRY
  ;   [symbol]
@@ -891,7 +819,6 @@
  ;     query data. rest is wrapped in the ?pipe operator.
  ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
-
 ```
  ; LQN:QRYD
  ;   [symbol]
@@ -902,7 +829,6 @@
  ;     run lqn query on dat
  ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
-
 ```
  ; LQN:QRYDB
  ;   [symbol]
@@ -913,7 +839,6 @@
  ;     query data. rest is wrapped in the ?pipe operator.
  ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
-
 ```
  ; LQN:QRYL
  ;   [symbol]
@@ -925,7 +850,6 @@
  ;     compile lqn query and execute on dat.
  ;   Source file: /data/x/lqn/src/qry-operators.lisp
 ```
-
 ```
  ; LQN:RANGE
  ;   [symbol]
@@ -938,7 +862,6 @@
  ;     declare range. from 0 to a; or a to b.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:READ?
  ;   [symbol]
@@ -951,7 +874,6 @@
  ;     read from string; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:REPL
  ;   [symbol]
@@ -964,7 +886,6 @@
  ;     replace from with to in s
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:RPAD
  ;   [symbol]
@@ -976,7 +897,6 @@
  ;     right pad to length n. always of length n.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:SDWN
  ;   [symbol]
@@ -988,7 +908,6 @@
  ;     mkstr and downcase
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SEL
  ;   [symbol]
@@ -1005,7 +924,6 @@
  ;     ranges are lists that behave like arguments to seq.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SEQ
  ;   [symbol]
@@ -1018,14 +936,12 @@
  ;     (subseq v ,@rest)
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
-:missing:todo:
+:missing:
 
  ; LQN:SEQ!?
  ;   [symbol]
 ```
-
 ```
  ; LQN:SEQ?
  ;   [symbol]
@@ -1037,7 +953,6 @@
  ;     s if sequence; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:SIZE?
  ;   [symbol]
@@ -1049,7 +964,6 @@
  ;     length of sequence/number of keys in ht.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:SOME?
  ;   [symbol]
@@ -1061,7 +975,6 @@
  ;     check if some; or empty.
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:SPLT
  ;   [symbol]
@@ -1072,7 +985,6 @@
  ;     split s at substrings x to vector. trims whitespace by default. prune removes empty strings.
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SRT
  ;   [symbol]
@@ -1084,7 +996,6 @@
  ;     sort sequence by: s<, s> < >
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SSYM?
  ;   [symbol]
@@ -1096,7 +1007,6 @@
  ;     s if sym, not kw; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:STR!
  ;   [symbol]
@@ -1108,7 +1018,6 @@
  ;     coerce to string
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:STR!?
  ;   [symbol]
@@ -1120,7 +1029,6 @@
  ;     s as str if it is str or can be parsed as str; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:STR?
  ;   [symbol]
@@ -1132,7 +1040,6 @@
  ;     s if string; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:STRCAT
  ;   [symbol]
@@ -1144,7 +1051,6 @@
  ;     concatenate all strings in these sequences
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SUB?
  ;   [symbol]
@@ -1157,7 +1063,6 @@
  ;     s if sub is substring of s; or d
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SUBDIR
  ;   [symbol]
@@ -1169,7 +1074,6 @@
  ;     list subdirectories.
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:SUBFILES
  ;   [symbol]
@@ -1181,7 +1085,6 @@
  ;     list subdirectories.
  ;   Source file: /data/x/lqn/src/sh.lisp
 ```
-
 ```
  ; LQN:SUBX?
  ;   [symbol]
@@ -1195,7 +1098,6 @@
  ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SUF?
  ;   [symbol]
@@ -1208,7 +1110,6 @@
  ;     s if s ends with suf; or d
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SUP
  ;   [symbol]
@@ -1220,7 +1121,6 @@
  ;     mkstr and upcase
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:SYM!
  ;   [symbol]
@@ -1232,7 +1132,6 @@
  ;     stringify, make symbol
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:SYMB
  ;   [symbol]
@@ -1245,7 +1144,6 @@
  ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:TAIL
  ;   [symbol]
@@ -1261,7 +1159,6 @@
  ;     last ±n elements
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:TRIM
  ;   [symbol]
@@ -1280,7 +1177,6 @@
  ;     trim string
  ;   Source file: /data/x/lqn/src/qry-utils.lisp
 ```
-
 ```
  ; LQN:TXT-EXPORT
  ;   [symbol]
@@ -1293,7 +1189,6 @@
  ;     write lines from vector to file. see txt-read-file
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:TXT-READ-FILE
  ;   [symbol]
@@ -1305,7 +1200,6 @@
  ;     read lines of text from file into vector.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:TXT-READ-STREAM
  ;   [symbol]
@@ -1318,7 +1212,6 @@
  ;     read lines of text from stream into vector.
  ;   Source file: /data/x/lqn/src/io.lisp
 ```
-
 ```
  ; LQN:UNIQ
  ;   [symbol]
@@ -1334,7 +1227,6 @@
  ;     remove duplicates from sequence
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
  ; LQN:V?
  ;   [symbol]
@@ -1349,7 +1241,6 @@
  ;     return/print lqn version.
  ;   Source file: /data/x/lqn/src/init.lisp
 ```
-
 ```
  ; LQN:VEC!
  ;   [symbol]
@@ -1361,14 +1252,12 @@
  ;     coerce v to vector. if v is not a string, vector
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
 ```
-:missing:todo:
+:missing:
 
  ; LQN:VEC!?
  ;   [symbol]
 ```
-
 ```
  ; LQN:VEC?
  ;   [symbol]
@@ -1380,4 +1269,3 @@
  ;     v if vector; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
-
