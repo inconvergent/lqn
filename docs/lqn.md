@@ -546,6 +546,17 @@
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
 ```
 ```
+ ; LQN:KW!
+ ;   [symbol]
+ ; 
+ ; KW! names a compiled function:
+ ;   Lambda-list: (&REST REST)
+ ;   Derived type: (FUNCTION * (VALUES SYMBOL &OPTIONAL))
+ ;   Documentation:
+ ;     stringify, make keyword
+ ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+```
  ; LQN:KW?
  ;   [symbol]
  ; 

@@ -9,7 +9,7 @@
     #:some? #:all? #:none? #:cd #:keys?
     #:new* #:new$ #:cat$ #:cat* #:head #:tail #:apply* #:range #:linspace #:psh* #:pop*
     #:flatn* #:compct #:flatall* #:flatn$ #:uniq
-    #:noop #:kv? #:kw? #:ssym? #:msym? #:trim #:sym!
+    #:noop #:kv? #:kw? #:ssym? #:msym? #:trim #:sym! #:kw!
     #:num!? #:num? #:flt! #:flt!? #:flt? #:int! #:int!? #:int?
     #:lst? #:lst! #:lst!? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!?
     #:ind* #:sel #:seq
