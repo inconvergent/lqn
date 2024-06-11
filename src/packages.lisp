@@ -3,13 +3,13 @@
   (:nicknames #:cl-lqn)
   (:export #:d? #:v?
     #:qry #:qrydb #:qryd #:jsnqryf #:qryl #:proc-qry
-    #:jsnloads #:jsnloadf #:jsnout #:ldnout #:ldnload #:fmt #:out #:jsnstr #:@* #:@get #:??
+    #:jsnloads #:jsnloadf #:jsnout #:ldnout #:ldnload #:fmt #:out #:stdstr #:jsnstr #:@* #:@get #:??
     #:read? #:some? #:none? #:all? #:empty? #:size? #:is?
     #:path? #:subdir #:subfiles #:ls #:dir? #:file? #:cwd #:now #:cmd
     #:some? #:all? #:none? #:cd #:keys?
     #:new* #:new$ #:cat$ #:cat* #:head #:tail #:apply* #:range #:linspace #:psh* #:pop*
     #:flatn* #:compct #:flatall* #:flatn$ #:uniq
-    #:noop #:kv? #:kw? #:ssym? #:msym? #:trim #:sym! #:kw!
+    #:noop #:kv? #:kw? #:ssym? #:msym? #:trim #:sym! #:kw! #:extsym?
     #:num!? #:num? #:flt! #:flt!? #:flt? #:int! #:int!? #:int?
     #:lst? #:lst! #:lst!? #:seq? #:seq!? #:str! #:str? #:str!? #:vec! #:vec? #:vec!?
     #:ind* #:sel #:seq
