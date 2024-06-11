@@ -97,6 +97,8 @@ as alists. see ldnload."
                           (format *standard-output* "~&~a~&" ,s*))))))
 (defmacro fmt (s &rest rest) "format to string."
   (if rest `(format nil ,s ,@rest) `(format nil "~a" ,s)))
+(defmacro stdstr (body) "trap stdout as string."
+  `(with-output-to-string (*standard-output*) ,body))
 
 (defun nstr (n &optional (c #\Space)) "str of length n, filled with c"
   (make-string n :initial-element c))

@@ -48,6 +48,10 @@
 (abbrev mvc multiple-value-call) (abbrev mvl multiple-value-list)
 (abbrev vpe vector-push-extend)  (defmacro vex (v o) `(vpe ,o ,v))
 
+(defun extsym? (&optional (pkg "LQN") default &aux (pkg (find-package pkg)))
+  "list external symbols of package"
+  (if pkg (loop for s being the external-symbols of pkg collect s) default))
+
 (defmacro λ (&rest rest) `(lambda ,@rest))
 (defun internal-path-string (&optional (path "") (pkg :lqn)) (declare (string path))
   (namestring (asdf:system-relative-pathname pkg path)))

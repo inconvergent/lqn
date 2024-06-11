@@ -1,4 +1,4 @@
-# Lisp Query Notation Symbol Documentation (2.1.0)
+# Lisp Query Notation Symbol Documentation (2.1.1)
 
 ```
  ; LQN:??
@@ -248,6 +248,18 @@
  ;   Documentation:
  ;     t if l is empty; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+```
+ ; LQN:EXTSYM?
+ ;   [symbol]
+ ; 
+ ; EXTSYM? names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (PKG LQN) DEFAULT &AUX
+ ;                 (PKG (FIND-PACKAGE PKG)))
+ ;   Derived type: (FUNCTION (&OPTIONAL T T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     list external symbols of package
+ ;   Source file: /data/x/lqn/src/init.lisp
 ```
 ```
  ; LQN:FILE?
@@ -1017,6 +1029,16 @@
  ;   Documentation:
  ;     s if sym, not kw; or d
  ;   Source file: /data/x/lqn/src/basic-utils.lisp
+```
+```
+ ; LQN:STDSTR
+ ;   [symbol]
+ ; 
+ ; STDSTR names a macro:
+ ;   Lambda-list: (BODY)
+ ;   Documentation:
+ ;     trap stdout as string.
+ ;   Source file: /data/x/lqn/src/io.lisp
 ```
 ```
  ; LQN:STR!
