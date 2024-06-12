@@ -2,10 +2,7 @@
 
 (defvar *docstring-map* nil)
 
-(defmacro -outstr (body) `(with-output-to-string (*standard-output*) ,body))
 (defun -strsrt (l) (sort l #'string-lessp :key #'car))
-(defun -md-sanitize (d) (repl d "*" "\*"))
-
 (defun desc (sym) (declare (symbol sym))
   (let ((d (with-output-to-string (*standard-output*)
              (describe sym))))
@@ -41,7 +38,7 @@ use :pretty to print verbose output to stdout in a readable form."
       (:pretty
         `(loop for (,str ,sym) in (pckgs ,pkg)
                do (mvb (,doc ,skip) (select-docs ,sym)
-                       (unless ,skip (format t "~&```~&~a~&```~%" (-md-sanitize ,doc))))))
+                       (unless ,skip (format t "~&```~&~a~&```~%" ,doc)))))
       (:pairs `(loop for (,str ,sym) in (pckgs ,pkg)
                      collect (list ,str (select-docs ,sym))))
       (otherwise `(loop for (,str ,sym) in (pckgs ,pkg) collect ,str)))))

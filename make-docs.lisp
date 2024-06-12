@@ -7,7 +7,6 @@
   (with-open-file (fs (internal-path-string "docs/lqn.md")
                       :direction :output :if-exists :supersede)
     (format fs "# Lisp Query Notation Symbol Documentation (~a)~%~%" (v? t))
-    (princ (with-output-to-string (*standard-output*)
-             (ext-symbols? "LQN" :pretty)) fs)))
+    (princ (stdstr (ext-symbols? "LQN" :pretty)) fs)))
 (make-docs)
 
