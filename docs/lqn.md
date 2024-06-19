@@ -729,7 +729,7 @@
  ; 
  ; NOW names a compiled function:
  ;   Lambda-list: ()
- ;   Derived type: (FUNCTION NIL *)
+ ;   Derived type: (FUNCTION NIL (VALUES STRING &OPTIONAL))
  ;   Documentation:
  ;     timestamp.
  ;   Source file: /data/x/lqn/src/sh.lisp

@@ -94,7 +94,7 @@
   (mvb (res err errcode) (uiop:run-program `(,fx ,@args) :output '(:string :stripped t))
     (values (splt res #.(str! #\Newline)) err errcode)))
 ; (defun now () (cmd "date" "+%Y%m%d-%H%M%S-%N"))
-(defun now () "timestamp." (cmd "date" "+%Y-%m-%dT%H:%M:%S.%N"))
+(defun now () "timestamp." (the string (aref (cmd "date" "+%Y-%m-%dT%H:%M:%S.%N") 0)))
 
 ; https://quickref.common-lisp.net/uiop.html#g_t_2768268_2769
 ; TODO: how are #P/strings handled here for input/output to other fxs?
