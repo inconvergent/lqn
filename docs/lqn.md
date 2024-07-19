@@ -1,4 +1,4 @@
-# Lisp Query Notation Symbol Documentation (2.1.1)
+# Lisp Query Notation Symbol Documentation (2.1.2)
 
 ```
  ; LQN:??
