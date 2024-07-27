@@ -5,7 +5,7 @@
                       :?xpr :?txpr :?mxpr
                       :?fld :?srch :?grp :?rec))
 (defvar *opt* '(optimize (speed 3) (safety 1)))
-(defvar *fxns* '(:err :wrn :nope :noop :lst :lit :qt :hld :ghv :pnum :inum :cnt :λ
+(defvar *fxns* '(:err :wrn :nope :noop :lit :qt :hld :ghv :pnum :inum :cnt :λ
                  :fmt :out :jsnstr
                  :fn :fi :ctx  :par :itr :key :val :compct :?? :@get :@*
                  :read? :some? :all? :none? :smth? :size?
