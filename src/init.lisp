@@ -17,7 +17,7 @@
                  :lpad :rpad :nstr :sup :sdwn :mkstr :repl :strcat :splt :join
                  :msym? :is? :kv? kw? :sym? :ssym? :sym! :trim
                  :num!? :num? :flt! :flt!? :flt? :int! :int!? :int?
-                 :lst? :lst! :lst!? :seq? :seq!? :str! :str? :str!? :vec! :vec? :vec!?
+                 :lst? :lst! :lst!? :seq? :seq!? :str! :str? :str!? :kw! :vec! :vec? :vec!?
                  :path? :subdir :subfiles :ls :dir? :file? :cwd :now :cmd :cd))
 (defun cmd-args ()
   (or #+SBCL sb-ext:*posix-argv* #+LISPWORKS system:*line-arguments-list*
