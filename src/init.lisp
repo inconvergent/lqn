@@ -42,7 +42,8 @@
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s) `(,s (gensym ,(symbol-name s)))) syms) ,@body))
 
-(defmacro abbrev (short long) `(defmacro ,short (&rest args) `(,',long ,@args)))
+(defmacro abbrev (short long)
+  `(defmacro ,short (&rest args) ,(format nil "alias: ~s~&" long) `(,',long ,@args)))
 (abbrev awg with-gensyms)        (abbrev mav make-adjustable-vector)
 (abbrev dsb destructuring-bind)  (abbrev mvb multiple-value-bind)
 (abbrev mvc multiple-value-call) (abbrev mvl multiple-value-list)
