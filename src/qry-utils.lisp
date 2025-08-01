@@ -299,3 +299,12 @@ ranges are lists that behave like arguments to seq."
                      (t ,f*))))
       (,rec ,d)))))
 
+
+; TODO: rename?
+(defmacro pfn ((pref &optional (sep "-") (vsep ":")) &rest vars)
+  "make string: prefix-var1:val1-var2:val2-..."
+  `(str! ,pref "@"
+     (strcat ,@(head (loop for v in vars
+                           nconc `(,(str! v vsep) (fmt "~(~a~)" ,v) ,sep))
+                     -1))))
+
