@@ -646,7 +646,7 @@
  ; LST names a compiled function:
  ;   Lambda-list: (&REST REST)
  ;   Derived type: (FUNCTION * (VALUES LIST &OPTIONAL))
- ;   Source file: /data/x/lqn/src/basic-utils.lisp
+ ;   Source file: /home/anders/x/lqn/src/basic-utils.lisp
 ```
 ```
  ; LQN:LST!
