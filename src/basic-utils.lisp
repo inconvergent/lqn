@@ -151,3 +151,8 @@
   (declare (list conf) (keyword k)) "get k from config"
   (if (or silent hit) hit (warn "LQN: missing conf key: ~a~%conf: ~s" k conf)))
 
+(defun now ()
+  "string / timestamp"
+  (multiple-value-bind (s m hour day month year day-of-week dst-p tz) (get-decoded-time)
+  (format nil "~d-~d-~2,'0d-~2,'0d:~2,'0d:~2,'0d" year month day hour m s)))
+

@@ -17,7 +17,7 @@
  ; @* names a compiled function:
  ;   Lambda-list: (A D &REST REST &AUX L)
  ;   Derived type: (FUNCTION (T T &REST T)
- ;                  (VALUES (OR NULL SIMPLE-VECTOR) &OPTIONAL))
+ ;                  (VALUES (OR SIMPLE-VECTOR NULL) &OPTIONAL))
  ;   Documentation:
  ;     pick these indices/keys from sequence/hash-table into new vector.
  ;   Source file: /home/anders/x/lqn/src/qry-utils.lisp
@@ -301,7 +301,7 @@
  ; 
  ; FLATN* names a compiled function:
  ;   Lambda-list: (A &OPTIONAL (N 1) (STR NIL))
- ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM T)
+ ;   Derived type: (FUNCTION (T &OPTIONAL FIXNUM T)
  ;                  (VALUES SEQUENCE &OPTIONAL))
  ;   Documentation:
  ;     flatten n times
@@ -358,8 +358,8 @@
  ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
  ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
  ;                  (VALUES
- ;                   (OR LIST SB-KERNEL:EXTENDED-SEQUENCE
- ;                       (SIMPLE-ARRAY * (*)))
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     first ±n elements
@@ -451,7 +451,7 @@
  ; ISUBX? names a compiled function:
  ;   Lambda-list: (S SUB)
  ;   Derived type: (FUNCTION (STRING STRING)
- ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
+ ;                  (VALUES (OR (MOD 17592186044415) NULL) &OPTIONAL))
  ;   Documentation:
  ;     ignore case subx?
  ;   Inline proclamation: INLINE (inline expansion available)
@@ -740,10 +740,10 @@
  ; 
  ; NOW names a compiled function:
  ;   Lambda-list: ()
- ;   Derived type: (FUNCTION NIL (VALUES STRING &OPTIONAL))
+ ;   Derived type: (FUNCTION NIL (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
- ;     timestamp.
- ;   Source file: /home/anders/x/lqn/src/sh.lisp
+ ;     string / timestamp
+ ;   Source file: /home/anders/x/lqn/src/basic-utils.lisp
 ```
 ```
  ; LQN:NSTR
@@ -900,7 +900,7 @@
  ; 
  ; RANGE names a compiled function:
  ;   Lambda-list: (A &OPTIONAL (B 0 B?) (LEAP 1))
- ;   Derived type: (FUNCTION (FIXNUM &OPTIONAL FIXNUM FIXNUM)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T FIXNUM)
  ;                  (VALUES (AND (VECTOR T) (NOT SIMPLE-ARRAY)) &OPTIONAL))
  ;   Documentation:
  ;     declare range. from 0 to a; or a to b.
@@ -913,7 +913,7 @@
  ; READ? names a compiled function:
  ;   Lambda-list: (S &OPTIONAL D &REST REST)
  ;   Derived type: (FUNCTION (T &REST T)
- ;                  (VALUES T &OPTIONAL (MOD 4611686018427387901)))
+ ;                  (VALUES T &OPTIONAL (UNSIGNED-BYTE 44)))
  ;   Documentation:
  ;     read from string; or d
  ;   Source file: /home/anders/x/lqn/src/basic-utils.lisp
@@ -925,9 +925,7 @@
  ; REPL names a compiled function:
  ;   Lambda-list: (S FROM TO)
  ;   Derived type: (FUNCTION (STRING STRING STRING)
- ;                  (VALUES
- ;                   (OR SIMPLE-BASE-STRING (SIMPLE-ARRAY CHARACTER (*)))
- ;                   &OPTIONAL))
+ ;                  (VALUES SIMPLE-STRING &OPTIONAL))
  ;   Documentation:
  ;     replace from with to in s
  ;   Source file: /home/anders/x/lqn/src/qry-utils.lisp
@@ -1148,7 +1146,7 @@
  ; SUBX? names a compiled function:
  ;   Lambda-list: (S SUB)
  ;   Derived type: (FUNCTION (STRING STRING)
- ;                  (VALUES (OR NULL (MOD 4611686018427387901)) &OPTIONAL))
+ ;                  (VALUES (OR (MOD 17592186044415) NULL) &OPTIONAL))
  ;   Documentation:
  ;     returns index where substring matches s from left to right. otherwise nil
  ;   Inline proclamation: INLINE (inline expansion available)
@@ -1208,8 +1206,8 @@
  ;   Lambda-list: (S &OPTIONAL (N 10) &AUX (L (LENGTH S)))
  ;   Derived type: (FUNCTION (SEQUENCE &OPTIONAL FIXNUM)
  ;                  (VALUES
- ;                   (OR LIST SB-KERNEL:EXTENDED-SEQUENCE
- ;                       (SIMPLE-ARRAY * (*)))
+ ;                   (OR LIST (SIMPLE-ARRAY * (*))
+ ;                       SB-KERNEL:EXTENDED-SEQUENCE)
  ;                   &OPTIONAL))
  ;   Documentation:
  ;     last ±n elements
