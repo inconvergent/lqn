@@ -154,5 +154,5 @@
 (defun now ()
   "string / timestamp"
   (multiple-value-bind (s m hour day month year day-of-week dst-p tz) (get-decoded-time)
-  (format nil "~d-~d-~2,'0d-~2,'0d:~2,'0d:~2,'0d" year month day hour m s)))
+  (format nil "~d-~2,'0d-~2,'0d-~2,'0d:~2,'0d:~2,'0d" year month day hour m s)))
 
